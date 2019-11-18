@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: oauth2-resource
+  datasource:
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.71.136:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false
+    username: root
+    password: root
+

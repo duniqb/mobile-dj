@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.duniqb.mobile.mapper.WxUserMapper">
+  <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.WxUser">
+    <!--@mbg.generated generated on Mon Nov 18 11:32:44 CST 2019.-->
+    <!--@Table wx_user-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="openid" jdbcType="VARCHAR" property="openid" />
+    <result column="stu_no" jdbcType="CHAR" property="stuNo" />
+    <result column="nickname" jdbcType="VARCHAR" property="nickname" />
+    <result column="avatarurl" jdbcType="VARCHAR" property="avatarurl" />
+    <result column="gender" jdbcType="BOOLEAN" property="gender" />
+    <result column="country" jdbcType="VARCHAR" property="country" />
+    <result column="province" jdbcType="VARCHAR" property="province" />
+    <result column="city" jdbcType="VARCHAR" property="city" />
+    <result column="language" jdbcType="VARCHAR" property="language" />
+    <result column="ctime" jdbcType="TIMESTAMP" property="ctime" />
+    <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated generated on Mon Nov 18 11:32:44 CST 2019.-->
+    id, openid, stu_no, nickname, avatarurl, gender, country, province, city, `language`, 
+    ctime, mobile
+  </sql>
+</mapper>
