@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.duniqb.mobile.mapper.CreditMapper">
+  <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.Credit">
+    <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
+    <!--@Table credit-->
+    <id column="stu_no" jdbcType="CHAR" property="stuNo" />
+    <result column="major" jdbcType="VARCHAR" property="major" />
+    <result column="credit requirements" jdbcType="FLOAT" property="creditRequirements" />
+    <result column="required_credits" jdbcType="FLOAT" property="requiredCredits" />
+    <result column="elective_credits" jdbcType="FLOAT" property="electiveCredits" />
+    <result column="optional_credits" jdbcType="FLOAT" property="optionalCredits" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
+    stu_no, major, `credit requirements`, required_credits, elective_credits, optional_credits
+  </sql>
+</mapper>

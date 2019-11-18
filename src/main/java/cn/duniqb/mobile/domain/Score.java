@@ -39,26 +39,38 @@ public class Score implements Serializable {
     /**
      * 平时成绩
      */
-    @Column(name = "usual_socre")
-    private Double usualSocre;
+    @Column(name = "usual_score")
+    private String usualScore;
 
     /**
      * 期末成绩
      */
     @Column(name = "end_score")
-    private Double endScore;
+    private String endScore;
 
     /**
      * 总评
      */
     @Column(name = "total_score")
-    private Double totalScore;
+    private String totalScore;
 
     /**
      * 是否缓考  0-是、1-否
      */
     @Column(name = "slow_exam")
     private Boolean slowExam;
+
+    /**
+     * 考试性质
+     */
+    @Column(name = "exam_type")
+    private String examType;
+
+    /**
+     * 备注
+     */
+    @Column(name = "`comment`")
+    private String comment;
 
     private static final long serialVersionUID = 1L;
 }

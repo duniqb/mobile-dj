@@ -33,10 +33,16 @@ public class Course implements Serializable {
     private Double credit;
 
     /**
-     * 上课时间/地点
+     * 课组
      */
-    @Column(name = "time_date")
-    private String timeDate;
+    @Column(name = "course_group")
+    private String courseGroup;
+
+    /**
+     * 课程类别
+     */
+    @Column(name = "course_type")
+    private String courseType;
 
     private static final long serialVersionUID = 1L;
 }

@@ -7,12 +7,10 @@ import lombok.Data;
 @Data
 @Table(name = "teacher")
 public class Teacher implements Serializable {
-    /**
-     * 教师
-     */
     @Id
     @Column(name = "teacher_id")
-    private String teacherId;
+    @GeneratedValue(generator = "JDBC")
+    private Integer teacherId;
 
     /**
      * 教师姓名

@@ -5,3 +5,16 @@ public interface WxUserService {
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+

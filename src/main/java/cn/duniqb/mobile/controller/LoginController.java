@@ -1,8 +1,10 @@
 package cn.duniqb.mobile.controller;
 
+import cn.duniqb.mobile.domain.Student;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.User;
 import cn.duniqb.mobile.service.SpiderService;
+import cn.duniqb.mobile.service.StudentService;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -18,13 +20,17 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/")
 public class LoginController {
     @Autowired
     private SpiderService spiderService;
+
+    @Autowired
+    private StudentService studentService;
 
     private static HttpClient client = HttpClients.createDefault();
 
@@ -44,6 +50,7 @@ public class LoginController {
 
     /**
      * 登录教务
+     * 此登录总是获取最新的信息，以便在前端要求清空缓存时使用
      *
      * @param user
      * @return
@@ -60,7 +67,6 @@ public class LoginController {
 
         try {
             client.execute(getLoginPage);
-
             // 构造 POST 参数
             ArrayList<NameValuePair> postData = new ArrayList<>();
             postData.add(new BasicNameValuePair("groupId", null));
@@ -72,18 +78,25 @@ public class LoginController {
             post.setEntity(new UrlEncodedFormEntity(postData));
             HttpResponse response = client.execute(post);
 
-            System.out.println(response.toString());
-
             if (!response.toString().contains("error")) {
-                spiderService.getInfo(client);
-                return JSONResult.build(null, "登录成功", 200);
+                Map<Integer, Object> map = new HashMap<>();
+
+                int getInfo = spiderService.getInfo(client);
+                if (getInfo > 0) {
+                    map.put(0, "获取个人信息成功");
+                }
+                Map<Integer, String> scoreParam = spiderService.getScoreParam(client, user.getUsername());
+                map.put(1, scoreParam);
+
+//                spiderService.getTimeTable(client, 38, 2);
+                return JSONResult.build(map, "教务登录成功", 200);
             }
         } catch (IOException e) {
             System.out.println(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return JSONResult.build(null, "登录失败", 400);
+        return JSONResult.build(null, "教务登录失败", 400);
     }
 
     /**
@@ -95,7 +108,7 @@ public class LoginController {
         HttpGet getVerifyCode = new HttpGet("http://202.199.128.21/academic/getCaptcha.do");
         FileOutputStream fileOutputStream = null;
         client = HttpClients.createDefault();
-        String fileName = UUID.randomUUID().toString();
+        String fileName = System.currentTimeMillis() + "";
         // 把验证码图片保存到本地
         try {
             HttpResponse response = client.execute(getVerifyCode);
@@ -105,6 +118,7 @@ public class LoginController {
             e.printStackTrace();
         } finally {
             try {
+                assert fileOutputStream != null;
                 fileOutputStream.close();
             } catch (IOException e) {
                 e.printStackTrace();

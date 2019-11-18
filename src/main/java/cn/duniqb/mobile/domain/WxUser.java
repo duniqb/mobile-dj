@@ -34,7 +34,7 @@ public class WxUser implements Serializable {
     /**
      * 用户头像
      */
-    @Column(name = "avatarurl")
+    @Column(name = "avatarUrl")
     private String avatarurl;
 
     /**

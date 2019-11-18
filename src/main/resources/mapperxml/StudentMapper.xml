@@ -2,42 +2,27 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.duniqb.mobile.mapper.StudentMapper">
   <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.Student">
-    <!--@mbg.generated generated on Mon Nov 18 11:33:55 CST 2019.-->
+    <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
     <!--@Table student-->
-    <id column="id" jdbcType="BIGINT" property="id" />
-    <result column="stu_no" jdbcType="CHAR" property="stuNo" />
+    <id column="stu_no" jdbcType="CHAR" property="stuNo" />
     <result column="name" jdbcType="VARCHAR" property="name" />
-    <result column="gender" jdbcType="BOOLEAN" property="gender" />
-    <result column="birthday" jdbcType="DATE" property="birthday" />
     <result column="img" jdbcType="VARCHAR" property="img" />
-    <result column="hometown" jdbcType="VARCHAR" property="hometown" />
-    <result column="certificate" jdbcType="VARCHAR" property="certificate" />
-    <result column="nation" jdbcType="VARCHAR" property="nation" />
-    <result column="foreign_languages" jdbcType="VARCHAR" property="foreignLanguages" />
-    <result column="student_source" jdbcType="VARCHAR" property="studentSource" />
-    <result column="exam_area" jdbcType="VARCHAR" property="examArea" />
-    <result column="exam_stu_no" jdbcType="VARCHAR" property="examStuNo" />
-    <result column="cee_score" jdbcType="INTEGER" property="ceeScore" />
-    <result column="exam_no" jdbcType="VARCHAR" property="examNo" />
-    <result column="offer_no" jdbcType="VARCHAR" property="offerNo" />
-    <result column="middle_school" jdbcType="VARCHAR" property="middleSchool" />
-    <result column="enrollment_date" jdbcType="DATE" property="enrollmentDate" />
-    <result column="enrollment_type" jdbcType="VARCHAR" property="enrollmentType" />
-    <result column="train_mode" jdbcType="VARCHAR" property="trainMode" />
     <result column="college" jdbcType="VARCHAR" property="college" />
     <result column="major" jdbcType="VARCHAR" property="major" />
+    <result column="direction" jdbcType="VARCHAR" property="direction" />
+    <result column="student_type" jdbcType="VARCHAR" property="studentType" />
     <result column="grade" jdbcType="VARCHAR" property="grade" />
-    <result column="campus_area" jdbcType="VARCHAR" property="campusArea" />
-    <result column="student_status" jdbcType="VARCHAR" property="studentStatus" />
-    <result column="learn_type" jdbcType="VARCHAR" property="learnType" />
+    <result column="clazz" jdbcType="VARCHAR" property="clazz" />
+    <result column="certificate_type" jdbcType="VARCHAR" property="certificateType" />
+    <result column="certificate" jdbcType="CHAR" property="certificate" />
+    <result column="email" jdbcType="VARCHAR" property="email" />
     <result column="phone" jdbcType="CHAR" property="phone" />
     <result column="address" jdbcType="VARCHAR" property="address" />
+    <result column="zip_code" jdbcType="CHAR" property="zipCode" />
   </resultMap>
   <sql id="Base_Column_List">
-    <!--@mbg.generated generated on Mon Nov 18 11:33:55 CST 2019.-->
-    id, stu_no, `name`, gender, birthday, img, hometown, certificate, nation, foreign_languages, 
-    student_source, exam_area, exam_stu_no, cee_score, exam_no, offer_no, middle_school, 
-    enrollment_date, enrollment_type, train_mode, college, major, grade, campus_area, 
-    student_status, learn_type, phone, address
+    <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
+    stu_no, `name`, img, college, major, direction, student_type, grade, clazz, certificate_type, 
+    certificate, email, phone, address, zip_code
   </sql>
 </mapper>

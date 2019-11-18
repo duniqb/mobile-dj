@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="cn.duniqb.mobile.mapper.TeacherMapper">
-  <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.Teacher">
+<mapper namespace="cn.duniqb.mobile.mapper.TeacherCourseMapper">
+  <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.TeacherCourse">
     <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
-    <!--@Table teacher-->
-    <id column="teacher_id" jdbcType="INTEGER" property="teacherId" />
+    <!--@Table teacher_course-->
+    <id column="id" jdbcType="INTEGER" property="id" />
     <result column="teacher_name" jdbcType="VARCHAR" property="teacherName" />
+    <result column="course_id" jdbcType="CHAR" property="courseId" />
   </resultMap>
   <sql id="Base_Column_List">
     <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
-    teacher_id, teacher_name
+    id, teacher_name, course_id
   </sql>
 </mapper>

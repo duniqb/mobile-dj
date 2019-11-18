@@ -5,36 +5,24 @@ import javax.persistence.*;
 import lombok.Data;
 
 @Data
-@Table(name = "student_course")
-public class StudentCourse implements Serializable {
+@Table(name = "teacher_course")
+public class TeacherCourse implements Serializable {
     @Id
     @Column(name = "id")
     @GeneratedValue(generator = "JDBC")
     private Integer id;
 
     /**
-     * 学号
+     * 教师姓名
      */
-    @Column(name = "stu_no")
-    private String stuNo;
+    @Column(name = "teacher_name")
+    private String teacherName;
 
     /**
      * 课程号
      */
     @Column(name = "course_id")
     private String courseId;
-
-    /**
-     * 选课属性
-     */
-    @Column(name = "course_attr")
-    private String courseAttr;
-
-    /**
-     * 上课时间/地点
-     */
-    @Column(name = "time_date")
-    private String timeDate;
 
     private static final long serialVersionUID = 1L;
 }
