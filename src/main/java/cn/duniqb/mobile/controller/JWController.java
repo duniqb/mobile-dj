@@ -3,8 +3,7 @@ package cn.duniqb.mobile.controller;
 import cn.duniqb.mobile.domain.Student;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.User;
-import cn.duniqb.mobile.service.SpiderService;
-import cn.duniqb.mobile.service.StudentService;
+import cn.duniqb.mobile.service.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -25,12 +24,21 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/")
-public class LoginController {
+public class JWController {
     @Autowired
     private SpiderService spiderService;
 
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private CreditService creditService;
+
+    @Autowired
+    private ScoreService scoreService;
+
+    @Autowired
+    private StudentCourseService studentCourseService;
 
     private static HttpClient client = HttpClients.createDefault();
 
@@ -39,7 +47,7 @@ public class LoginController {
     /**
      * 进入登录页面时或点击刷新，返回一个验证码
      */
-    @RequestMapping(value = "getVerifyCode", method = {RequestMethod.POST, RequestMethod.GET})
+    @GetMapping("verify")
     public JSONResult getVerifyCode() {
         // 后端收到来自前端的请求，后端立即获取一个验证码
         String fileName = saveVerifyCode();
@@ -55,8 +63,13 @@ public class LoginController {
      * @param user
      * @return
      */
-    @PostMapping("loginEdu")
+    @PostMapping("loginjw")
     public JSONResult login(@RequestBody User user) {
+        Map<Integer, Object> map = new HashMap<>();
+        Student student = studentService.selectOneByNo(user.getUsername());
+        if (student != null) {
+            return JSONResult.build(user.getUsername(), "学生已存在", 400);
+        }
         HttpGet getLoginPage = new HttpGet("http://202.199.128.21/academic/common/security/login.jsp");
 
         getLoginPage.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -79,8 +92,6 @@ public class LoginController {
             HttpResponse response = client.execute(post);
 
             if (!response.toString().contains("error")) {
-                Map<Integer, Object> map = new HashMap<>();
-
                 Map<Integer, String> info = spiderService.getInfo(client);
                 map.put(1, info);
                 Map<Integer, String> scoreParam = spiderService.getScoreParam(client, user.getUsername());
@@ -103,7 +114,7 @@ public class LoginController {
      *
      * @return 保存的唯一名字
      */
-    public String saveVerifyCode() {
+    private String saveVerifyCode() {
         HttpGet getVerifyCode = new HttpGet("http://202.199.128.21/academic/getCaptcha.do");
         FileOutputStream fileOutputStream = null;
         client = HttpClients.createDefault();
@@ -124,5 +135,34 @@ public class LoginController {
             }
         }
         return fileName;
+    }
+
+    /**
+     * 清空该学生的已存在所有数据
+     *
+     * @param user
+     * @return
+     */
+    @PostMapping("clear")
+    public JSONResult clear(@RequestBody User user) {
+        Student student = studentService.selectOneByNo(user.getUsername());
+        if (student == null) {
+            return JSONResult.build(user.getUsername(), "学生不存在", 400);
+        }
+        Map<Integer, Object> map = new HashMap<>();
+
+        int i1 = creditService.deleteByStuNo(user.getUsername());
+        map.put(1, "清空了 " + i1 + " 条学分信息");
+
+        int i2 = scoreService.deleteByStuNo(user.getUsername());
+        map.put(2, "清空了 " + i2 + " 条成绩信息");
+
+        int i3 = studentCourseService.deleteByStuNo(user.getUsername());
+        map.put(3, "清空了 " + i3 + " 条选课信息");
+
+        int i4 = studentService.deleteByStuNo(user.getUsername());
+        map.put(4, "清空了 " + i4 + " 条学生信息");
+
+        return JSONResult.build(map, "清空成功", 200);
     }
 }

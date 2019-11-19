@@ -11,6 +11,14 @@ public interface StudentService {
      * @return
      */
     Student selectOneByNo(String no);
+
+    /**
+     * 根据学号删除学生
+     *
+     * @param stuNo
+     * @return
+     */
+    int deleteByStuNo(String stuNo);
 }
 
 

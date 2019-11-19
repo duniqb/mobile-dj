@@ -16,10 +16,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -171,19 +173,22 @@ public class SpiderService {
             score.setComment(trd.get(13).text());
             int i1 = scoreMapper.insert(score);
             if (i1 > 0) {
-                map.put(1, "保存成绩成功");
+                map.put(1, "保存学生成绩成功");
             }
 
-            Course course = new Course();
-            course.setCourseId(trd.get(2).text());
-            course.setCourseSerialNo(trd.get(3).text());
-            course.setCourseName(trd.get(4).text());
-            course.setCourseGroup(trd.get(6).text());
-            course.setCredit(Double.valueOf(trd.get(7).text()));
-            course.setCourseType(trd.get(15).text());
-            int i2 = courseMapper.insert(course);
-            if (i2 > 0) {
-                map.put(2, "保存课程成功");
+            Course courseExist = courseMapper.selectByPrimaryKey(trd.get(2).text());
+            if (courseExist == null) {
+                Course course = new Course();
+                course.setCourseId(trd.get(2).text());
+                course.setCourseSerialNo(trd.get(3).text());
+                course.setCourseName(trd.get(4).text());
+                course.setCourseGroup(trd.get(6).text());
+                course.setCredit(Double.valueOf(trd.get(7).text()));
+                course.setCourseType(trd.get(15).text());
+                int i2 = courseMapper.insert(course);
+                if (i2 > 0) {
+                    map.put(2, "保存学生课程成功");
+                }
             }
 
             StudentCourse studentCourse = new StudentCourse();
@@ -194,16 +199,22 @@ public class SpiderService {
             studentCourse.setTerm("秋".equals(trd.get(1).text()));
             int i3 = studentCourseMapper.insert(studentCourse);
             if (i3 > 0) {
-                map.put(3, "保存选课成功");
+                map.put(3, "保存学生选课成功");
             }
 
-            TeacherCourse teacherCourse = new TeacherCourse();
-            teacherCourse.setTeacherName(trd.get(14).text());
-            teacherCourse.setCourseId(trd.get(2).text());
-            int i4 = teacherCourseMapper.insert(teacherCourse);
-            if (i4 > 0) {
-                map.put(4, "保存授课成功");
+            Example example = new Example(TeacherCourse.class);
+            example.createCriteria().andEqualTo("teacherName", trd.get(14).text());
+            List<TeacherCourse> teacherCourses = teacherCourseMapper.selectByExample(example);
+            if (teacherCourses.isEmpty()) {
+                TeacherCourse teacherCourse = new TeacherCourse();
+                teacherCourse.setTeacherName(trd.get(14).text());
+                teacherCourse.setCourseId(trd.get(2).text());
+                int i4 = teacherCourseMapper.insert(teacherCourse);
+                if (i4 > 0) {
+                    map.put(4, "保存教师授课成功");
+                }
             }
+
         }
         return map;
     }

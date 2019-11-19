@@ -24,6 +24,17 @@ public class StudentServiceImpl implements StudentService {
 
         return studentMapper.selectByPrimaryKey(no);
     }
+
+    /**
+     * 根据学号删除学生
+     *
+     * @param stuNo
+     * @return
+     */
+    @Override
+    public int deleteByStuNo(String stuNo) {
+        return studentMapper.deleteByPrimaryKey(stuNo);
+    }
 }
 
 
