@@ -24,6 +24,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * 爬取教务
+ *
+ * @author duniqb
+ */
 @Service
 public class SpiderService {
 
@@ -59,7 +64,6 @@ public class SpiderService {
         HttpResponse response = client.execute(new HttpGet("http://202.199.128.21/academic/showPersonalInfo.do"));
         Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
         String imgUrl = doc.select("table.form td img").attr("src");
-        System.out.println("图片地址" + "http://202.199.128.21" + imgUrl);
 
         Elements elements = doc.select("table.form tr");
         Map<Integer, String> map = new HashMap<>();

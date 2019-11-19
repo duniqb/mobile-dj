@@ -23,6 +23,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 教务
+ *
+ * @author duniqb
+ */
 @Scope("session")
 @RestController
 @RequestMapping("/api/v1/")
@@ -42,6 +47,10 @@ public class JWController {
     @Autowired
     private StudentCourseService studentCourseService;
 
+    /**
+     * 此处有问题，虽然将 Controller 实例改为 Session，但此处仍然是静态的，所有实例共享。
+     * 导致两次 Session 共享，从而让第一次的失效
+     */
     private static CloseableHttpClient client = HttpClients.createDefault();
 
     private final String URL = "http://localhost:8080/";
