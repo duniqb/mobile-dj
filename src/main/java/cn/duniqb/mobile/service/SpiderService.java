@@ -43,6 +43,9 @@ public class SpiderService {
     @Autowired
     private TeacherCourseMapper teacherCourseMapper;
 
+    @Autowired
+    private GradeExamMapper gradeExamMapper;
+
     /**
      * 获取个人信息与学分信息
      *
@@ -50,13 +53,14 @@ public class SpiderService {
      * @return
      * @throws Exception
      */
-    public int getInfo(HttpClient client) throws Exception {
+    public Map<Integer, String> getInfo(HttpClient client) throws Exception {
         HttpResponse response = client.execute(new HttpGet("http://202.199.128.21/academic/showPersonalInfo.do"));
         Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
         String imgUrl = doc.select("table.form td img").attr("src");
         System.out.println("图片地址" + "http://202.199.128.21" + imgUrl);
 
         Elements elements = doc.select("table.form tr");
+        Map<Integer, String> map = new HashMap<>();
         Student student = new Student();
         for (Element element : elements) {
             Elements tit = element.select("th");
@@ -113,8 +117,15 @@ public class SpiderService {
             }
         }
         credit.setStuNo(student.getStuNo());
-        creditMapper.insert(credit);
-        return studentMapper.insert(student);
+        int i1 = creditMapper.insert(credit);
+        if (i1 > 0) {
+            map.put(1, "保存学分成功");
+        }
+        int i2 = studentMapper.insert(student);
+        if (i2 > 0) {
+            map.put(2, "保存学籍成功");
+        }
+        return map;
     }
 
     /**
@@ -123,84 +134,78 @@ public class SpiderService {
      *
      * @return
      */
-    public Map<Integer, String> getScoreParam(HttpClient client, String stuNo) {
-        try {
-            HttpPost post = new HttpPost("http://202.199.128.21/academic/manager/score/studentOwnScore.do");
-            ArrayList<NameValuePair> postData = new ArrayList<>();
+    public Map<Integer, String> getScoreParam(HttpClient client, String stuNo) throws Exception {
+        HttpPost post = new HttpPost("http://202.199.128.21/academic/manager/score/studentOwnScore.do");
+        ArrayList<NameValuePair> postData = new ArrayList<>();
 
-            postData.add(new BasicNameValuePair("year", null));
-            postData.add(new BasicNameValuePair("term", null));
-            postData.add(new BasicNameValuePair("para", "0"));
-            postData.add(new BasicNameValuePair("sortColumn", ""));
-            postData.add(new BasicNameValuePair("Submit", "查询"));
+        postData.add(new BasicNameValuePair("year", null));
+        postData.add(new BasicNameValuePair("term", null));
+        postData.add(new BasicNameValuePair("para", "0"));
+        postData.add(new BasicNameValuePair("sortColumn", ""));
+        postData.add(new BasicNameValuePair("Submit", "查询"));
 
-            post.setEntity(new UrlEncodedFormEntity(postData));
+        post.setEntity(new UrlEncodedFormEntity(postData));
 
-            HttpResponse response = client.execute(post);
-            Map<Integer, String> map = new HashMap<>();
-            try {
-                Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
-                Element element = doc.select("table.datalist").first();
-                Elements th = element.select("th");
-                Elements tr = element.select("tr");
+        HttpResponse response = client.execute(post);
+        Map<Integer, String> map = new HashMap<>();
 
-                // 保存成绩，课程，选课，授课
-                for (int i = 1; i < tr.size(); i++) {
-                    Elements trd = tr.get(i).select("td");
+        Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        Element element = doc.select("table.datalist").first();
+        Elements th = element.select("th");
+        Elements tr = element.select("tr");
 
-                    Score score = new Score();
-                    score.setStuNo(stuNo);
-                    score.setYear(Integer.valueOf(trd.get(0).text()));
-                    score.setTerm("秋".equals(trd.get(1).text()));
-                    score.setCourseId(trd.get(2).text());
-                    score.setUsualScore("".equals(trd.get(8).text()) ? null : trd.get(8).text());
-                    score.setEndScore("".equals(trd.get(9).text()) ? null : trd.get(9).text());
-                    score.setTotalScore("".equals(trd.get(10).text())? null : trd.get(10).text());
-                    score.setSlowExam("是".equals(trd.get(11).text()));
-                    score.setExamType(trd.get(12).text());
-                    score.setComment(trd.get(13).text());
-                    int i1 = scoreMapper.insert(score);
-                    if (i1 > 0) {
-                        map.put(1, "保存成绩成功");
-                    }
+        // 保存成绩，课程，选课，授课
+        for (int i = 1; i < tr.size(); i++) {
+            Elements trd = tr.get(i).select("td");
 
-                    Course course = new Course();
-                    course.setCourseId(trd.get(2).text());
-                    course.setCourseSerialNo(trd.get(3).text());
-                    course.setCourseName(trd.get(4).text());
-                    course.setCourseGroup(trd.get(6).text());
-                    course.setCredit(Double.valueOf(trd.get(7).text()));
-                    course.setCourseType(trd.get(15).text());
-                    int i2 = courseMapper.insert(course);
-                    if (i2 > 0) {
-                        map.put(2, "保存课程成功");
-                    }
-
-                    StudentCourse studentCourse = new StudentCourse();
-                    studentCourse.setStuNo(stuNo);
-                    studentCourse.setCourseAttr(trd.get(5).text());
-                    studentCourse.setCourseId(trd.get(2).text());
-                    int i3 = studentCourseMapper.insert(studentCourse);
-                    if (i3 > 0) {
-                        map.put(3, "保存选课成功");
-                    }
-
-                    TeacherCourse teacherCourse = new TeacherCourse();
-                    teacherCourse.setTeacherName(trd.get(14).text());
-                    teacherCourse.setCourseId(trd.get(2).text());
-                    int i4 = teacherCourseMapper.insert(teacherCourse);
-                    if (i4 > 0) {
-                        map.put(4, "保存授课成功");
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+            Score score = new Score();
+            score.setStuNo(stuNo);
+            score.setYear(Integer.valueOf(trd.get(0).text()));
+            score.setTerm("秋".equals(trd.get(1).text()));
+            score.setCourseId(trd.get(2).text());
+            score.setUsualScore("".equals(trd.get(8).text()) ? null : trd.get(8).text());
+            score.setEndScore("".equals(trd.get(9).text()) ? null : trd.get(9).text());
+            score.setTotalScore("".equals(trd.get(10).text()) ? null : trd.get(10).text());
+            score.setSlowExam("是".equals(trd.get(11).text()));
+            score.setExamType(trd.get(12).text());
+            score.setComment(trd.get(13).text());
+            int i1 = scoreMapper.insert(score);
+            if (i1 > 0) {
+                map.put(1, "保存成绩成功");
             }
-            return map;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+
+            Course course = new Course();
+            course.setCourseId(trd.get(2).text());
+            course.setCourseSerialNo(trd.get(3).text());
+            course.setCourseName(trd.get(4).text());
+            course.setCourseGroup(trd.get(6).text());
+            course.setCredit(Double.valueOf(trd.get(7).text()));
+            course.setCourseType(trd.get(15).text());
+            int i2 = courseMapper.insert(course);
+            if (i2 > 0) {
+                map.put(2, "保存课程成功");
+            }
+
+            StudentCourse studentCourse = new StudentCourse();
+            studentCourse.setStuNo(stuNo);
+            studentCourse.setCourseAttr(trd.get(5).text());
+            studentCourse.setCourseId(trd.get(2).text());
+            studentCourse.setYear(Integer.valueOf(trd.get(0).text()));
+            studentCourse.setTerm("秋".equals(trd.get(1).text()));
+            int i3 = studentCourseMapper.insert(studentCourse);
+            if (i3 > 0) {
+                map.put(3, "保存选课成功");
+            }
+
+            TeacherCourse teacherCourse = new TeacherCourse();
+            teacherCourse.setTeacherName(trd.get(14).text());
+            teacherCourse.setCourseId(trd.get(2).text());
+            int i4 = teacherCourseMapper.insert(teacherCourse);
+            if (i4 > 0) {
+                map.put(4, "保存授课成功");
+            }
         }
+        return map;
     }
 
     /**
@@ -238,5 +243,38 @@ public class SpiderService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    /**
+     * 等级考试
+     *
+     * @param client
+     * @param stuNo
+     * @throws Exception
+     */
+    public Map<Integer, String> getGradeExam(HttpClient client, String stuNo) throws Exception {
+        HttpResponse response = client.execute(new HttpGet("http://202.199.128.21/academic/student/queryscore/skilltestscore.jsdo"));
+        Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        Map<Integer, String> map = new HashMap<>();
+        Elements elements = doc.select("table.infolist_tab");
+
+        Elements th = elements.select("th");
+        Elements tr = elements.select("tr");
+
+        for (int i = 1; i < tr.size(); i++) {
+            Elements trd = tr.get(i).select("td");
+            for (int j = 0; j < trd.size(); j++) {
+                GradeExam gradeExam = new GradeExam();
+                gradeExam.setStuNo(stuNo);
+                gradeExam.setExamName(trd.get(0).text());
+                gradeExam.setExamTime(trd.get(1).text());
+                gradeExam.setScore(trd.get(2).text());
+                int insert = gradeExamMapper.insert(gradeExam);
+                if (insert > 0) {
+                    map.put(1, "保存成绩成功");
+                }
+            }
+        }
+        return map;
     }
 }

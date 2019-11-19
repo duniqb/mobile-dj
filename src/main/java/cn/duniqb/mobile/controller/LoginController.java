@@ -81,14 +81,13 @@ public class LoginController {
             if (!response.toString().contains("error")) {
                 Map<Integer, Object> map = new HashMap<>();
 
-                int getInfo = spiderService.getInfo(client);
-                if (getInfo > 0) {
-                    map.put(0, "获取个人信息成功");
-                }
+                Map<Integer, String> info = spiderService.getInfo(client);
+                map.put(1, info);
                 Map<Integer, String> scoreParam = spiderService.getScoreParam(client, user.getUsername());
-                map.put(1, scoreParam);
+                map.put(2, scoreParam);
 
-//                spiderService.getTimeTable(client, 38, 2);
+                Map<Integer, String> gradeExam = spiderService.getGradeExam(client, user.getUsername());
+                map.put(3, gradeExam);
                 return JSONResult.build(map, "教务登录成功", 200);
             }
         } catch (IOException e) {

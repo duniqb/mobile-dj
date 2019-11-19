@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.duniqb.mobile.mapper.WxUserMapper">
   <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.WxUser">
-    <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
+    <!--@mbg.generated generated on Tue Nov 19 16:38:13 CST 2019.-->
     <!--@Table wx_user-->
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="openid" jdbcType="VARCHAR" property="openid" />
@@ -18,7 +18,7 @@
     <result column="mobile" jdbcType="VARCHAR" property="mobile" />
   </resultMap>
   <sql id="Base_Column_List">
-    <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
+    <!--@mbg.generated generated on Tue Nov 19 16:38:13 CST 2019.-->
     id, openid, stu_no, nickname, avatarUrl, gender, country, province, city, `language`, 
     ctime, mobile
   </sql>

@@ -36,5 +36,17 @@ public class StudentCourse implements Serializable {
     @Column(name = "time_date")
     private String timeDate;
 
+    /**
+     * 学年
+     */
+    @Column(name = "`year`")
+    private Integer year;
+
+    /**
+     * 学期  0-春、1-秋
+     */
+    @Column(name = "term")
+    private Boolean term;
+
     private static final long serialVersionUID = 1L;
 }

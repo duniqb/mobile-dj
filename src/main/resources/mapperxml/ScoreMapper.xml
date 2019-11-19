@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.duniqb.mobile.mapper.ScoreMapper">
   <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.Score">
-    <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
+    <!--@mbg.generated generated on Tue Nov 19 16:38:13 CST 2019.-->
     <!--@Table score-->
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="stu_no" jdbcType="CHAR" property="stuNo" />
@@ -17,7 +17,7 @@
     <result column="comment" jdbcType="VARCHAR" property="comment" />
   </resultMap>
   <sql id="Base_Column_List">
-    <!--@mbg.generated generated on Mon Nov 18 21:45:26 CST 2019.-->
+    <!--@mbg.generated generated on Tue Nov 19 16:38:13 CST 2019.-->
     id, stu_no, course_id, `year`, term, usual_score, end_score, total_score, slow_exam, 
     exam_type, `comment`
   </sql>
