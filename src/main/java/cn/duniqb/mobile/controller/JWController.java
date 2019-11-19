@@ -6,13 +6,14 @@ import cn.duniqb.mobile.dto.User;
 import cn.duniqb.mobile.service.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
+@Scope("session")
 @RestController
 @RequestMapping("/api/v1/")
 public class JWController {
@@ -40,7 +42,7 @@ public class JWController {
     @Autowired
     private StudentCourseService studentCourseService;
 
-    private static HttpClient client = HttpClients.createDefault();
+    private static CloseableHttpClient client = HttpClients.createDefault();
 
     private final String URL = "http://localhost:8080/";
 
@@ -49,9 +51,8 @@ public class JWController {
      */
     @GetMapping("verify")
     public JSONResult getVerifyCode() {
-        // 后端收到来自前端的请求，后端立即获取一个验证码
+        // 获取验证码并保存到本地
         String fileName = saveVerifyCode();
-        // 取出已保存在本地的验证码发给前端可访问
         String imgUrl = "verify/" + fileName + ".jpg";
         return JSONResult.build(URL + imgUrl, "验证码获取成功", 200);
     }
@@ -96,13 +97,10 @@ public class JWController {
                 map.put(1, info);
                 Map<Integer, String> scoreParam = spiderService.getScoreParam(client, user.getUsername());
                 map.put(2, scoreParam);
-
                 Map<Integer, String> gradeExam = spiderService.getGradeExam(client, user.getUsername());
                 map.put(3, gradeExam);
                 return JSONResult.build(map, "教务登录成功", 200);
             }
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
         } catch (Exception e) {
             e.printStackTrace();
         }
