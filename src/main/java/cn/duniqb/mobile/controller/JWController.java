@@ -6,11 +6,14 @@ import cn.duniqb.mobile.dto.User;
 import cn.duniqb.mobile.service.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -47,12 +50,7 @@ public class JWController {
     @Autowired
     private StudentCourseService studentCourseService;
 
-    /**
-     * 此处有问题，虽然将 Controller 实例改为 Session，但此处仍然是静态的，所有实例共享。
-     * 导致两次 Session 共享，从而让第一次的失效
-     */
-    private static CloseableHttpClient client = HttpClients.createDefault();
-
+    private CookieStore cookieStore = null;
     private final String URL = "http://localhost:8080/";
 
     /**
@@ -75,6 +73,8 @@ public class JWController {
      */
     @PostMapping("loginjw")
     public JSONResult login(@RequestBody User user) {
+        HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
+
         Map<Integer, Object> map = new HashMap<>();
         Student student = studentService.selectOneByNo(user.getUsername());
         if (student != null) {
@@ -101,17 +101,22 @@ public class JWController {
             post.setEntity(new UrlEncodedFormEntity(postData));
             HttpResponse response = client.execute(post);
 
+            // 响应中不包含 error 字符，认为是成功
             if (!response.toString().contains("error")) {
-                Map<Integer, String> info = spiderService.getInfo(client);
+                Map<Integer, String> info = spiderService.getInfo(cookieStore);
                 map.put(1, info);
-                Map<Integer, String> scoreParam = spiderService.getScoreParam(client, user.getUsername());
+                Map<Integer, String> scoreParam = spiderService.getScoreParam(cookieStore, user.getUsername());
                 map.put(2, scoreParam);
-                Map<Integer, String> gradeExam = spiderService.getGradeExam(client, user.getUsername());
+                Map<Integer, String> gradeExam = spiderService.getGradeExam(cookieStore, user.getUsername());
                 map.put(3, gradeExam);
+                cookieStore.clear();
                 return JSONResult.build(map, "教务登录成功", 200);
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        if (cookieStore != null) {
+            cookieStore.clear();
         }
         return JSONResult.build(null, "教务登录失败", 400);
     }
@@ -124,11 +129,12 @@ public class JWController {
     private String saveVerifyCode() {
         HttpGet getVerifyCode = new HttpGet("http://202.199.128.21/academic/getCaptcha.do");
         FileOutputStream fileOutputStream = null;
-        client = HttpClients.createDefault();
         String fileName = System.currentTimeMillis() + "";
         // 把验证码图片保存到本地
         try {
+            HttpClient client = HttpClients.createDefault();
             HttpResponse response = client.execute(getVerifyCode);
+            setCookieStore(response);
             fileOutputStream = new FileOutputStream(new File("D:\\verify\\" + fileName + ".jpg"));
             response.getEntity().writeTo(fileOutputStream);
         } catch (IOException e) {
@@ -160,16 +166,32 @@ public class JWController {
 
         int i1 = creditService.deleteByStuNo(user.getUsername());
         map.put(1, "清空了 " + i1 + " 条学分信息");
-
         int i2 = scoreService.deleteByStuNo(user.getUsername());
         map.put(2, "清空了 " + i2 + " 条成绩信息");
-
         int i3 = studentCourseService.deleteByStuNo(user.getUsername());
         map.put(3, "清空了 " + i3 + " 条选课信息");
-
         int i4 = studentService.deleteByStuNo(user.getUsername());
         map.put(4, "清空了 " + i4 + " 条学生信息");
 
         return JSONResult.build(map, "清空成功", 200);
+    }
+
+    /**
+     * 设置 Cookie
+     *
+     * @param httpResponse
+     */
+    private void setCookieStore(HttpResponse httpResponse) {
+        cookieStore = new BasicCookieStore();
+        // JSESSIONID
+        String setCookie = httpResponse.getFirstHeader("Set-Cookie").getValue();
+        String JSESSIONID = setCookie.substring("JSESSIONID=".length(), setCookie.indexOf(";"));
+//        System.out.println("JSESSIONID: " + JSESSIONID);
+        // 新建一个 Cookie
+        BasicClientCookie cookie = new BasicClientCookie("JSESSIONID", JSESSIONID);
+        cookie.setVersion(0);
+        cookie.setDomain("202.199.128.21");
+        cookie.setPath("/academic");
+        cookieStore.addCookie(cookie);
     }
 }

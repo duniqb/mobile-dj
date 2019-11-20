@@ -4,10 +4,12 @@ import cn.duniqb.mobile.domain.*;
 import cn.duniqb.mobile.mapper.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
@@ -56,11 +58,13 @@ public class SpiderService {
     /**
      * 获取个人信息与学分信息
      *
-     * @param client
+     * @param cookieStore
      * @return
      * @throws Exception
      */
-    public Map<Integer, String> getInfo(HttpClient client) throws Exception {
+    public Map<Integer, String> getInfo(CookieStore cookieStore) throws Exception {
+        HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
+
         HttpResponse response = client.execute(new HttpGet("http://202.199.128.21/academic/showPersonalInfo.do"));
         Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
         String imgUrl = doc.select("table.form td img").attr("src");
@@ -138,9 +142,13 @@ public class SpiderService {
      * 查询成绩
      * 在此处总是查询所有的成绩
      *
+     * @param cookieStore
+     * @param stuNo
      * @return
+     * @throws Exception
      */
-    public Map<Integer, String> getScoreParam(HttpClient client, String stuNo) throws Exception {
+    public Map<Integer, String> getScoreParam(CookieStore cookieStore, String stuNo) throws Exception {
+        HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         HttpPost post = new HttpPost("http://202.199.128.21/academic/manager/score/studentOwnScore.do");
         ArrayList<NameValuePair> postData = new ArrayList<>();
 
@@ -157,7 +165,6 @@ public class SpiderService {
 
         Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
         Element element = doc.select("table.datalist").first();
-        Elements th = element.select("th");
         Elements tr = element.select("tr");
 
         // 保存成绩，课程，选课，授课
@@ -218,7 +225,6 @@ public class SpiderService {
                     map.put(4, "保存教师授课成功");
                 }
             }
-
         }
         return map;
     }
@@ -226,6 +232,11 @@ public class SpiderService {
     /**
      * 根据学期查询课表
      * 在此处总是查询所有的成绩
+     *
+     * @param client
+     * @param year
+     * @param term
+     * @return
      */
     public HttpResponse getTimeTable(HttpClient client, Integer year, Integer term) {
         try {
@@ -263,11 +274,13 @@ public class SpiderService {
     /**
      * 等级考试
      *
-     * @param client
+     * @param cookieStore
      * @param stuNo
+     * @return
      * @throws Exception
      */
-    public Map<Integer, String> getGradeExam(HttpClient client, String stuNo) throws Exception {
+    public Map<Integer, String> getGradeExam(CookieStore cookieStore, String stuNo) throws Exception {
+        HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         HttpResponse response = client.execute(new HttpGet("http://202.199.128.21/academic/student/queryscore/skilltestscore.jsdo"));
         Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
         Map<Integer, String> map = new HashMap<>();
