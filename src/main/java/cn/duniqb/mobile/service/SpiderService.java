@@ -62,7 +62,7 @@ public class SpiderService {
      * @return
      * @throws Exception
      */
-    public Map<Integer, String> getInfo(CookieStore cookieStore) throws Exception {
+    public Map<Integer, String> getInfo(CookieStore cookieStore, String password) throws Exception {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
 
         HttpResponse response = client.execute(new HttpGet("http://202.199.128.21/academic/showPersonalInfo.do"));
@@ -105,6 +105,7 @@ public class SpiderService {
                 } else if (tit.get(i).text().contains("邮政编码")) {
                     student.setZipCode(info.get(i).text());
                 }
+                student.setPassword(password);
             }
         }
 

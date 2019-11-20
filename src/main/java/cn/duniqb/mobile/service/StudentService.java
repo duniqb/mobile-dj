@@ -1,6 +1,7 @@
 package cn.duniqb.mobile.service;
 
 import cn.duniqb.mobile.domain.Student;
+import cn.duniqb.mobile.dto.User;
 
 public interface StudentService {
 
@@ -19,7 +20,17 @@ public interface StudentService {
      * @return
      */
     int deleteByStuNo(String stuNo);
+
+
+    /**
+     * 根据账户密码查询学生
+     *
+     * @param user
+     * @return
+     */
+    Student selectOneByStudent(User user);
 }
+
 
 
 

@@ -103,7 +103,7 @@ public class JWController {
 
             // 响应中不包含 error 字符，认为是成功
             if (!response.toString().contains("error")) {
-                Map<Integer, String> info = spiderService.getInfo(cookieStore);
+                Map<Integer, String> info = spiderService.getInfo(cookieStore, user.getPassword());
                 map.put(1, info);
                 Map<Integer, String> scoreParam = spiderService.getScoreParam(cookieStore, user.getUsername());
                 map.put(2, scoreParam);
@@ -158,22 +158,34 @@ public class JWController {
      */
     @PostMapping("clear")
     public JSONResult clear(@RequestBody User user) {
-        Student student = studentService.selectOneByNo(user.getUsername());
-        if (student == null) {
-            return JSONResult.build(user.getUsername(), "学生不存在", 400);
+        if (user.getUsername() != null) {
+            Student student = studentService.selectOneByNo(user.getUsername());
+            if (student == null) {
+                return JSONResult.build(user.getUsername(), "学生不存在", 400);
+            }
         }
-        Map<Integer, Object> map = new HashMap<>();
 
-        int i1 = creditService.deleteByStuNo(user.getUsername());
-        map.put(1, "清空了 " + i1 + " 条学分信息");
-        int i2 = scoreService.deleteByStuNo(user.getUsername());
-        map.put(2, "清空了 " + i2 + " 条成绩信息");
-        int i3 = studentCourseService.deleteByStuNo(user.getUsername());
-        map.put(3, "清空了 " + i3 + " 条选课信息");
-        int i4 = studentService.deleteByStuNo(user.getUsername());
-        map.put(4, "清空了 " + i4 + " 条学生信息");
+        if (user.getUsername() != null && user.getPassword() != null) {
+            Student studentUser = studentService.selectOneByStudent(user);
+            if (studentUser == null) {
+                return JSONResult.build(user.getUsername(), "学号/密码错误", 400);
+            } else {
+                Map<Integer, Object> map = new HashMap<>();
 
-        return JSONResult.build(map, "清空成功", 200);
+                int i1 = creditService.deleteByStuNo(user.getUsername());
+                map.put(1, "清空了 " + i1 + " 条学分信息");
+                int i2 = scoreService.deleteByStuNo(user.getUsername());
+                map.put(2, "清空了 " + i2 + " 条成绩信息");
+                int i3 = studentCourseService.deleteByStuNo(user.getUsername());
+                map.put(3, "清空了 " + i3 + " 条选课信息");
+                int i4 = studentService.deleteByStuNo(user.getUsername());
+                map.put(4, "清空了 " + i4 + " 条学生信息");
+
+                return JSONResult.build(map, "清空成功", 200);
+            }
+        }
+
+        return JSONResult.build(null, "清空失败", 400);
     }
 
     /**

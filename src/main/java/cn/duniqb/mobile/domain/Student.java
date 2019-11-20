@@ -21,6 +21,12 @@ public class Student implements Serializable {
     private String name;
 
     /**
+     * 密码
+     */
+    @Column(name = "`password`")
+    private String password;
+
+    /**
      * 照片
      */
     @Column(name = "img")

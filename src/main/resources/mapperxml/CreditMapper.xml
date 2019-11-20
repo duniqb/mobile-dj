@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.duniqb.mobile.mapper.CreditMapper">
   <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.Credit">
-    <!--@mbg.generated generated on Tue Nov 19 16:38:13 CST 2019.-->
+    <!--@mbg.generated generated on Wed Nov 20 16:00:57 CST 2019.-->
     <!--@Table credit-->
     <id column="stu_no" jdbcType="CHAR" property="stuNo" />
     <result column="major" jdbcType="VARCHAR" property="major" />
@@ -12,7 +12,7 @@
     <result column="optional_credits" jdbcType="FLOAT" property="optionalCredits" />
   </resultMap>
   <sql id="Base_Column_List">
-    <!--@mbg.generated generated on Tue Nov 19 16:38:13 CST 2019.-->
+    <!--@mbg.generated generated on Wed Nov 20 16:00:57 CST 2019.-->
     stu_no, major, `credit requirements`, required_credits, elective_credits, optional_credits
   </sql>
 </mapper>
