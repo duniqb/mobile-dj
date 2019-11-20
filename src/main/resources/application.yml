@@ -2,10 +2,13 @@ spring:
   application:
     name: oauth2-resource
   datasource:
-    driver-class-name: com.mysql.jdbc.Driver
+    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.71.136:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false
     username: root
     password: root
-
+#  devtools:
+#    restart:
+#      #热部署生效
+#      enabled: false
 mybatis:
   config-location: classpath:mybatis-config.xml

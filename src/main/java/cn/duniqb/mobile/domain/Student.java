@@ -2,6 +2,8 @@ package cn.duniqb.mobile.domain;
 
 import java.io.Serializable;
 import javax.persistence.*;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 @Data
@@ -23,6 +25,7 @@ public class Student implements Serializable {
     /**
      * 密码
      */
+    @JsonIgnore
     @Column(name = "`password`")
     private String password;
 

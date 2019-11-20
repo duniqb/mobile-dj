@@ -4,6 +4,9 @@ import cn.duniqb.mobile.domain.Student;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.User;
 import cn.duniqb.mobile.service.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiOperation;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.CookieStore;
@@ -27,13 +30,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 教务
+ * 与登录教务相关的接口
  *
  * @author duniqb
  */
+@Api(value = "与登录教务相关的接口", tags = {"与登录教务相关的接口 Controller"})
 @Scope("session")
 @RestController
-@RequestMapping("/api/v1/")
+@RequestMapping("/api/v1/jw")
 public class JWController {
     @Autowired
     private SpiderService spiderService;
@@ -56,6 +60,7 @@ public class JWController {
     /**
      * 进入登录页面时或点击刷新，返回一个验证码
      */
+    @ApiOperation(value = "获取验证码", notes = "无需参数，但获取验证码的客户端应当和登录的客户端一致，否则无效，即同一个 Session")
     @GetMapping("verify")
     public JSONResult getVerifyCode() {
         // 获取验证码并保存到本地
@@ -71,7 +76,9 @@ public class JWController {
      * @param user
      * @return
      */
-    @PostMapping("loginjw")
+    @ApiOperation(value = "登录教务", notes = "登录教务的接口，请求体是 User，包含学号，密码和验证码")
+    @ApiImplicitParam(name = "user", value = "请求对象 user，包含学号，密码和验证码", required = true, dataType = "User", paramType = "body")
+    @PostMapping("login")
     public JSONResult login(@RequestBody User user) {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
 
@@ -122,40 +129,13 @@ public class JWController {
     }
 
     /**
-     * 从教务获取验证码，并保存到本地
-     *
-     * @return 保存的唯一名字
-     */
-    private String saveVerifyCode() {
-        HttpGet getVerifyCode = new HttpGet("http://202.199.128.21/academic/getCaptcha.do");
-        FileOutputStream fileOutputStream = null;
-        String fileName = System.currentTimeMillis() + "";
-        // 把验证码图片保存到本地
-        try {
-            HttpClient client = HttpClients.createDefault();
-            HttpResponse response = client.execute(getVerifyCode);
-            setCookieStore(response);
-            fileOutputStream = new FileOutputStream(new File("D:\\verify\\" + fileName + ".jpg"));
-            response.getEntity().writeTo(fileOutputStream);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                assert fileOutputStream != null;
-                fileOutputStream.close();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        return fileName;
-    }
-
-    /**
      * 清空该学生的已存在所有数据
      *
      * @param user
      * @return
      */
+    @ApiOperation(value = "清空学生信息", notes = "清空学生信息的接口，请求体是 User，包含学号，密码")
+    @ApiImplicitParam(name = "user", value = "请求对象 user，包含学号，密码", required = true, dataType = "User", paramType = "body")
     @PostMapping("clear")
     public JSONResult clear(@RequestBody User user) {
         if (user.getUsername() != null) {
@@ -189,6 +169,35 @@ public class JWController {
     }
 
     /**
+     * 从教务获取验证码，并保存到本地
+     *
+     * @return 保存的唯一名字
+     */
+    private String saveVerifyCode() {
+        HttpGet getVerifyCode = new HttpGet("http://202.199.128.21/academic/getCaptcha.do");
+        FileOutputStream fileOutputStream = null;
+        String fileName = System.currentTimeMillis() + "";
+        // 把验证码图片保存到本地
+        try {
+            HttpClient client = HttpClients.createDefault();
+            HttpResponse response = client.execute(getVerifyCode);
+            setCookieStore(response);
+            fileOutputStream = new FileOutputStream(new File("D:\\verify\\" + fileName + ".jpg"));
+            response.getEntity().writeTo(fileOutputStream);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                assert fileOutputStream != null;
+                fileOutputStream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return fileName;
+    }
+
+    /**
      * 设置 Cookie
      *
      * @param httpResponse
@@ -198,8 +207,6 @@ public class JWController {
         // JSESSIONID
         String setCookie = httpResponse.getFirstHeader("Set-Cookie").getValue();
         String JSESSIONID = setCookie.substring("JSESSIONID=".length(), setCookie.indexOf(";"));
-//        System.out.println("JSESSIONID: " + JSESSIONID);
-        // 新建一个 Cookie
         BasicClientCookie cookie = new BasicClientCookie("JSESSIONID", JSESSIONID);
         cookie.setVersion(0);
         cookie.setDomain("202.199.128.21");
