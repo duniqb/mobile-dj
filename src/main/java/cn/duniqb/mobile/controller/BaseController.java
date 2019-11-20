@@ -11,7 +11,7 @@ public class BaseController implements ErrorController {
 
     @RequestMapping(value = "/error", method = {RequestMethod.GET, RequestMethod.POST})
     public JSONResult error() {
-        return JSONResult.build(null, "无效的路径", 404);
+        return JSONResult.build(null, "无效的请求", 404);
     }
 
     @Override

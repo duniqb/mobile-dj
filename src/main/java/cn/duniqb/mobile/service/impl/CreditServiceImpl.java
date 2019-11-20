@@ -1,5 +1,6 @@
 package cn.duniqb.mobile.service.impl;
 
+import cn.duniqb.mobile.domain.Credit;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -21,7 +22,14 @@ public class CreditServiceImpl implements CreditService {
      */
     @Override
     public int deleteByStuNo(String stuNo) {
+
         return creditMapper.deleteByPrimaryKey(stuNo);
+    }
+
+    @Override
+    public Credit selectOneByNo(String no) {
+
+        return creditMapper.selectByPrimaryKey(no);
     }
 }
 

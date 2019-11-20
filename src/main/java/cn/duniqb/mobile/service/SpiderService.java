@@ -292,16 +292,20 @@ public class SpiderService {
 
         for (int i = 1; i < tr.size(); i++) {
             Elements trd = tr.get(i).select("td");
-            for (int j = 0; j < trd.size(); j++) {
-                GradeExam gradeExam = new GradeExam();
-                gradeExam.setStuNo(stuNo);
-                gradeExam.setExamName(trd.get(0).text());
-                gradeExam.setExamTime(trd.get(1).text());
-                gradeExam.setScore(trd.get(2).text());
-                int insert = gradeExamMapper.insert(gradeExam);
-                if (insert > 0) {
-                    map.put(1, "保存成绩成功");
-                }
+
+            GradeExam gradeExam = new GradeExam();
+            gradeExam.setStuNo(stuNo);
+            gradeExam.setExamName(trd.get(0).text());
+            if (trd.get(0).text().contains("4")) {
+                gradeExam.setGrade(4);
+            } else if (trd.get(0).text().contains("6")) {
+                gradeExam.setGrade(6);
+            }
+            gradeExam.setExamTime(trd.get(1).text());
+            gradeExam.setScore(trd.get(2).text());
+            int insert = gradeExamMapper.insert(gradeExam);
+            if (insert > 0) {
+                map.put(1, "保存等级考试成功");
             }
         }
         return map;

@@ -2,16 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.duniqb.mobile.mapper.GradeExamMapper">
   <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.GradeExam">
-    <!--@mbg.generated generated on Wed Nov 20 16:00:57 CST 2019.-->
+    <!--@mbg.generated generated on Wed Nov 20 21:24:58 CST 2019.-->
     <!--@Table grade_exam-->
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="stu_no" jdbcType="CHAR" property="stuNo" />
     <result column="exam_name" jdbcType="VARCHAR" property="examName" />
     <result column="exam_time" jdbcType="VARCHAR" property="examTime" />
     <result column="score" jdbcType="VARCHAR" property="score" />
+    <result column="grade" jdbcType="INTEGER" property="grade" />
   </resultMap>
   <sql id="Base_Column_List">
-    <!--@mbg.generated generated on Wed Nov 20 16:00:57 CST 2019.-->
-    id, stu_no, exam_name, exam_time, score
+    <!--@mbg.generated generated on Wed Nov 20 21:24:58 CST 2019.-->
+    id, stu_no, exam_name, exam_time, score, grade
   </sql>
 </mapper>

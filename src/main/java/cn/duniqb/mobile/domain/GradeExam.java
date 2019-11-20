@@ -36,5 +36,11 @@ public class GradeExam implements Serializable {
     @Column(name = "score")
     private String score;
 
+    /**
+     * 等级
+     */
+    @Column(name = "grade")
+    private Integer grade;
+
     private static final long serialVersionUID = 1L;
 }

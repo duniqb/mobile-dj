@@ -54,6 +54,9 @@ public class JWController {
     @Autowired
     private StudentCourseService studentCourseService;
 
+    @Autowired
+    private GradeExamService gradeExamService;
+
     private CookieStore cookieStore = null;
     private final String URL = "http://localhost:8080/";
 
@@ -160,6 +163,8 @@ public class JWController {
                 map.put(3, "清空了 " + i3 + " 条选课信息");
                 int i4 = studentService.deleteByStuNo(user.getUsername());
                 map.put(4, "清空了 " + i4 + " 条学生信息");
+                int i5 = gradeExamService.deleteByStuNo(user.getUsername());
+                map.put(5, "清空了 " + i5 + " 条等级信息");
 
                 return JSONResult.build(map, "清空成功", 200);
             }

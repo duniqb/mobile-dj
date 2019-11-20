@@ -40,7 +40,7 @@ public class StudentServiceImpl implements StudentService {
     }
 
     /**
-     * 根据学号密码查询学生
+     * 根据学号查询学生
      *
      * @param user
      * @return
@@ -49,7 +49,6 @@ public class StudentServiceImpl implements StudentService {
     public Student selectOneByStudent(User user) {
         Example example = new Example(Student.class);
         example.createCriteria().andEqualTo("stuNo", user.getUsername());
-        example.createCriteria().andEqualTo("password", user.getPassword());
         return studentMapper.selectOneByExample(example);
     }
 }

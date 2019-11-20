@@ -1,6 +1,6 @@
 spring:
   application:
-    name: oauth2-resource
+    name: mobile-dj
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.71.136:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false
