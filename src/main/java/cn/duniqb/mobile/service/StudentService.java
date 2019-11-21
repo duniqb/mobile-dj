@@ -25,11 +25,13 @@ public interface StudentService {
     /**
      * 根据账户密码查询学生
      *
-     * @param user
+     * @param no
+     * @param password
      * @return
      */
-    Student selectOneByStudent(User user);
+    Student selectOneByStuNoPwd(String no, String password);
 }
+
 
 
 

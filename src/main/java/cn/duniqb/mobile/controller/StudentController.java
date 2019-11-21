@@ -5,7 +5,6 @@ import cn.duniqb.mobile.domain.GradeExam;
 import cn.duniqb.mobile.domain.Student;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.ScoreDto;
-import cn.duniqb.mobile.dto.User;
 import cn.duniqb.mobile.service.CreditService;
 import cn.duniqb.mobile.service.GradeExamService;
 import cn.duniqb.mobile.service.ScoreService;
@@ -15,7 +14,10 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -24,7 +26,7 @@ import java.util.List;
  *
  * @author duniqb
  */
-@Api(value = "与学生相关的接口", tags = {"与学生相关的接口 Controller"})
+@Api(value = "与学生相关的接口", tags = {"与学生相关的接口"})
 @RestController
 @RequestMapping("/api/v1/student/")
 public class StudentController {

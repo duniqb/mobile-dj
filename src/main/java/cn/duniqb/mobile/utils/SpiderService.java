@@ -1,4 +1,4 @@
-package cn.duniqb.mobile.service;
+package cn.duniqb.mobile.utils;
 
 import cn.duniqb.mobile.domain.*;
 import cn.duniqb.mobile.mapper.*;
@@ -25,10 +25,7 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 爬取教务
@@ -137,7 +134,8 @@ public class SpiderService {
                 } else if (tit.get(i).text().contains("邮政编码")) {
                     student.setZipCode(info.get(i).text());
                 }
-                student.setPassword(password);
+                student.setSalt(UUID.randomUUID().toString().substring(0, 5));
+                student.setPassword(MobileUtil.MD5(password) + student.getSalt());
             }
         }
 

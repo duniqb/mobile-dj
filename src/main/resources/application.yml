@@ -31,4 +31,5 @@ jw:
   cookie:
     domain: 202.199.128.21
     path: /academic
+  # 验证码存放的本机文件夹
   verifyPath: D:\verify\

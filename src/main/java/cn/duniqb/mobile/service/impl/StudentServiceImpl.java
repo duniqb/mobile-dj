@@ -40,18 +40,20 @@ public class StudentServiceImpl implements StudentService {
     }
 
     /**
-     * 根据学号查询学生
+     * 根据账户密码查询学生
      *
-     * @param user
+     * @param no
+     * @param password
      * @return
      */
     @Override
-    public Student selectOneByStudent(User user) {
+    public Student selectOneByStuNoPwd(String no, String password) {
         Example example = new Example(Student.class);
-        example.createCriteria().andEqualTo("stuNo", user.getUsername());
+        example.createCriteria().andEqualTo("stuNo", no).andEqualTo("password", password);
         return studentMapper.selectOneByExample(example);
     }
 }
+
 
 
 

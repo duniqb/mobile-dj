@@ -2,11 +2,12 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.duniqb.mobile.mapper.StudentMapper">
   <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.Student">
-    <!--@mbg.generated generated on Wed Nov 20 16:00:57 CST 2019.-->
+    <!--@mbg.generated generated on Thu Nov 21 17:15:22 CST 2019.-->
     <!--@Table student-->
     <id column="stu_no" jdbcType="CHAR" property="stuNo" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="password" jdbcType="VARCHAR" property="password" />
+    <result column="salt" jdbcType="CHAR" property="salt" />
     <result column="img" jdbcType="VARCHAR" property="img" />
     <result column="college" jdbcType="VARCHAR" property="college" />
     <result column="major" jdbcType="VARCHAR" property="major" />
@@ -22,8 +23,8 @@
     <result column="zip_code" jdbcType="CHAR" property="zipCode" />
   </resultMap>
   <sql id="Base_Column_List">
-    <!--@mbg.generated generated on Wed Nov 20 16:00:57 CST 2019.-->
-    stu_no, `name`, `password`, img, college, major, direction, student_type, grade, 
+    <!--@mbg.generated generated on Thu Nov 21 17:15:22 CST 2019.-->
+    stu_no, `name`, `password`, salt, img, college, major, direction, student_type, grade, 
     clazz, certificate_type, certificate, email, phone, address, zip_code
   </sql>
 </mapper>
