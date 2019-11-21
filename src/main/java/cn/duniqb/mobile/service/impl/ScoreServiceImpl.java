@@ -1,8 +1,10 @@
 package cn.duniqb.mobile.service.impl;
 
 import cn.duniqb.mobile.domain.Score;
+import cn.duniqb.mobile.domain.TeacherCourse;
 import cn.duniqb.mobile.dto.ScoreDto;
 import cn.duniqb.mobile.mapper.CourseMapper;
+import cn.duniqb.mobile.service.TeacherCourseService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,9 @@ public class ScoreServiceImpl implements ScoreService {
 
     @Autowired
     private CourseMapper courseMapper;
+
+    @Autowired
+    private TeacherCourseService teacherCourseService;
 
     /**
      * 根据学号清空成绩
@@ -97,6 +102,9 @@ public class ScoreServiceImpl implements ScoreService {
             BeanUtils.copyProperties(score, scoreDto);
             scoreDto.setCourseName(courseMapper.selectByPrimaryKey(score.getCourseId()).getCourseName());
             scoreDto.setTerm(score.getTerm() ? "秋" : "春");
+            scoreDto.setCredit(courseMapper.selectByPrimaryKey(score.getCourseId()).getCredit());
+            TeacherCourse teacherCourse = teacherCourseService.searchByStuNoCourseId(score.getStuNo(), score.getCourseId());
+            scoreDto.setTeacherName(teacherCourse.getTeacherName());
             scoreDtoList.add(scoreDto);
         }
         return scoreDtoList;

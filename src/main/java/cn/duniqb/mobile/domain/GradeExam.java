@@ -31,10 +31,22 @@ public class GradeExam implements Serializable {
     private String examTime;
 
     /**
+     * 准考证号
+     */
+    @Column(name = "ticket_number")
+    private String ticketNumber;
+
+    /**
      * 成绩
      */
     @Column(name = "score")
     private String score;
+
+    /**
+     * 是否已批准考试
+     */
+    @Column(name = "approved")
+    private String approved;
 
     /**
      * 等级

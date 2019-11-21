@@ -18,9 +18,12 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -62,11 +65,22 @@ public class SpiderService {
      * @return
      * @throws Exception
      */
-    public Map<Integer, String> getInfo(CookieStore cookieStore, String password) throws Exception {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Map<Integer, String> getInfo(CookieStore cookieStore, String password) {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
 
-        HttpResponse response = client.execute(new HttpGet("http://202.199.128.21/academic/showPersonalInfo.do"));
-        Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        HttpResponse response = null;
+        try {
+            response = client.execute(new HttpGet("http://202.199.128.21/academic/showPersonalInfo.do"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         String imgUrl = doc.select("table.form td img").attr("src");
 
         Elements elements = doc.select("table.form tr");
@@ -131,10 +145,14 @@ public class SpiderService {
         int i1 = creditMapper.insert(credit);
         if (i1 > 0) {
             map.put(1, "保存学分成功");
+        } else {
+            map.put(1, "保存学分失败");
         }
         int i2 = studentMapper.insert(student);
         if (i2 > 0) {
             map.put(2, "保存学籍成功");
+        } else {
+            map.put(2, "保存学籍失败");
         }
         return map;
     }
@@ -148,7 +166,8 @@ public class SpiderService {
      * @return
      * @throws Exception
      */
-    public Map<Integer, String> getScoreParam(CookieStore cookieStore, String stuNo) throws Exception {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Map<Integer, String> getScoreParam(CookieStore cookieStore, String stuNo) {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         HttpPost post = new HttpPost("http://202.199.128.21/academic/manager/score/studentOwnScore.do");
         ArrayList<NameValuePair> postData = new ArrayList<>();
@@ -159,12 +178,26 @@ public class SpiderService {
         postData.add(new BasicNameValuePair("sortColumn", ""));
         postData.add(new BasicNameValuePair("Submit", "查询"));
 
-        post.setEntity(new UrlEncodedFormEntity(postData));
+        try {
+            post.setEntity(new UrlEncodedFormEntity(postData));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
 
-        HttpResponse response = client.execute(post);
+        HttpResponse response = null;
+        try {
+            response = client.execute(post);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Map<Integer, String> map = new HashMap<>();
 
-        Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        Document doc = null;
+        try {
+            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Element element = doc.select("table.datalist").first();
         Elements tr = element.select("tr");
 
@@ -186,6 +219,8 @@ public class SpiderService {
             int i1 = scoreMapper.insert(score);
             if (i1 > 0) {
                 map.put(1, "保存学生成绩成功");
+            } else {
+                map.put(1, "保存学生成绩失败");
             }
 
             Course courseExist = courseMapper.selectByPrimaryKey(trd.get(2).text());
@@ -200,6 +235,8 @@ public class SpiderService {
                 int i2 = courseMapper.insert(course);
                 if (i2 > 0) {
                     map.put(2, "保存学生课程成功");
+                } else {
+                    map.put(2, "保存学生成绩失败");
                 }
             }
 
@@ -212,18 +249,23 @@ public class SpiderService {
             int i3 = studentCourseMapper.insert(studentCourse);
             if (i3 > 0) {
                 map.put(3, "保存学生选课成功");
+            } else {
+                map.put(3, "保存学生选课失败");
             }
 
             Example example = new Example(TeacherCourse.class);
-            example.createCriteria().andEqualTo("teacherName", trd.get(14).text());
+            example.createCriteria().andEqualTo("courseId", trd.get(2).text());
             List<TeacherCourse> teacherCourses = teacherCourseMapper.selectByExample(example);
             if (teacherCourses.isEmpty()) {
                 TeacherCourse teacherCourse = new TeacherCourse();
+                teacherCourse.setStuNo(stuNo);
                 teacherCourse.setTeacherName(trd.get(14).text());
                 teacherCourse.setCourseId(trd.get(2).text());
                 int i4 = teacherCourseMapper.insert(teacherCourse);
                 if (i4 > 0) {
                     map.put(4, "保存教师授课成功");
+                } else {
+                    map.put(4, "保存教师授课失败");
                 }
             }
         }
@@ -243,18 +285,14 @@ public class SpiderService {
         try {
             String url = "http://202.199.128.21/academic/student/currcourse/currcourse.jsdo";
 
-            // 2.输入网址,发起get请求创建HttpGet对象
             HttpGet httpGet = new HttpGet(url + "year=" + year + "&term=" + term);
 
-            // 3.返回响应
             HttpResponse response = client.execute(httpGet);
 
             Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()));
             Element element = doc.select("table.infolist_tab").first();
 
-            // 标题集合
             Elements th = element.select("tr th");
-            // 总行数
             Elements tr = element.select("tr.infolist_common");
 
             for (int i = 0; i < tr.size(); i++) {
@@ -262,7 +300,6 @@ public class SpiderService {
                 for (int j = 0; j < th.size() - 2; j++) {
                     System.out.println(th.get(j).text() + ": " + trd.get(j).text());
                 }
-                System.out.println("-------------------------------------------------");
             }
 
             return response;
@@ -280,17 +317,26 @@ public class SpiderService {
      * @return
      * @throws Exception
      */
-    public Map<Integer, String> getGradeExam(CookieStore cookieStore, String stuNo) throws Exception {
+    @Transactional(propagation = Propagation.REQUIRED)
+    public Map<Integer, String> getGradeExam(CookieStore cookieStore, String stuNo) {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
-        HttpResponse response = client.execute(new HttpGet("http://202.199.128.21/academic/student/queryscore/skilltestscore.jsdo"));
-        Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        HttpResponse response = null;
+        try {
+            response = client.execute(new HttpGet("http://202.199.128.21/academic/student/skilltest/skilltest.jsdo"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         Map<Integer, String> map = new HashMap<>();
-        Elements elements = doc.select("table.infolist_tab");
+        Element element = doc.select("table.infolist_tab").last();
+        Elements tr = element.select("tr");
 
-        Elements th = elements.select("th");
-        Elements tr = elements.select("tr");
-
-        for (int i = 1; i < tr.size(); i++) {
+        for (int i = 1; i < tr.size() - 1; i++) {
             Elements trd = tr.get(i).select("td");
 
             GradeExam gradeExam = new GradeExam();
@@ -301,11 +347,15 @@ public class SpiderService {
             } else if (trd.get(0).text().contains("6")) {
                 gradeExam.setGrade(6);
             }
+            gradeExam.setTicketNumber(trd.get(2).text());
             gradeExam.setExamTime(trd.get(1).text());
-            gradeExam.setScore(trd.get(2).text());
+            gradeExam.setScore(trd.get(4).text());
+            gradeExam.setApproved(trd.get(5).text());
             int insert = gradeExamMapper.insert(gradeExam);
             if (insert > 0) {
                 map.put(1, "保存等级考试成功");
+            } else {
+                map.put(1, "保存等级考试失败");
             }
         }
         return map;

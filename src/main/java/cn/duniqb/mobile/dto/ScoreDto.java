@@ -24,7 +24,20 @@ public class ScoreDto implements Serializable {
     @JsonIgnore
     private String courseId;
 
+    /**
+     * 课程名
+     */
     private String courseName;
+
+    /**
+     * 学分
+     */
+    private Double credit;
+
+    /**
+     * 教师姓名
+     */
+    private String teacherName;
 
     /**
      * 学年

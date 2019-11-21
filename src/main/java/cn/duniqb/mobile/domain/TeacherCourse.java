@@ -13,6 +13,12 @@ public class TeacherCourse implements Serializable {
     private Integer id;
 
     /**
+     * 学号
+     */
+    @Column(name = "stu_no")
+    private String stuNo;
+
+    /**
      * 教师姓名
      */
     @Column(name = "teacher_name")
