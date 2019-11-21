@@ -6,9 +6,29 @@ spring:
     url: jdbc:mysql://192.168.71.136:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false
     username: root
     password: root
-#  devtools:
-#    restart:
-#      #热部署生效
-#      enabled: false
+
 mybatis:
   config-location: classpath:mybatis-config.xml
+
+# 爬虫的各种配置
+jw:
+  # 本机 url，以供回传验证码地址
+  localhost: http://localhost:8080/
+  login:
+    # 登录教务的 url
+    loginUrl: http://202.199.128.21/academic/common/security/login.jsp
+    # 发起教务登录的 url
+    loginPostUrl: http://202.199.128.21/academic/j_acegi_security_check
+  # 获取验证码的 url
+  verifyUrl: http://202.199.128.21/academic/getCaptcha.do
+  # 获取个人信息的 url
+  getInfoUrl: http://202.199.128.21/academic/showPersonalInfo.do
+  # 获取成绩的 url
+  getScoreParamUrl: http://202.199.128.21/academic/manager/score/studentOwnScore.do
+  # 获取等级考试的 url
+  getGradeExam: http://202.199.128.21/academic/student/skilltest/skilltest.jsdo
+  # 设置 Cookie 的参数
+  cookie:
+    domain: 202.199.128.21
+    path: /academic
+  verifyPath: D:\verify\

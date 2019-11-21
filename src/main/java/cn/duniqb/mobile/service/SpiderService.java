@@ -17,6 +17,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -59,6 +60,24 @@ public class SpiderService {
     private GradeExamMapper gradeExamMapper;
 
     /**
+     * 获取个人信息的 url
+     */
+    @Value("${jw.getInfoUrl}")
+    private String getInfoUrl;
+
+    /**
+     * 获取成绩的 url
+     */
+    @Value("${jw.getScoreParamUrl}")
+    private String getScoreParamUrl;
+
+    /**
+     * 获取等级考试的 url
+     */
+    @Value("${jw.getGradeExam}")
+    private String getGradeExam;
+
+    /**
      * 获取个人信息与学分信息
      *
      * @param cookieStore
@@ -68,10 +87,9 @@ public class SpiderService {
     @Transactional(propagation = Propagation.REQUIRED)
     public Map<Integer, String> getInfo(CookieStore cookieStore, String password) {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
-
         HttpResponse response = null;
         try {
-            response = client.execute(new HttpGet("http://202.199.128.21/academic/showPersonalInfo.do"));
+            response = client.execute(new HttpGet(getInfoUrl));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -169,7 +187,7 @@ public class SpiderService {
     @Transactional(propagation = Propagation.REQUIRED)
     public Map<Integer, String> getScoreParam(CookieStore cookieStore, String stuNo) {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
-        HttpPost post = new HttpPost("http://202.199.128.21/academic/manager/score/studentOwnScore.do");
+        HttpPost post = new HttpPost(getScoreParamUrl);
         ArrayList<NameValuePair> postData = new ArrayList<>();
 
         postData.add(new BasicNameValuePair("year", null));
@@ -275,6 +293,7 @@ public class SpiderService {
     /**
      * 根据学期查询课表
      * 在此处总是查询所有的成绩
+     * 暂未使用
      *
      * @param client
      * @param year
@@ -322,7 +341,7 @@ public class SpiderService {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         HttpResponse response = null;
         try {
-            response = client.execute(new HttpGet("http://202.199.128.21/academic/student/skilltest/skilltest.jsdo"));
+            response = client.execute(new HttpGet(getGradeExam));
         } catch (IOException e) {
             e.printStackTrace();
         }

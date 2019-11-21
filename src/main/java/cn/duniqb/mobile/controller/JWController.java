@@ -19,6 +19,7 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,49 @@ public class JWController {
     private GradeExamService gradeExamService;
 
     private CookieStore cookieStore = null;
-    private final String URL = "http://localhost:8080/";
+
+    /**
+     * 本机 url，以供回传验证码地址
+     */
+    @Value("${jw.localhost}")
+    private String localhost;
+
+    /**
+     * 登录教务的 url
+     */
+    @Value("${jw.login.loginUrl}")
+    private String loginUrl;
+
+    /**
+     * 发起教务登录的 url
+     */
+    @Value("${jw.login.loginPostUrl}")
+    private String loginPostUrl;
+
+    /**
+     * 获取验证码的 url
+     */
+    @Value("${jw.verifyUrl}")
+    private String verifyUrl;
+
+    /**
+     * 设置 Cookie 的参数 domain
+     */
+    @Value("${jw.cookie.domain}")
+    private String domain;
+
+    /**
+     * 设置 Cookie 的参数 path
+     */
+    @Value("${jw.cookie.path}")
+    private String path;
+
+    /**
+     * 设置验证码存放路径
+     */
+    @Value("${jw.verifyPath}")
+    private String verifyPath;
+
 
     /**
      * 进入登录页面时或点击刷新，返回一个验证码
@@ -71,7 +114,7 @@ public class JWController {
         // 获取验证码并保存到本地
         String fileName = saveVerifyCode();
         String imgUrl = "verify/" + fileName + ".jpg";
-        return JSONResult.build(URL + imgUrl, "验证码获取成功", 200);
+        return JSONResult.build(localhost + imgUrl, "验证码获取成功", 200);
     }
 
     /**
@@ -93,7 +136,7 @@ public class JWController {
         if (student != null) {
             return JSONResult.build(user.getUsername(), "学生已存在", 400);
         }
-        HttpGet getLoginPage = new HttpGet("http://202.199.128.21/academic/common/security/login.jsp");
+        HttpGet getLoginPage = new HttpGet(loginUrl);
 
         getLoginPage.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         getLoginPage.setHeader("Accept-Encoding", "gzip, deflate");
@@ -110,7 +153,7 @@ public class JWController {
             postData.add(new BasicNameValuePair("j_password", user.getPassword()));
             postData.add(new BasicNameValuePair("j_captcha", user.getVerifyCode()));
 
-            HttpPost post = new HttpPost("http://202.199.128.21/academic/j_acegi_security_check");
+            HttpPost post = new HttpPost(loginPostUrl);
             post.setEntity(new UrlEncodedFormEntity(postData));
             HttpResponse response = client.execute(post);
 
@@ -182,7 +225,7 @@ public class JWController {
      * @return 保存的唯一名字
      */
     private String saveVerifyCode() {
-        HttpGet getVerifyCode = new HttpGet("http://202.199.128.21/academic/getCaptcha.do");
+        HttpGet getVerifyCode = new HttpGet(verifyUrl);
         FileOutputStream fileOutputStream = null;
         String fileName = System.currentTimeMillis() + "";
         // 把验证码图片保存到本地
@@ -190,7 +233,7 @@ public class JWController {
             HttpClient client = HttpClients.createDefault();
             HttpResponse response = client.execute(getVerifyCode);
             setCookieStore(response);
-            fileOutputStream = new FileOutputStream(new File("D:\\verify\\" + fileName + ".jpg"));
+            fileOutputStream = new FileOutputStream(new File(verifyPath + fileName + ".jpg"));
             response.getEntity().writeTo(fileOutputStream);
         } catch (IOException e) {
             e.printStackTrace();
@@ -212,13 +255,12 @@ public class JWController {
      */
     private void setCookieStore(HttpResponse httpResponse) {
         cookieStore = new BasicCookieStore();
-        // JSESSIONID
         String setCookie = httpResponse.getFirstHeader("Set-Cookie").getValue();
         String JSESSIONID = setCookie.substring("JSESSIONID=".length(), setCookie.indexOf(";"));
         BasicClientCookie cookie = new BasicClientCookie("JSESSIONID", JSESSIONID);
         cookie.setVersion(0);
-        cookie.setDomain("202.199.128.21");
-        cookie.setPath("/academic");
+        cookie.setDomain(domain);
+        cookie.setPath(path);
         cookieStore.addCookie(cookie);
     }
 }
