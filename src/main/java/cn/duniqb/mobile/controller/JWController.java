@@ -4,6 +4,8 @@ import cn.duniqb.mobile.domain.Student;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.User;
 import cn.duniqb.mobile.service.*;
+import cn.duniqb.mobile.utils.MobileUtil;
+import cn.duniqb.mobile.utils.SpiderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -37,7 +39,7 @@ import java.util.Map;
  *
  * @author duniqb
  */
-@Api(value = "与登录教务相关的接口", tags = {"与登录教务相关的接口 Controller"})
+@Api(value = "与登录教务相关的接口", tags = {"与登录教务相关的接口"})
 @Scope("session")
 @RestController
 @RequestMapping("/api/v1/jw")
@@ -195,7 +197,9 @@ public class JWController {
         }
 
         if (user.getUsername() != null && user.getPassword() != null) {
-            Student studentUser = studentService.selectOneByStudent(user);
+            // 校验学号和加密过的密码
+            Student studentUser = studentService.selectOneByStuNoPwd(user.getUsername(),
+                    MobileUtil.MD5(user.getPassword()) + studentService.selectOneByNo(user.getUsername()).getSalt());
             if (studentUser == null) {
                 return JSONResult.build(user.getUsername(), "学号/密码错误", 400);
             } else {
