@@ -2,13 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.duniqb.mobile.mapper.WxUserMapper">
   <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.WxUser">
-    <!--@mbg.generated generated on Wed Nov 20 16:00:57 CST 2019.-->
+    <!--@mbg.generated generated on Thu Nov 21 21:31:02 CST 2019.-->
     <!--@Table wx_user-->
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="openid" jdbcType="VARCHAR" property="openid" />
+    <result column="unionid" jdbcType="VARCHAR" property="unionid" />
     <result column="stu_no" jdbcType="CHAR" property="stuNo" />
     <result column="nickname" jdbcType="VARCHAR" property="nickname" />
-    <result column="avatarUrl" jdbcType="VARCHAR" property="avatarurl" />
+    <result column="avatar_url" jdbcType="VARCHAR" property="avatarUrl" />
     <result column="gender" jdbcType="BOOLEAN" property="gender" />
     <result column="country" jdbcType="VARCHAR" property="country" />
     <result column="province" jdbcType="VARCHAR" property="province" />
@@ -16,10 +17,11 @@
     <result column="language" jdbcType="VARCHAR" property="language" />
     <result column="ctime" jdbcType="TIMESTAMP" property="ctime" />
     <result column="mobile" jdbcType="VARCHAR" property="mobile" />
+    <result column="session_key" jdbcType="VARCHAR" property="sessionKey" />
   </resultMap>
   <sql id="Base_Column_List">
-    <!--@mbg.generated generated on Wed Nov 20 16:00:57 CST 2019.-->
-    id, openid, stu_no, nickname, avatarUrl, gender, country, province, city, `language`, 
-    ctime, mobile
+    <!--@mbg.generated generated on Thu Nov 21 21:31:02 CST 2019.-->
+    id, openid, unionid, stu_no, nickname, avatar_url, gender, country, province, city, 
+    `language`, ctime, mobile, session_key
   </sql>
 </mapper>

@@ -33,3 +33,8 @@ jw:
     path: /academic
   # 验证码存放的本机文件夹
   verifyPath: D:\verify\
+
+# 小程序配置
+mini:
+  appId: wxe1f564d00f76340a
+  secret: ec547e58ed84fcbbee3a7e24a5823cc8

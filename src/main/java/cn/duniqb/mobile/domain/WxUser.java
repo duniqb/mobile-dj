@@ -20,6 +20,12 @@ public class WxUser implements Serializable {
     private String openid;
 
     /**
+     * 用户在开放平台的唯一标识符
+     */
+    @Column(name = "unionid")
+    private String unionid;
+
+    /**
      * 学号
      */
     @Column(name = "stu_no")
@@ -34,8 +40,8 @@ public class WxUser implements Serializable {
     /**
      * 用户头像
      */
-    @Column(name = "avatarUrl")
-    private String avatarurl;
+    @Column(name = "avatar_url")
+    private String avatarUrl;
 
     /**
      * 性别  0-男、1-女
@@ -78,6 +84,12 @@ public class WxUser implements Serializable {
      */
     @Column(name = "mobile")
     private String mobile;
+
+    /**
+     * 会话密钥
+     */
+    @Column(name = "session_key")
+    private String sessionKey;
 
     private static final long serialVersionUID = 1L;
 }
