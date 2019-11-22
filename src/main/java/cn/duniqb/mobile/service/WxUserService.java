@@ -3,16 +3,6 @@ package cn.duniqb.mobile.service;
 import cn.duniqb.mobile.domain.WxUser;
 
 public interface WxUserService {
-
-    /**
-     * 更新 session_key
-     *
-     * @param openid
-     * @param sessionKey
-     * @return
-     */
-    int updateSessionKeyByOpenid(String openid, String sessionKey);
-
     /**
      * 根据 openid 查找
      *
@@ -29,6 +19,7 @@ public interface WxUserService {
      */
     int insertWxUser(WxUser wxUser);
 }
+
 
 
 

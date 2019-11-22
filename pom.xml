@@ -40,6 +40,21 @@
             <artifactId>mapper-spring-boot-starter</artifactId>
             <version>${spring-boot-mapper.version}</version>
         </dependency>
+        <!-- 引入 redis 依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>redis.clients</groupId>
+            <artifactId>jedis</artifactId>
+            <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-redis</artifactId>
+            <version>2.2.1.RELEASE</version>
+        </dependency>
 
         <!-- 工具 -->
         <dependency>

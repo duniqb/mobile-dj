@@ -5,6 +5,7 @@ import cn.duniqb.mobile.dto.Code2Session;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.service.WxUserService;
 import cn.duniqb.mobile.utils.MobileUtil;
+import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -22,6 +23,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.UUID;
 
 /**
  * 与小程序相关的接口
@@ -36,6 +38,9 @@ public class MiniController {
     @Autowired
     private WxUserService wxUserService;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
     /**
      * 小程序配置
      */
@@ -49,7 +54,14 @@ public class MiniController {
     private String secret;
 
     /**
+     * Session_key 在 Redis 里前缀
+     */
+    private static final String SESSION_ID = "SESSION_ID";
+
+    /**
+     * 自定义登录态，使用 Redis 的随机字符串来作为 SessionId
      * 调用 auth.code2Session 接口，换取 用户唯一标识 OpenID 和 会话密钥 session_key
+     * 以后每次调用业务接口，都根据 sessionId 的值 sessionKey 是否存在，不存在提示重新登录
      *
      * @param code
      * @return
@@ -66,24 +78,26 @@ public class MiniController {
             String json = doc.select("html body").first().text();
             Code2Session code2Session = JSON.parseObject(json, Code2Session.class);
 
-            // 查询是否第一次登录，是则插入
+            // 查询是否第一次登录，是则插入用户，并添加 Session_key
             WxUser wxUser = wxUserService.selectByOpenid(code2Session.getOpenid());
+            String sessionId = SESSION_ID + ":" + UUID.randomUUID().toString().replace("-", "");
             if (wxUser == null) {
                 WxUser wxUserNew = new WxUser();
                 wxUserNew.setOpenid(code2Session.getOpenid());
                 wxUserNew.setUnionid(code2Session.getUnionid());
-                wxUserNew.setSessionKey(code2Session.getSession_key());
                 int i = wxUserService.insertWxUser(wxUserNew);
                 if (i > 0) {
-                    return JSONResult.build(code2Session, "首次登录成功", 200);
+                    // 以 随机串 为 key，openid:session_key 为 value 组成键值对并存到缓存当中，24 小时过期
+                    String value = code2Session.getOpenid() + ":" + code2Session.getSession_key();
+                    redisUtil.set(sessionId, value, 60 * 60 * 24);
+                    return JSONResult.build(sessionId, "首次登录成功", 200);
                 }
             }
             // 否则更新 Session_key
             else {
-                int i = wxUserService.updateSessionKeyByOpenid(code2Session.getOpenid(), code2Session.getSession_key());
-                if (i > 0) {
-                    return JSONResult.build(code2Session, "登录成功，已更新 Session_key", 200);
-                }
+                String value = code2Session.getOpenid() + ":" + code2Session.getSession_key();
+                redisUtil.set(sessionId, value, 60 * 60 * 24);
+                return JSONResult.build(sessionId, "登录成功，已更新 Session_key", 200);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -94,29 +108,24 @@ public class MiniController {
     /**
      * 解密微信开放数据
      *
-     * @param openid
+     * @param sessionId
      * @param iv
      * @param encryptData
      * @return
      */
     @PostMapping("decrypt")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "openid", value = "openid", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "sessionId", value = "登录态保持 id", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "iv", value = "偏移向量", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "encryptData", value = "被加密的数据", required = true, dataType = "String", paramType = "query")
     })
-    public JSONResult decrypt(String openid, String iv, String encryptData) {
-        if (openid != null) {
-            WxUser wxUser = wxUserService.selectByOpenid(openid);
-            System.out.println("wxUser: " + wxUser);
-            if (wxUser != null) {
-                String sessionKey = wxUser.getSessionKey();
-                if (sessionKey != null) {
-                    String decrypt = MobileUtil.decrypt(sessionKey, iv, encryptData);
-                    return JSONResult.build(decrypt, "解密成功", 200);
-                }
-            }
+    public JSONResult decrypt(String sessionId, String iv, String encryptData) {
+        String value = redisUtil.get(sessionId);
+        if (value == null) {
+            return JSONResult.build(null, "解密失败", 400);
         }
-        return JSONResult.build(null, "解密失败", 400);
+        String sessionKey = value.split(":")[1];
+        String decrypt = MobileUtil.decrypt(sessionKey, iv, encryptData);
+        return JSONResult.build(decrypt, "解密成功", 200);
     }
 }

@@ -6,6 +6,18 @@ spring:
     url: jdbc:mysql://192.168.71.136:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false
     username: root
     password: root
+  # Redis 配置
+  redis:
+    database: 0
+    host: 192.168.71.136
+    port: 6379
+    jedis:
+      pool:
+        max-active: 8
+        max-wait: 0
+        max-idle: 10
+        min-idle: 0
+    timeout: 300
 
 mybatis:
   config-location: classpath:mybatis-config.xml

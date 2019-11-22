@@ -9,28 +9,14 @@ import cn.duniqb.mobile.mapper.WxUserMapper;
 import cn.duniqb.mobile.service.WxUserService;
 import tk.mybatis.mapper.entity.Example;
 
+/**
+ * @author duniqb
+ */
 @Service
 public class WxUserServiceImpl implements WxUserService {
 
     @Resource
     private WxUserMapper wxUserMapper;
-
-    /**
-     * 更新 session_key
-     *
-     * @param openid
-     * @param sessionKey
-     * @return
-     */
-    @Override
-    public int updateSessionKeyByOpenid(String openid, String sessionKey) {
-        Example example = new Example(WxUser.class);
-        example.createCriteria().andEqualTo("openid", openid);
-
-        WxUser wxUser = new WxUser();
-        wxUser.setSessionKey(sessionKey);
-        return wxUserMapper.updateByExampleSelective(wxUser, example);
-    }
 
     /**
      * 根据 openid 查找
@@ -56,6 +42,7 @@ public class WxUserServiceImpl implements WxUserService {
         return wxUserMapper.insert(wxUser);
     }
 }
+
 
 
 

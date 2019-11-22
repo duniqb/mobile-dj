@@ -85,11 +85,5 @@ public class WxUser implements Serializable {
     @Column(name = "mobile")
     private String mobile;
 
-    /**
-     * 会话密钥
-     */
-    @Column(name = "session_key")
-    private String sessionKey;
-
     private static final long serialVersionUID = 1L;
 }
