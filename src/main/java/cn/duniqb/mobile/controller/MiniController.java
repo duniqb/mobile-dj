@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -59,6 +60,8 @@ public class MiniController {
     private static final String SESSION_ID = "SESSION_ID";
 
     /**
+     * 此登录接口只有在首次使用或登录过期时才使用
+     * <p>
      * 自定义登录态，使用 Redis 的随机字符串来作为 SessionId
      * 调用 auth.code2Session 接口，换取 用户唯一标识 OpenID 和 会话密钥 session_key
      * 以后每次调用业务接口，都根据 sessionId 的值 sessionKey 是否存在，不存在提示重新登录
@@ -67,6 +70,7 @@ public class MiniController {
      * @return
      */
     @GetMapping("login")
+    @ApiOperation(value = "登录小程序", notes = "获取登录态的接口，请求参数是 code")
     @ApiImplicitParam(name = "code", value = "认证 code", required = true, dataType = "String", paramType = "query")
     public JSONResult login(@RequestParam String code) {
         String url = "https://api.weixin.qq.com/sns/jscode2session";
@@ -106,7 +110,7 @@ public class MiniController {
     }
 
     /**
-     * 解密微信开放数据
+     * 解密微信加密数据
      *
      * @param sessionId
      * @param iv
@@ -114,6 +118,7 @@ public class MiniController {
      * @return
      */
     @PostMapping("decrypt")
+    @ApiOperation(value = "解密数据", notes = "解密数据的接口，请求参数是 sessionId，iv，encryptData")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sessionId", value = "登录态保持 id", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "iv", value = "偏移向量", required = true, dataType = "String", paramType = "query"),
@@ -127,5 +132,22 @@ public class MiniController {
         String sessionKey = value.split(":")[1];
         String decrypt = MobileUtil.decrypt(sessionKey, iv, encryptData);
         return JSONResult.build(decrypt, "解密成功", 200);
+    }
+
+    /**
+     * 检查登录状态
+     *
+     * @param sessionId
+     * @return
+     */
+    @GetMapping("session")
+    @ApiOperation(value = "检查登录是否有效", notes = "检查登录是否有效的接口，请求参数是 sessionId")
+    @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
+    public JSONResult session(@RequestParam String sessionId) {
+        String value = redisUtil.get(sessionId);
+        if (value == null) {
+            return JSONResult.build(null, "未登录", 400);
+        }
+        return JSONResult.build(null, "已登录", 200);
     }
 }
