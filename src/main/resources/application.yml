@@ -52,10 +52,16 @@ lib:
   searchUrl: http://wxlib.djtu.edu.cn/wx/search.aspx
   # 显示图书详情的 url
   showBookUrl: http://wxlib.djtu.edu.cn/wx/ShowBook.aspx
-  # 设置 Cookie 的参数
-  cookie:
-    domain: wxlib.djtu.edu.cn
-    path: /
+  # 读者热点-近2年入藏复本平均量的 url
+  readerHotAvg: http://wxlib.djtu.edu.cn/br/ReaderScoreHot.aspx
+  # 读者热点-近2年入藏复本总借量的 url
+  readerHotSum: http://wxlib.djtu.edu.cn/br/ReaderScoreHot2.aspx
+  # 荐购热点-近5年入藏复本平均量的 url
+  recommendHotAvg: http://wxlib.djtu.edu.cn/br/ReaderRecommanded.aspx
+  # 荐购热点-近5年入藏复本总借量的 url
+  recommendHotSum: http://wxlib.djtu.edu.cn/br/ReaderRecommanded2.aspx
+  # 新书热度-近90天内入藏复本总借量的 url
+  newHotSum: http://wxlib.djtu.edu.cn/br/ReaderNewBook.aspx
 
 # 小程序配置
 mini:

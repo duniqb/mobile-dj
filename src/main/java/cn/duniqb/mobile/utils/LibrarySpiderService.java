@@ -13,6 +13,7 @@ import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -160,5 +161,57 @@ public class LibrarySpiderService {
         book.setId(id);
         book.setStatus(list);
         return book;
+    }
+
+
+    /**
+     * 热点图书
+     *
+     * @return
+     */
+    public List<Book> hot(String url) {
+        HttpClient client = HttpClients.createDefault();
+        HttpResponse response = null;
+        try {
+            response = client.execute(new HttpGet(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            assert response != null;
+            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert doc != null;
+        Elements elements = doc.select("#form1 article dd a");
+        List<Book> bookList = new ArrayList<>();
+        for (Element element : elements) {
+            Book book = new Book();
+            // 当前序号
+            book.setCurNo(element.text().split("\\.")[0]);
+
+            // 热度
+            String[] split = element.text().split("\\(");
+            String last = split[split.length - 1];
+            book.setHot(last.replace(")", ""));
+
+            // id
+            String string = element.select("a").attr("href");
+            if (string.contains("id")) {
+                book.setId(string.split("=")[1]);
+            }
+
+            // 书名
+            StringBuilder stringBuffer = new StringBuilder();
+            for (int i = 1; i < element.text().split("\\.").length; i++) {
+                stringBuffer.append(element.text().split("\\.")[i]);
+            }
+            book.setBookName(stringBuffer.toString().split("\\(")[0].replace(")", ""));
+
+            bookList.add(book);
+        }
+        return bookList;
     }
 }

@@ -7,6 +7,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,6 +28,37 @@ import java.util.List;
 public class LibraryController {
     @Autowired
     private LibrarySpiderService librarySpiderService;
+
+    /**
+     * 读者热点-近2年入藏复本平均量的 url
+     */
+    @Value("${lib.readerHotAvg}")
+    private String readerHotAvg;
+
+    /**
+     * 读者热点-近2年入藏复本总借量的 url
+     */
+    @Value("${lib.readerHotSum}")
+    private String readerHotSum;
+
+    /**
+     * 荐购热点-近5年入藏复本平均量的 url
+     */
+    @Value("${lib.recommendHotAvg}")
+    private String recommendHotAvg;
+
+    /**
+     * 荐购热点-近5年入藏复本总借量的 url
+     */
+    @Value("${lib.recommendHotSum}")
+    private String recommendHotSum;
+
+    /**
+     * 新书热度-近90天内入藏复本总借量的 url
+     */
+    @Value("${lib.newHotSum}")
+    private String newHotSum;
+
 
     /**
      * 馆藏查询
@@ -62,4 +94,36 @@ public class LibraryController {
         return JSONResult.build(book, "查询成功", 200);
     }
 
+    /**
+     * 热点图书
+     *
+     * @return
+     */
+    @ApiOperation(value = "热点图书", notes = "热点图书的接口")
+    @ApiImplicitParam(name = "type", value = "查询参数，热度类型，1：读者热点-近2年入藏复本平均量，2：读者热点-近2年入藏复本总借量，" +
+            "3：荐购热点-近5年入藏复本平均量，4：荐购热点-近5年入藏复本总借量，5：新书热度-近90天内入藏复本总借量)，",
+            required = true, dataType = "String", paramType = "query")
+    @GetMapping("hot")
+    public JSONResult score(@RequestParam String type) {
+        if ("1".equals(type)) {
+            List<Book> bookList = librarySpiderService.hot(readerHotAvg);
+            return JSONResult.build(bookList, "读者热点-近2年入藏复本平均量，查询成功", 200);
+        } else if ("2".equals(type)) {
+            List<Book> bookList = librarySpiderService.hot(readerHotSum);
+            return JSONResult.build(bookList, "读者热点-近2年入藏复本总借量，查询成功", 200);
+        } else if ("3".equals(type)) {
+            List<Book> bookList = librarySpiderService.hot(recommendHotAvg);
+            return JSONResult.build(bookList, "荐购热点-近5年入藏复本平均量，查询成功", 200);
+        } else if ("4".equals(type)) {
+            List<Book> bookList = librarySpiderService.hot(recommendHotSum);
+            return JSONResult.build(bookList, "荐购热点-近5年入藏复本总借量，查询成功", 200);
+        } else if ("5".equals(type)) {
+            List<Book> bookList = librarySpiderService.hot(newHotSum);
+            return JSONResult.build(bookList, "新书热度-近90天内入藏复本总借量，查询成功", 200);
+        }
+
+        return JSONResult.build(null, "查询失败", 400);
+    }
+
 }
+

@@ -65,4 +65,8 @@ public class Book {
      */
     private String index;
 
+    /**
+     * 热度
+     */
+    private String hot;
 }
