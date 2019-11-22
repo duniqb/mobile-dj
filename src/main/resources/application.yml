@@ -53,15 +53,20 @@ lib:
   # 显示图书详情的 url
   showBookUrl: http://wxlib.djtu.edu.cn/wx/ShowBook.aspx
   # 读者热点-近2年入藏复本平均量的 url
-  readerHotAvg: http://wxlib.djtu.edu.cn/br/ReaderScoreHot.aspx
+  readerHotAvgUrl: http://wxlib.djtu.edu.cn/br/ReaderScoreHot.aspx
   # 读者热点-近2年入藏复本总借量的 url
-  readerHotSum: http://wxlib.djtu.edu.cn/br/ReaderScoreHot2.aspx
+  readerHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderScoreHot2.aspx
   # 荐购热点-近5年入藏复本平均量的 url
-  recommendHotAvg: http://wxlib.djtu.edu.cn/br/ReaderRecommanded.aspx
+  recommendHotAvgUrl: http://wxlib.djtu.edu.cn/br/ReaderRecommanded.aspx
   # 荐购热点-近5年入藏复本总借量的 url
-  recommendHotSum: http://wxlib.djtu.edu.cn/br/ReaderRecommanded2.aspx
+  recommendHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderRecommanded2.aspx
   # 新书热度-近90天内入藏复本总借量的 url
-  newHotSum: http://wxlib.djtu.edu.cn/br/ReaderNewBook.aspx
+  newHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderNewBook.aspx
+  # 分类热度-近2年入藏复本平均量的 url
+  cateHotAvgUrl: http://wxlib.djtu.edu.cn/br/ReaderHot4.aspx
+  # 分类热度-近2年入藏复本总借量的 url
+  cateHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderHot.aspx
+
 
 # 小程序配置
 mini:

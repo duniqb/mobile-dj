@@ -5,6 +5,7 @@ import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.utils.LibrarySpiderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -32,33 +33,44 @@ public class LibraryController {
     /**
      * 读者热点-近2年入藏复本平均量的 url
      */
-    @Value("${lib.readerHotAvg}")
-    private String readerHotAvg;
+    @Value("${lib.readerHotAvgUrl}")
+    private String readerHotAvgUrl;
 
     /**
      * 读者热点-近2年入藏复本总借量的 url
      */
-    @Value("${lib.readerHotSum}")
-    private String readerHotSum;
+    @Value("${lib.readerHotSumUrl}")
+    private String readerHotSumUrl;
 
     /**
      * 荐购热点-近5年入藏复本平均量的 url
      */
-    @Value("${lib.recommendHotAvg}")
-    private String recommendHotAvg;
+    @Value("${lib.recommendHotAvgUrl}")
+    private String recommendHotAvgUrl;
 
     /**
      * 荐购热点-近5年入藏复本总借量的 url
      */
-    @Value("${lib.recommendHotSum}")
-    private String recommendHotSum;
+    @Value("${lib.recommendHotSumUrl}")
+    private String recommendHotSumUrl;
 
     /**
      * 新书热度-近90天内入藏复本总借量的 url
      */
-    @Value("${lib.newHotSum}")
-    private String newHotSum;
+    @Value("${lib.newHotSumUrl}")
+    private String newHotSumUrl;
 
+    /**
+     * 分类热度-近2年入藏复本平均量的 url
+     */
+    @Value("${lib.cateHotAvgUrl}")
+    private String cateHotAvgUrl;
+
+    /**
+     * 分类热度-近2年入藏复本总借量的 url
+     */
+    @Value("${lib.cateHotSumUrl}")
+    private String cateHotSumUrl;
 
     /**
      * 馆藏查询
@@ -106,24 +118,55 @@ public class LibraryController {
     @GetMapping("hot")
     public JSONResult score(@RequestParam String type) {
         if ("1".equals(type)) {
-            List<Book> bookList = librarySpiderService.hot(readerHotAvg);
+            List<Book> bookList = librarySpiderService.hot(readerHotAvgUrl);
             return JSONResult.build(bookList, "读者热点-近2年入藏复本平均量，查询成功", 200);
         } else if ("2".equals(type)) {
-            List<Book> bookList = librarySpiderService.hot(readerHotSum);
+            List<Book> bookList = librarySpiderService.hot(readerHotSumUrl);
             return JSONResult.build(bookList, "读者热点-近2年入藏复本总借量，查询成功", 200);
         } else if ("3".equals(type)) {
-            List<Book> bookList = librarySpiderService.hot(recommendHotAvg);
+            List<Book> bookList = librarySpiderService.hot(recommendHotAvgUrl);
             return JSONResult.build(bookList, "荐购热点-近5年入藏复本平均量，查询成功", 200);
         } else if ("4".equals(type)) {
-            List<Book> bookList = librarySpiderService.hot(recommendHotSum);
+            List<Book> bookList = librarySpiderService.hot(recommendHotSumUrl);
             return JSONResult.build(bookList, "荐购热点-近5年入藏复本总借量，查询成功", 200);
         } else if ("5".equals(type)) {
-            List<Book> bookList = librarySpiderService.hot(newHotSum);
+            List<Book> bookList = librarySpiderService.hot(newHotSumUrl);
             return JSONResult.build(bookList, "新书热度-近90天内入藏复本总借量，查询成功", 200);
         }
 
         return JSONResult.build(null, "查询失败", 400);
     }
 
-}
 
+    /**
+     * 分类热点
+     *
+     * @param type
+     * @param cate
+     * @return
+     */
+    @ApiOperation(value = "分类热点", notes = "分类热点的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "type", value = "查询参数，type=1 近2年入藏复本平均量，type=2 近2年入藏复本总借量", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "cate", value = "1.马克思主义、列宁主义、毛泽东思...A  \n  2.哲学、宗教...B  \n 3.社会科学总论...C  \n   " +
+                    "4.政治、法律...D  \n 5.军事...E  \n   6.经济...F  \n   7.文化、科学、教育、体育...G \n   8.语言、文字...H \n 9.文学...I  \n   " +
+                    "10.艺术...J  \n  11.历史、地理...K \n    12.自然科学总论...N  \n  13.数理科学和化学...O \n  14.天文学、地球科学...P  \n   " +
+                    "15.生物科学...Q  \n   16.医药、卫生...R  \n   17.农业科学...S \n  18.工业技术...T  \n 19.交通运输...U \n  20.航空、航天...V  \n   " +
+                    "21.环境科学、安全科学...X \n    22.综合性图书...Z", required = true, dataType = "String", paramType = "query"),
+    })
+    @GetMapping("category")
+    public JSONResult category(@RequestParam String type, @RequestParam String cate) {
+        if (type == null || cate == null) {
+            return JSONResult.build(null, "参数不能为空", 400);
+        }
+
+        if ("1".equals(type)) {
+            List<Book> bookList = librarySpiderService.hot(cateHotAvgUrl + "?sq=" + cate);
+            return JSONResult.build(bookList, "分类热点-近2年入藏复本平均量，查询成功", 200);
+        } else if ("2".equals(type)) {
+            List<Book> bookList = librarySpiderService.hot(cateHotSumUrl + "?sq=" + cate);
+            return JSONResult.build(bookList, "分类热点-近2年入藏复本总借量，查询成功", 200);
+        }
+        return JSONResult.build(null, "查询失败", 400);
+    }
+}
