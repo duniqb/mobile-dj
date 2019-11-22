@@ -2,6 +2,8 @@ package cn.duniqb.mobile.dto;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 图书 DTO
  *
@@ -56,7 +58,7 @@ public class Book {
     /**
      * 复本情况
      */
-    private String status;
+    private List<String> status;
 
     /**
      * 索书号

@@ -7,7 +7,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -30,30 +29,6 @@ public class LibraryController {
     private LibrarySpiderService librarySpiderService;
 
     /**
-     * 发起馆藏查询的 url
-     */
-    @Value("${lib.searchUrl}")
-    private String searchUrl;
-
-    /**
-     * 显示图书详情的 url
-     */
-    @Value("${lib.showBookUrl}")
-    private String showBookUrl;
-
-    /**
-     * 设置 Cookie 的参数 domain
-     */
-    @Value("${lib.cookie.domain}")
-    private String domain;
-
-    /**
-     * 设置 Cookie 的参数 path
-     */
-    @Value("${lib.cookie.path}")
-    private String path;
-
-    /**
      * 馆藏查询
      *
      * @param name
@@ -68,6 +43,23 @@ public class LibraryController {
         }
         List<Book> bookList = librarySpiderService.query(name);
         return JSONResult.build(bookList, "查询成功", 200);
+    }
+
+    /**
+     * 图书详情
+     *
+     * @param id
+     * @return
+     */
+    @ApiOperation(value = "图书详情", notes = "图书详情的接口，请求参数是图书 id")
+    @ApiImplicitParam(name = "id", value = "查询参数，图书 id", required = true, dataType = "String", paramType = "query")
+    @GetMapping("show")
+    public JSONResult show(@RequestParam String id) {
+        if (id == null || "".equals(id.trim())) {
+            return JSONResult.build(null, "id 不能为空", 400);
+        }
+        Book book = librarySpiderService.show(id);
+        return JSONResult.build(book, "查询成功", 200);
     }
 
 }

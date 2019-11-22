@@ -5,6 +5,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -33,6 +34,12 @@ public class LibrarySpiderService {
      */
     @Value("${lib.searchUrl}")
     private String searchUrl;
+
+    /**
+     * 显示图书详情的 url
+     */
+    @Value("${lib.showBookUrl}")
+    private String showBookUrl;
 
     /**
      * 馆藏查询
@@ -72,10 +79,12 @@ public class LibrarySpiderService {
         }
         Document doc = null;
         try {
-            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+            assert response != null;
+            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", "").replace("&gt;", ""));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        assert doc != null;
         Element div = doc.select("#form1 div").get(2);
         String[] split = div.toString().split("<hr>");
         List<Book> list = new ArrayList<>();
@@ -87,16 +96,69 @@ public class LibrarySpiderService {
             Document parse = Jsoup.parse(split[i]);
             String url = parse.select("a").attr("href");
             if (url.contains("id")) {
-                book.setId(url.split("=")[1]);
+                book.setId(url.split("=")[1].trim());
             }
             book.setBookName(parse.select("a").text());
             if (split[i].contains("<br>")) {
                 String[] split1 = split[i].split("<br>");
                 book.setAuthor(split1[1].trim());
-                book.setIndex(split1[2]);
+                book.setIndex(split1[2].trim());
             }
             list.add(book);
         }
         return list;
+    }
+
+    /**
+     * 图书详情
+     *
+     * @param id
+     * @return
+     */
+    public Book show(String id) {
+        HttpClient client = HttpClients.createDefault();
+        HttpResponse response = null;
+        try {
+            response = client.execute(new HttpGet(showBookUrl + "?id=" + id));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            assert response != null;
+            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert doc != null;
+        Element element = doc.select("#form1 div").get(0);
+        String[] split = element.toString().split("<br>");
+        Book book = new Book();
+        // 复本情况
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < split.length; i++) {
+            if (split[i].contains("MARC状态")) {
+                book.setType(split[i].split(">")[1].trim());
+            } else if (split[i].contains("题名")) {
+                book.setBookName(split[i].split("：")[1].trim());
+            } else if (split[i].contains("责任者")) {
+                book.setAuthor(split[i].split("：")[1].trim());
+            } else if (split[i].contains("出版发行项")) {
+                book.setPublisher(split[i].split("：")[1].trim());
+            } else if (split[i].contains("索书号")) {
+                book.setIndex(split[i].split("：")[1].trim());
+            } else if (split[i].contains("提要文摘")) {
+                book.setSummary(split[i].split("：")[1].trim());
+            } else if (split[i].contains("CALIS")) {
+                book.setCALIS(split[i].split("：")[1].trim());
+            } else if (split[i].contains("ISBN")) {
+                book.setISBN(split[i].split("：")[1].trim());
+            } else if (split[i].contains("可借") || split[i].contains("不详") || split[i].contains("留本")) {
+                list.add(split[i].split("、")[1].trim());
+            }
+        }
+        book.setId(id);
+        book.setStatus(list);
+        return book;
     }
 }
