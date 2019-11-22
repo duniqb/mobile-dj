@@ -5,7 +5,7 @@ import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.User;
 import cn.duniqb.mobile.service.*;
 import cn.duniqb.mobile.utils.MobileUtil;
-import cn.duniqb.mobile.utils.SpiderService;
+import cn.duniqb.mobile.utils.JWSpiderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -45,7 +45,7 @@ import java.util.Map;
 @RequestMapping("/api/v1/jw")
 public class JWController {
     @Autowired
-    private SpiderService spiderService;
+    private JWSpiderService JWSpiderService;
 
     @Autowired
     private StudentService studentService;
@@ -161,11 +161,11 @@ public class JWController {
 
             // 响应中不包含 error 字符，认为是成功
             if (!response.toString().contains("error")) {
-                Map<Integer, String> info = spiderService.getInfo(cookieStore, user.getPassword());
+                Map<Integer, String> info = JWSpiderService.getInfo(cookieStore, user.getPassword());
                 map.put(1, info);
-                Map<Integer, String> scoreParam = spiderService.getScoreParam(cookieStore, user.getUsername());
+                Map<Integer, String> scoreParam = JWSpiderService.getScoreParam(cookieStore, user.getUsername());
                 map.put(2, scoreParam);
-                Map<Integer, String> gradeExam = spiderService.getGradeExam(cookieStore, user.getUsername());
+                Map<Integer, String> gradeExam = JWSpiderService.getGradeExam(cookieStore, user.getUsername());
                 map.put(3, gradeExam);
                 cookieStore.clear();
                 return JSONResult.build(map, "教务登录成功", 200);

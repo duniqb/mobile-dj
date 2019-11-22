@@ -22,7 +22,7 @@ spring:
 mybatis:
   config-location: classpath:mybatis-config.xml
 
-# 爬虫的各种配置
+# 教务爬虫的各种配置
 jw:
   # 本机 url，以供回传验证码地址
   localhost: http://localhost:8080/
@@ -45,6 +45,17 @@ jw:
     path: /academic
   # 验证码存放的本机文件夹
   verifyPath: D:\verify\
+
+# 图书馆爬虫的各种配置
+lib:
+  # 发起馆藏查询的 url
+  searchUrl: http://wxlib.djtu.edu.cn/wx/search.aspx
+  # 显示图书详情的 url
+  showBookUrl: http://wxlib.djtu.edu.cn/wx/ShowBook.aspx
+  # 设置 Cookie 的参数
+  cookie:
+    domain: wxlib.djtu.edu.cn
+    path: /
 
 # 小程序配置
 mini:

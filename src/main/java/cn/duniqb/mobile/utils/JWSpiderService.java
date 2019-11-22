@@ -33,7 +33,7 @@ import java.util.*;
  * @author duniqb
  */
 @Service
-public class SpiderService {
+public class JWSpiderService {
 
     @Autowired
     private StudentMapper studentMapper;
