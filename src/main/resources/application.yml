@@ -62,6 +62,8 @@ lib:
   recommendHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderRecommanded2.aspx
   # 新书热度-近90天内入藏复本总借量的 url
   newHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderNewBook.aspx
+  # 专业热点查询的 url
+  majorHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderHot3.aspx
   # 分类热度-近2年入藏复本平均量的 url
   cateHotAvgUrl: http://wxlib.djtu.edu.cn/br/ReaderHot4.aspx
   # 分类热度-近2年入藏复本总借量的 url
@@ -72,6 +74,7 @@ lib:
   majorUrl: http://wxlib.djtu.edu.cn/br/ReaderProfession.aspx
   # 学院+专业查询的 url
   collegeMajorUrl: http://wxlib.djtu.edu.cn/br/ReaderFenLeiHao.aspx
+
 
 
 # 小程序配置

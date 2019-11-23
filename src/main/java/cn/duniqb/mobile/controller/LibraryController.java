@@ -79,6 +79,12 @@ public class LibraryController {
     private String cateHotSumUrl;
 
     /**
+     * 专业热点查询的 url
+     */
+    @Value("${lib.majorHotSumUrl}")
+    private String majorHotSumUrl;
+
+    /**
      * 馆藏查询
      *
      * @param name
@@ -120,36 +126,44 @@ public class LibraryController {
      *
      * @return
      */
-    @ApiOperation(value = "热点图书", notes = "热点图书的接口")
-    @ApiImplicitParam(name = "type", value = "查询参数，热度类型，1：读者热点-近2年入藏复本平均量，2：读者热点-近2年入藏复本总借量，" +
-            "3：荐购热点-近5年入藏复本平均量，4：荐购热点-近5年入藏复本总借量，5：新书热度-近90天内入藏复本总借量)，",
-            required = true, dataType = "String", paramType = "query")
+    @ApiOperation(value = "热点图书 - 读者热点，荐购热点，新书热度，专业热点", notes = "热点图书的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "type", value = "查询参数，热度类型，1：读者热点-近2年入藏复本平均量，2：读者热点-近2年入藏复本总借量，" +
+                    "3：荐购热点-近5年入藏复本平均量，4：荐购热点-近5年入藏复本总借量，5：新书热度-近90天内入藏复本总借量)，6：专业热点",
+                    required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "sq", value = "查询参数，6.专业热点的查询参数", dataType = "String", paramType = "query")
+    })
     @GetMapping("hot")
-    public JSONResult score(@RequestParam String type) {
-        if ("1".equals(type)) {
+    public JSONResult score(@RequestParam String type, @RequestParam(required = false) String sq) {
+        if ("1".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot(readerHotAvgUrl);
             if (!bookList.isEmpty()) {
                 return JSONResult.build(bookList, "读者热点-近2年入藏复本平均量，查询成功", 200);
             }
-        } else if ("2".equals(type)) {
+        } else if ("2".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot(readerHotSumUrl);
             if (!bookList.isEmpty()) {
                 return JSONResult.build(bookList, "读者热点-近2年入藏复本总借量，查询成功", 200);
             }
-        } else if ("3".equals(type)) {
+        } else if ("3".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot(recommendHotAvgUrl);
             if (!bookList.isEmpty()) {
                 return JSONResult.build(bookList, "荐购热点-近5年入藏复本平均量，查询成功", 200);
             }
-        } else if ("4".equals(type)) {
+        } else if ("4".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot(recommendHotSumUrl);
             if (!bookList.isEmpty()) {
                 return JSONResult.build(bookList, "荐购热点-近5年入藏复本总借量，查询成功", 200);
             }
-        } else if ("5".equals(type)) {
+        } else if ("5".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot(newHotSumUrl);
             if (!bookList.isEmpty()) {
                 return JSONResult.build(bookList, "新书热度-近90天内入藏复本总借量，查询成功", 200);
+            }
+        } else if ("6".equals(type) && sq != null) {
+            List<Book> bookList = librarySpiderService.hot(majorHotSumUrl + "?sq=" + sq);
+            if (!bookList.isEmpty()) {
+                return JSONResult.build(bookList, "专业热点-近2年内入藏复本总借量，查询成功", 200);
             }
         }
         return JSONResult.build(null, "查询失败", 400);
@@ -163,7 +177,7 @@ public class LibraryController {
      * @param cate
      * @return
      */
-    @ApiOperation(value = "分类热点", notes = "分类热点的接口")
+    @ApiOperation(value = "热点图书 - 分类热点", notes = "热点图书的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "type", value = "查询参数，type=1 近2年入藏复本平均量，type=2 近2年入藏复本总借量", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "cate", value = "1.马克思主义、列宁主义、毛泽东思...A  \n  2.哲学、宗教...B  \n 3.社会科学总论...C  \n   " +
@@ -221,11 +235,11 @@ public class LibraryController {
     }
 
     /**
-     * 专业/课程列表
+     * 专业热点里的专业/课程列表
      *
      * @return
      */
-    @ApiOperation(value = "专业/课程列表", notes = "专业/课程列表的接口")
+    @ApiOperation(value = "专业热点里的专业/课程列表", notes = "专业/课程列表的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "college", value = "查询参数，学院", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "major", value = "查询参数，专业", dataType = "String", paramType = "query")
@@ -241,4 +255,6 @@ public class LibraryController {
         }
         return JSONResult.build(null, "查询失败", 400);
     }
+
+
 }
