@@ -20,7 +20,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -32,7 +31,6 @@ import java.util.UUID;
  * @author duniqb
  */
 @Api(value = "与小程序相关的接口", tags = {"与小程序相关的接口"})
-@Scope("session")
 @RestController
 @RequestMapping("/api/v1/mini/")
 public class MiniController {

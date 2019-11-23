@@ -75,6 +75,18 @@ lib:
   # 学院+专业查询的 url
   collegeMajorUrl: http://wxlib.djtu.edu.cn/br/ReaderFenLeiHao.aspx
 
+# 一卡通爬虫的各种配置
+card:
+  # 本机 url，以供回传验证码地址
+  localhost: http://localhost:8080/
+  # 获取验证码的 url
+  verifyUrl: http://ykt.djtu.edu.cn/Account/GetCheckCodeImg
+  # 验证码存放的本机文件夹
+  verifyPath: D:\verify\
+  # 获取卡信息的 url
+  infoUrl: http://ykt.djtu.edu.cn/CardManage/CardInfo/BasicInfo
+  # 登录一卡通的 url
+  loginUrl: http://ykt.djtu.edu.cn/Account/MiniCheckIn
 
 
 # 小程序配置

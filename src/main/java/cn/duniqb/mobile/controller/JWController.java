@@ -138,16 +138,7 @@ public class JWController {
         if (student != null) {
             return JSONResult.build(user.getUsername(), "学生已存在", 400);
         }
-        HttpGet getLoginPage = new HttpGet(loginUrl);
-
-        getLoginPage.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-        getLoginPage.setHeader("Accept-Encoding", "gzip, deflate");
-        getLoginPage.setHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3");
-        getLoginPage.setHeader("Connection", "keep-alive");
-        getLoginPage.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0");
-
         try {
-            client.execute(getLoginPage);
             // 构造 POST 参数
             ArrayList<NameValuePair> postData = new ArrayList<>();
             postData.add(new BasicNameValuePair("groupId", null));

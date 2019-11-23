@@ -1,9 +1,9 @@
 package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.domain.BookCate;
-import cn.duniqb.mobile.dto.Book;
+import cn.duniqb.mobile.dto.BookDto;
 import cn.duniqb.mobile.dto.JSONResult;
-import cn.duniqb.mobile.dto.profession.ProfessionHot;
+import cn.duniqb.mobile.dto.profession.ProfessionHotDto;
 import cn.duniqb.mobile.service.BookCateService;
 import cn.duniqb.mobile.utils.LibrarySpiderService;
 import io.swagger.annotations.Api;
@@ -97,9 +97,9 @@ public class LibraryController {
         if (name == null || "".equals(name.trim())) {
             return JSONResult.build(null, "书名不能为空", 400);
         }
-        List<Book> bookList = librarySpiderService.query(name);
-        if (!bookList.isEmpty()) {
-            return JSONResult.build(bookList, "查询成功", 200);
+        List<BookDto> bookDtoList = librarySpiderService.query(name);
+        if (!bookDtoList.isEmpty()) {
+            return JSONResult.build(bookDtoList, "查询成功", 200);
         }
         return JSONResult.build(null, "查询失败", 400);
     }
@@ -117,8 +117,8 @@ public class LibraryController {
         if (id == null || "".equals(id.trim())) {
             return JSONResult.build(null, "id 不能为空", 400);
         }
-        Book book = librarySpiderService.show(id);
-        return JSONResult.build(book, "查询成功", 200);
+        BookDto bookDto = librarySpiderService.show(id);
+        return JSONResult.build(bookDto, "查询成功", 200);
     }
 
     /**
@@ -136,34 +136,34 @@ public class LibraryController {
     @GetMapping("hot")
     public JSONResult score(@RequestParam String type, @RequestParam(required = false) String sq) {
         if ("1".equals(type) && sq == null) {
-            List<Book> bookList = librarySpiderService.hot(readerHotAvgUrl);
-            if (!bookList.isEmpty()) {
-                return JSONResult.build(bookList, "读者热点-近2年入藏复本平均量，查询成功", 200);
+            List<BookDto> bookDtoList = librarySpiderService.hot(readerHotAvgUrl);
+            if (!bookDtoList.isEmpty()) {
+                return JSONResult.build(bookDtoList, "读者热点-近2年入藏复本平均量，查询成功", 200);
             }
         } else if ("2".equals(type) && sq == null) {
-            List<Book> bookList = librarySpiderService.hot(readerHotSumUrl);
-            if (!bookList.isEmpty()) {
-                return JSONResult.build(bookList, "读者热点-近2年入藏复本总借量，查询成功", 200);
+            List<BookDto> bookDtoList = librarySpiderService.hot(readerHotSumUrl);
+            if (!bookDtoList.isEmpty()) {
+                return JSONResult.build(bookDtoList, "读者热点-近2年入藏复本总借量，查询成功", 200);
             }
         } else if ("3".equals(type) && sq == null) {
-            List<Book> bookList = librarySpiderService.hot(recommendHotAvgUrl);
-            if (!bookList.isEmpty()) {
-                return JSONResult.build(bookList, "荐购热点-近5年入藏复本平均量，查询成功", 200);
+            List<BookDto> bookDtoList = librarySpiderService.hot(recommendHotAvgUrl);
+            if (!bookDtoList.isEmpty()) {
+                return JSONResult.build(bookDtoList, "荐购热点-近5年入藏复本平均量，查询成功", 200);
             }
         } else if ("4".equals(type) && sq == null) {
-            List<Book> bookList = librarySpiderService.hot(recommendHotSumUrl);
-            if (!bookList.isEmpty()) {
-                return JSONResult.build(bookList, "荐购热点-近5年入藏复本总借量，查询成功", 200);
+            List<BookDto> bookDtoList = librarySpiderService.hot(recommendHotSumUrl);
+            if (!bookDtoList.isEmpty()) {
+                return JSONResult.build(bookDtoList, "荐购热点-近5年入藏复本总借量，查询成功", 200);
             }
         } else if ("5".equals(type) && sq == null) {
-            List<Book> bookList = librarySpiderService.hot(newHotSumUrl);
-            if (!bookList.isEmpty()) {
-                return JSONResult.build(bookList, "新书热度-近90天内入藏复本总借量，查询成功", 200);
+            List<BookDto> bookDtoList = librarySpiderService.hot(newHotSumUrl);
+            if (!bookDtoList.isEmpty()) {
+                return JSONResult.build(bookDtoList, "新书热度-近90天内入藏复本总借量，查询成功", 200);
             }
         } else if ("6".equals(type) && sq != null) {
-            List<Book> bookList = librarySpiderService.hot(majorHotSumUrl + "?sq=" + sq);
-            if (!bookList.isEmpty()) {
-                return JSONResult.build(bookList, "专业热点-近2年内入藏复本总借量，查询成功", 200);
+            List<BookDto> bookDtoList = librarySpiderService.hot(majorHotSumUrl + "?sq=" + sq);
+            if (!bookDtoList.isEmpty()) {
+                return JSONResult.build(bookDtoList, "专业热点-近2年内入藏复本总借量，查询成功", 200);
             }
         }
         return JSONResult.build(null, "查询失败", 400);
@@ -193,14 +193,14 @@ public class LibraryController {
         }
 
         if ("1".equals(type)) {
-            List<Book> bookList = librarySpiderService.hot(cateHotAvgUrl + "?sq=" + cate);
-            if (!bookList.isEmpty()) {
-                return JSONResult.build(bookList, "分类热点-近2年入藏复本平均量，查询成功", 200);
+            List<BookDto> bookDtoList = librarySpiderService.hot(cateHotAvgUrl + "?sq=" + cate);
+            if (!bookDtoList.isEmpty()) {
+                return JSONResult.build(bookDtoList, "分类热点-近2年入藏复本平均量，查询成功", 200);
             }
         } else if ("2".equals(type)) {
-            List<Book> bookList = librarySpiderService.hot(cateHotSumUrl + "?sq=" + cate);
-            if (!bookList.isEmpty()) {
-                return JSONResult.build(bookList, "分类热点-近2年入藏复本总借量，查询成功", 200);
+            List<BookDto> bookDtoList = librarySpiderService.hot(cateHotSumUrl + "?sq=" + cate);
+            if (!bookDtoList.isEmpty()) {
+                return JSONResult.build(bookDtoList, "分类热点-近2年入藏复本总借量，查询成功", 200);
             }
         }
         return JSONResult.build(null, "查询失败", 400);
@@ -227,7 +227,7 @@ public class LibraryController {
     @ApiOperation(value = "学院列表", notes = "学院列表的接口")
     @GetMapping("college")
     public JSONResult college() {
-        ProfessionHot college = librarySpiderService.college();
+        ProfessionHotDto college = librarySpiderService.college();
         if (!college.getList().isEmpty()) {
             return JSONResult.build(college, "查询成功", 200);
         }
@@ -249,9 +249,9 @@ public class LibraryController {
         if (college == null) {
             return JSONResult.build(null, "查询失败", 400);
         }
-        ProfessionHot professionHot = librarySpiderService.major(college, major);
-        if (!professionHot.getList().isEmpty()) {
-            return JSONResult.build(professionHot, "查询成功", 200);
+        ProfessionHotDto professionHotDto = librarySpiderService.major(college, major);
+        if (!professionHotDto.getList().isEmpty()) {
+            return JSONResult.build(professionHotDto, "查询成功", 200);
         }
         return JSONResult.build(null, "查询失败", 400);
     }
