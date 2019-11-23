@@ -68,6 +68,10 @@ lib:
   cateHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderHot.aspx
   # 学院列表的 url
   collegeUrl: http://wxlib.djtu.edu.cn/br/ReaderInstitute.aspx
+  # 专业查询的 url
+  majorUrl: http://wxlib.djtu.edu.cn/br/ReaderProfession.aspx
+  # 学院+专业查询的 url
+  collegeMajorUrl: http://wxlib.djtu.edu.cn/br/ReaderFenLeiHao.aspx
 
 
 # 小程序配置

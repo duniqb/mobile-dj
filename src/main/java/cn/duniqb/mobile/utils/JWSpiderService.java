@@ -96,6 +96,7 @@ public class JWSpiderService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        assert doc != null;
         String imgUrl = doc.select("table.form td img").attr("src");
 
         Elements elements = doc.select("table.form tr");
@@ -210,10 +211,12 @@ public class JWSpiderService {
 
         Document doc = null;
         try {
+            assert response != null;
             doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
         } catch (IOException e) {
             e.printStackTrace();
         }
+        assert doc != null;
         Element element = doc.select("table.datalist").first();
         Elements tr = element.select("tr");
 
@@ -350,6 +353,7 @@ public class JWSpiderService {
             e.printStackTrace();
         }
         Map<Integer, String> map = new HashMap<>();
+        assert doc != null;
         Element element = doc.select("table.infolist_tab").last();
         Elements tr = element.select("tr");
 

@@ -18,7 +18,7 @@ public class Item {
     private String name;
 
     /**
-     * 后半部分关键词
+     * 用于详情查询
      */
-    private String keyWord;
+    private String sq;
 }

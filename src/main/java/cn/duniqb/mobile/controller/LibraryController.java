@@ -219,4 +219,26 @@ public class LibraryController {
         }
         return JSONResult.build(null, "查询失败", 400);
     }
+
+    /**
+     * 专业/课程列表
+     *
+     * @return
+     */
+    @ApiOperation(value = "专业/课程列表", notes = "专业/课程列表的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "college", value = "查询参数，学院", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "major", value = "查询参数，专业", dataType = "String", paramType = "query")
+    })
+    @GetMapping("major")
+    public JSONResult major(@RequestParam String college, @RequestParam(required = false) String major) {
+        if (college == null) {
+            return JSONResult.build(null, "查询失败", 400);
+        }
+        ProfessionHot professionHot = librarySpiderService.major(college, major);
+        if (!professionHot.getList().isEmpty()) {
+            return JSONResult.build(professionHot, "查询成功", 200);
+        }
+        return JSONResult.build(null, "查询失败", 400);
+    }
 }

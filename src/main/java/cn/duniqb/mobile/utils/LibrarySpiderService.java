@@ -51,6 +51,18 @@ public class LibrarySpiderService {
     private String collegeUrl;
 
     /**
+     * 专业查询的 url
+     */
+    @Value("${lib.majorUrl}")
+    private String majorUrl;
+
+    /**
+     * 学院+专业查询的 url
+     */
+    @Value("${lib.collegeMajorUrl}")
+    private String collegeMajorUrl;
+
+    /**
      * 馆藏查询
      *
      * @param name
@@ -253,6 +265,50 @@ public class LibrarySpiderService {
             list.add(item);
         }
         professionHot.setTitle("院系列表");
+        professionHot.setList(list);
+        return professionHot;
+    }
+
+    /**
+     * 专业/课程列表
+     * major 为空则 http://wxlib.djtu.edu.cn/br/ReaderProfession.aspx?sq=材料科学
+     * 否则 http://wxlib.djtu.edu.cn/br/ReaderFenLeiHao.aspx?zy=材料焊接&xy=材料科学
+     */
+    public ProfessionHot major(String college, String major) {
+        HttpClient client = HttpClients.createDefault();
+        String url = null;
+        // 查询专业列表
+        if (major == null && college != null) {
+            url = majorUrl + "?sq=" + college;
+        } else if (major != null && college != null) {
+            url = collegeMajorUrl + "?zy=" + major + "&xy=" + college;
+        }
+        HttpResponse response = null;
+        try {
+            response = client.execute(new HttpGet(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            assert response != null;
+            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert doc != null;
+        ProfessionHot professionHot = new ProfessionHot();
+        List<Item> list = new ArrayList<>();
+        Elements elements = doc.select("#form1 article dd a");
+        for (int i = 0; i < elements.size(); i++) {
+            Item item = new Item();
+            item.setCurNo(i);
+            item.setName(elements.get(i).text());
+            String trim = elements.get(i).select("span").attr("title").trim();
+            item.setSq("".equals(trim) ? null : trim);
+            list.add(item);
+        }
+        professionHot.setTitle(doc.select("#form1 article dt a").text());
         professionHot.setList(list);
         return professionHot;
     }
