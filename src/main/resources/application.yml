@@ -66,6 +66,8 @@ lib:
   cateHotAvgUrl: http://wxlib.djtu.edu.cn/br/ReaderHot4.aspx
   # 分类热度-近2年入藏复本总借量的 url
   cateHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderHot.aspx
+  # 学院列表的 url
+  collegeUrl: http://wxlib.djtu.edu.cn/br/ReaderInstitute.aspx
 
 
 # 小程序配置

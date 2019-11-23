@@ -1,6 +1,8 @@
 package cn.duniqb.mobile.utils;
 
 import cn.duniqb.mobile.dto.Book;
+import cn.duniqb.mobile.dto.profession.Item;
+import cn.duniqb.mobile.dto.profession.ProfessionHot;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -41,6 +43,12 @@ public class LibrarySpiderService {
      */
     @Value("${lib.showBookUrl}")
     private String showBookUrl;
+
+    /**
+     * 学院列表的 url
+     */
+    @Value("${lib.collegeUrl}")
+    private String collegeUrl;
 
     /**
      * 馆藏查询
@@ -213,5 +221,39 @@ public class LibrarySpiderService {
             bookList.add(book);
         }
         return bookList;
+    }
+
+    /**
+     * 学院列表
+     */
+    public ProfessionHot college() {
+        HttpClient client = HttpClients.createDefault();
+        String url = collegeUrl;
+        HttpResponse response = null;
+        try {
+            response = client.execute(new HttpGet(url));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            assert response != null;
+            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert doc != null;
+        Elements elements = doc.select("#form1 .cgal_nr ul li");
+        ProfessionHot professionHot = new ProfessionHot();
+        List<Item> list = new ArrayList<>();
+        for (int i = 0; i < elements.size(); i++) {
+            Item item = new Item();
+            item.setCurNo(i);
+            item.setName(elements.get(i).text());
+            list.add(item);
+        }
+        professionHot.setTitle("院系列表");
+        professionHot.setList(list);
+        return professionHot;
     }
 }
