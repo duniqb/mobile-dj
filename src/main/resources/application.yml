@@ -88,6 +88,15 @@ card:
   # 登录一卡通的 url
   loginUrl: http://ykt.djtu.edu.cn/Account/MiniCheckIn
 
+# 新闻爬虫的各种配置
+news:
+  # 交大要闻的 url
+  newsUrl: http://www.djtu.edu.cn/News
+  # 综合报道的 url
+  reportUrl: http://www.djtu.edu.cn/Report.html
+  # 通知公告的 url
+  noticesUrl: http://www.djtu.edu.cn/Notices.html
+
 
 # 小程序配置
 mini:

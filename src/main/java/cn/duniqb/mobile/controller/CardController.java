@@ -3,7 +3,7 @@ package cn.duniqb.mobile.controller;
 import cn.duniqb.mobile.dto.CardInfo;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.User;
-import cn.duniqb.mobile.utils.CardService;
+import cn.duniqb.mobile.utils.CardSpiderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;
@@ -42,7 +42,7 @@ import java.util.ArrayList;
 public class CardController {
 
     @Autowired
-    private CardService cardService;
+    private CardSpiderService cardSpiderService;
 
     private CookieStore cookieStore = null;
 
@@ -123,7 +123,7 @@ public class CardController {
             HttpResponse response = client.execute(post);
             System.out.println(response);
             if (response.toString().contains("200")) {
-                CardInfo info = cardService.info(cookieStore);
+                CardInfo info = cardSpiderService.info(cookieStore);
                 return JSONResult.build(info, "一卡通登录成功", 200);
             }
         } catch (IOException e) {

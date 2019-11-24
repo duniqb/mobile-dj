@@ -21,7 +21,7 @@ import java.io.IOException;
  * @author duniqb
  */
 @Service
-public class CardService {
+public class CardSpiderService {
 
     /**
      * 获取卡信息的 url
