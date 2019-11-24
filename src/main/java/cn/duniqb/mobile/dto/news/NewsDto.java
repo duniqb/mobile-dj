@@ -30,6 +30,11 @@ public class NewsDto {
     private String date;
 
     /**
+     * 新闻类型
+     */
+    private String type;
+
+    /**
      * 发布时间：从详情中获取的
      */
     private String time;
@@ -47,10 +52,10 @@ public class NewsDto {
     /**
      * 内容
      */
-    private String content;
+    private List<String> content;
 
     /**
      * 图片地址
      */
-    List<String> images;
+    private List<String> image;
 }

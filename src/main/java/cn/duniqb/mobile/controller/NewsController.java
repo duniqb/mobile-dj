@@ -1,6 +1,7 @@
 package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.news.NewsDto;
 import cn.duniqb.mobile.dto.news.NewsList;
 import cn.duniqb.mobile.utils.NewsSpiderService;
 import io.swagger.annotations.Api;
@@ -46,4 +47,21 @@ public class NewsController {
         }
         return JSONResult.build(null, "获取失败", 400);
     }
+
+    @GetMapping("detail")
+    @ApiOperation(value = "获取新闻详情", notes = "获取新闻详情的接口，请求参数是 type，id")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "type", value = "新闻类型 type，1：交大要闻 2：综合报道 ，3：通知公告", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "id", value = "新闻 id", required = true, dataType = "String", paramType = "query")
+    })
+    public JSONResult detail(@RequestParam String type, @RequestParam String id) {
+        NewsDto detail = newsSpiderService.detail(type, id);
+        if (detail != null) {
+            return JSONResult.build(detail, detail.getType() + " - 获取成功", 200);
+        }
+        return JSONResult.build(null, "获取失败", 400);
+    }
+
+
+
 }

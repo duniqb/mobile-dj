@@ -90,12 +90,27 @@ card:
 
 # 新闻爬虫的各种配置
 news:
-  # 交大要闻的 url
-  newsUrl: http://www.djtu.edu.cn/News
-  # 综合报道的 url
-  reportUrl: http://www.djtu.edu.cn/Report.html
-  # 通知公告的 url
-  noticesUrl: http://www.djtu.edu.cn/Notices.html
+  list:
+    # 交大要闻的 url
+    newsUrl: http://www.djtu.edu.cn/News
+    # 综合报道的 url
+    reportUrl: http://www.djtu.edu.cn/Report.html
+    # 通知公告的 url
+    noticesUrl: http://www.djtu.edu.cn/Notices.html
+  # 新闻详情的 url
+  detail:
+    # 交大要闻详情的 url
+    newsDetailUrl: http://www.djtu.edu.cn/News
+    # 综合报道详情的 url
+    reportDetailUrl: http://www.djtu.edu.cn/Report
+    # 通知公告详情的 url
+    noticesDetailUrl: http://www.djtu.edu.cn/Notices
+  # 文章图片存放的本机文件夹
+  imagePath: D:\img\
+  # 学校主站地址
+  schoolHost: http://www.djtu.edu.cn
+  # 本机 url，以供展示图片
+  localhost: http://localhost:8080/
 
 
 # 小程序配置
