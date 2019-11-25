@@ -9,10 +9,7 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -31,13 +28,13 @@ public class LogisticsController {
     /**
      * 故障报修 查询各项数据清单
      */
-    @GetMapping("detail")
+    @GetMapping("data")
     @ApiOperation(value = "查询各项数据清单", notes = "查询各项数据清单的接口，请求参数是 id，value")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "id", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "value", value = "id 的值", required = true, dataType = "String", paramType = "query")
     })
-    public JSONResult detail(@RequestParam String id, @RequestParam String value) {
+    public JSONResult data(@RequestParam String id, @RequestParam String value) {
         String string = logisticsSpiderService.data(id, value);
 
         if ("distinctId".equals(id)) {
@@ -76,5 +73,19 @@ public class LogisticsController {
             return JSONResult.build(list, "查询报修列表成功", 200);
         }
         return JSONResult.build(null, "查询报修列表失败", 400);
+    }
+
+    /**
+     * 报修单详情
+     */
+    @GetMapping("detail")
+    @ApiOperation(value = "报修单详情", notes = "报修单详情的接口，请求参数是 url")
+    @ApiImplicitParam(name = "url", value = "路径", required = true, dataType = "String", paramType = "query")
+    public JSONResult detail(@RequestParam String url) {
+        RepairDetail repairDetail = logisticsSpiderService.detail(url);
+        if (repairDetail != null) {
+            return JSONResult.build(repairDetail, "查询报修单详情成功", 200);
+        }
+        return JSONResult.build(null, "查询报修单详情失败", 400);
     }
 }

@@ -5,12 +5,14 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -54,6 +56,12 @@ public class LogisticsSpiderService {
      */
     @Value("${logistics.detail.listUrl}")
     private String listUrl;
+
+    /**
+     * 根据报修手机号查询报修列表的 url
+     */
+    @Value("${logistics.logisticsHost}")
+    private String logisticsHost;
 
     /**
      * 故障报修 查询各项数据清单
@@ -164,5 +172,47 @@ public class LogisticsSpiderService {
             e.printStackTrace();
         }
         return list;
+    }
+
+    /**
+     * 报修单详情
+     */
+    public RepairDetail detail(String url) {
+        HttpGet detailGet = new HttpGet(logisticsHost + url);
+
+        detailGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        detailGet.setHeader("Accept-Encoding", "gzip, deflate");
+        detailGet.setHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3");
+        detailGet.setHeader("Connection", "keep-alive");
+        detailGet.setHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
+        HttpClient client = HttpClients.createDefault();
+        HttpResponse response = null;
+        try {
+            response = client.execute(detailGet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert response != null;
+        if (response.toString().contains("200")) {
+
+            try {
+                Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", "").replace("amp;", ""));
+                Element element = doc.select("div.page-current div.card-content-inner").first();
+
+                RepairDetail repairDetail = new RepairDetail();
+                repairDetail.setDate(element.select("p.color-gray").text().split("\\.")[0]);
+                repairDetail.setTitle(element.select("p[style]").first().text());
+                repairDetail.setRoom(element.select("div.card-content-inner>p[style]").last().text().split(" ")[1]);
+                repairDetail.setDescription(element.select("div.card-content-inner>p[style]").last().text().split(" ")[2]);
+                repairDetail.setId(element.select("div.color-gray").text().split(":")[1]);
+                repairDetail.setState(element.select("div.card-content-inner>div[style] p").text());
+                repairDetail.setPhone(doc.select("div.page-current div.card-content-inner").last().select(".item-inner .item-after").text().split(" ")[0]);
+
+                return repairDetail;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }
