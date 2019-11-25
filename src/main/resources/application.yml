@@ -115,7 +115,7 @@ news:
 # 后勤爬虫的各种配置
 logistics:
   # 故障报修 查询各项数据清单
-  detail:
+  data:
     # 查询校区 id，返回建筑 id的 url
     distinctIdUrl: https://nanqu.56team.com/web/app/user/buildings.action
     # 查询建筑 id，返回房间 id的 url
@@ -124,6 +124,11 @@ logistics:
     roomIdUrl: https://nanqu.56team.com/web/app/user/equipment.action
     # 查询设备 id，返回设备详情的 url
     equipmentIdUrl: https://nanqu.56team.com/web/app/user/equipment/detail.action
+  # 报修详情
+  detail:
+    # 根据报修手机号查询报修列表的 url
+    listUrl: https://nanqu.56team.com/web/app/user/select/all/maintenance.action
+
 
 # 小程序配置
 mini:
