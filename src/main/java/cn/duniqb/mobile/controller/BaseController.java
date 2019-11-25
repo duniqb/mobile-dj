@@ -1,9 +1,10 @@
 package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.dto.JSONResult;
-import io.swagger.annotations.ApiOperation;
 import org.springframework.boot.web.servlet.error.ErrorController;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class BaseController implements ErrorController {

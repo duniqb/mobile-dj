@@ -112,6 +112,18 @@ news:
   # 本机 url，以供展示图片
   localhost: http://localhost:8080/
 
+# 后勤爬虫的各种配置
+logistics:
+  # 故障报修 查询各项数据清单
+  detail:
+    # 查询校区 id，返回建筑 id的 url
+    distinctIdUrl: https://nanqu.56team.com/web/app/user/buildings.action
+    # 查询建筑 id，返回房间 id的 url
+    buildingIdUrl: https://nanqu.56team.com/web/app/user/placeRoom.action
+    # 查询房间 id，返回设备 id的 url
+    roomIdUrl: https://nanqu.56team.com/web/app/user/equipment.action
+    # 查询设备 id，返回设备详情的 url
+    equipmentIdUrl: https://nanqu.56team.com/web/app/user/equipment/detail.action
 
 # 小程序配置
 mini:

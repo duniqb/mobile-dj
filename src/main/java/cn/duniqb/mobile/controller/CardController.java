@@ -21,8 +21,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -90,7 +88,6 @@ public class CardController {
      * @param user
      * @return
      */
-    @Transactional(propagation = Propagation.REQUIRED)
     @ApiOperation(value = "登录一卡通", notes = "登录一卡通的接口，请求体是 User，包含学号，密码和验证码")
     @ApiImplicitParam(name = "user", value = "请求对象 user，包含学号，密码和验证码", required = true, dataType = "User", paramType = "body")
     @PostMapping("login")
