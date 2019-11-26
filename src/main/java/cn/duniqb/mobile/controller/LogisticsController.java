@@ -101,4 +101,17 @@ public class LogisticsController {
         }
         return JSONResult.build(null, "查询报最新通知失败", 400);
     }
+
+    /**
+     * 最近维修数量
+     */
+    @GetMapping("recent")
+    @ApiOperation(value = "最近维修数量", notes = "最近维修数量的接口")
+    public JSONResult recent() {
+        List<Recent> recentList = logisticsSpiderService.recent();
+        if (!recentList.isEmpty()) {
+            return JSONResult.build(recentList, "查询最近维修数量成功", 200);
+        }
+        return JSONResult.build(null, "查询最近维修数量失败", 400);
+    }
 }

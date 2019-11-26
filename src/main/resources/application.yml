@@ -132,6 +132,8 @@ logistics:
     listUrl: https://nanqu.56team.com/web/app/user/select/all/maintenance.action
   # 最新通知的 url
   noticeUrl: https://nanqu.56team.com/web/app/user/index.action
+  # 最近维修数量的 url
+  recentUrl: https://nanqu.56team.com/web/app/user/my/maintenance/router.action
 
 # 小程序配置
 mini:

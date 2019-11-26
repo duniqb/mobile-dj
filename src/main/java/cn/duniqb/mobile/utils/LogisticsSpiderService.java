@@ -1,6 +1,7 @@
 package cn.duniqb.mobile.utils;
 
 import cn.duniqb.mobile.dto.repair.Notice;
+import cn.duniqb.mobile.dto.repair.Recent;
 import cn.duniqb.mobile.dto.repair.RepairDetail;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -58,16 +59,22 @@ public class LogisticsSpiderService {
     private String listUrl;
 
     /**
-     * 根据报修手机号查询报修列表的 url
+     * 报修网站的主机地址
      */
     @Value("${logistics.logisticsHost}")
     private String logisticsHost;
 
     /**
-     * 根据报修手机号查询报修列表的 url
+     * 最新通知的 url
      */
     @Value("${logistics.noticeUrl}")
     private String noticeUrl;
+
+    /**
+     * 最近维修数量的 url
+     */
+    @Value("${logistics.recentUrl}")
+    private String recentUrl;
 
     /**
      * 故障报修 查询各项数据清单
@@ -260,5 +267,45 @@ public class LogisticsSpiderService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 最近维修数量
+     */
+    public List<Recent> recent() {
+        HttpGet recentGet = new HttpGet(recentUrl);
+
+        recentGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        recentGet.setHeader("Accept-Encoding", "gzip, deflate");
+        recentGet.setHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3");
+        recentGet.setHeader("Connection", "keep-alive");
+        recentGet.setHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
+
+        HttpResponse response = null;
+        HttpClient client = HttpClients.createDefault();
+        try {
+            response = client.execute(recentGet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        List<Recent> list = new ArrayList<>();
+        try {
+            Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", "").replace("amp;", ""));
+            Elements elements = doc.select("div.content>div.list-block>ul>li");
+            for (int i = 1; i < elements.size(); i++) {
+                Recent recent = new Recent();
+                recent.setArea(elements.get(i).select(".item-title").text());
+                String reported = elements.get(i).select(".item-after").text().split("/")[0].split("条")[0];
+                recent.setReported(reported);
+                String repaired = elements.get(i).select(".item-after").text().split("/")[1].split("条")[0];
+                recent.setRepaired(repaired);
+                recent.setPending(String.valueOf(Integer.parseInt(reported) - Integer.parseInt(repaired)));
+                list.add(recent);
+            }
+            return list;
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }
