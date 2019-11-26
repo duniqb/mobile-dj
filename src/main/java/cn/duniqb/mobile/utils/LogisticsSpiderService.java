@@ -1,5 +1,6 @@
 package cn.duniqb.mobile.utils;
 
+import cn.duniqb.mobile.dto.repair.Notice;
 import cn.duniqb.mobile.dto.repair.RepairDetail;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -19,7 +20,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -62,6 +62,12 @@ public class LogisticsSpiderService {
      */
     @Value("${logistics.logisticsHost}")
     private String logisticsHost;
+
+    /**
+     * 根据报修手机号查询报修列表的 url
+     */
+    @Value("${logistics.noticeUrl}")
+    private String noticeUrl;
 
     /**
      * 故障报修 查询各项数据清单
@@ -212,6 +218,46 @@ public class LogisticsSpiderService {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        return null;
+    }
+
+    /**
+     * 最新通知
+     */
+    public Notice notice() {
+        HttpGet noticeGet = new HttpGet(noticeUrl);
+
+        noticeGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        noticeGet.setHeader("Accept-Encoding", "gzip, deflate");
+        noticeGet.setHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3");
+        noticeGet.setHeader("Connection", "keep-alive");
+        noticeGet.setHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
+
+        HttpResponse response = null;
+        HttpClient client = HttpClients.createDefault();
+
+        try {
+            response = client.execute(noticeGet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (response != null && !response.toString().contains("200")) {
+            return null;
+        }
+
+        try {
+            Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", "").replace("amp;", ""));
+            Element element = doc.select("div.bottom_inside a").first();
+
+            Notice notice = new Notice();
+            notice.setTitle(element.select(".bottom_inside_title").text());
+            notice.setContent(element.select(".bottom_inside_art").text());
+            notice.setDate(element.select(".inscription").text());
+
+            return notice;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         return null;
     }

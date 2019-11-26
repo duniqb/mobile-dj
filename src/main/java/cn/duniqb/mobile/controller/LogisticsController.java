@@ -88,4 +88,17 @@ public class LogisticsController {
         }
         return JSONResult.build(null, "查询报修单详情失败", 400);
     }
+
+    /**
+     * 最新通知
+     */
+    @GetMapping("notice")
+    @ApiOperation(value = "最新通知", notes = "最新通知的接口")
+    public JSONResult notice() {
+        Notice notice = logisticsSpiderService.notice();
+        if (notice != null) {
+            return JSONResult.build(notice, "查询最新通知成功", 200);
+        }
+        return JSONResult.build(null, "查询报最新通知失败", 400);
+    }
 }

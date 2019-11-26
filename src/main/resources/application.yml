@@ -130,6 +130,8 @@ logistics:
   detail:
     # 根据报修手机号查询报修列表的 url
     listUrl: https://nanqu.56team.com/web/app/user/select/all/maintenance.action
+  # 最新通知的 url
+  noticeUrl: https://nanqu.56team.com/web/app/user/index.action
 
 # 小程序配置
 mini:
