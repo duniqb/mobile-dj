@@ -254,6 +254,7 @@ public class LogisticsSpiderService {
         }
 
         try {
+            assert response != null;
             Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", "").replace("amp;", ""));
             Element element = doc.select("div.bottom_inside a").first();
 
@@ -290,6 +291,7 @@ public class LogisticsSpiderService {
         }
         List<Recent> list = new ArrayList<>();
         try {
+            assert response != null;
             Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", "").replace("amp;", ""));
             Elements elements = doc.select("div.content>div.list-block>ul>li");
             for (int i = 1; i < elements.size(); i++) {

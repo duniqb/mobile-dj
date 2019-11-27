@@ -1,9 +1,13 @@
 package cn.duniqb.mobile.controller;
 
+import cn.duniqb.mobile.domain.Tip;
 import cn.duniqb.mobile.domain.WxUser;
 import cn.duniqb.mobile.dto.Code2Session;
 import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.TipDto;
+import cn.duniqb.mobile.service.TipService;
 import cn.duniqb.mobile.service.WxUserService;
+import cn.duniqb.mobile.utils.MiniSpiderService;
 import cn.duniqb.mobile.utils.MobileUtil;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
@@ -18,11 +22,14 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -40,6 +47,12 @@ public class MiniController {
     @Autowired
     private RedisUtil redisUtil;
 
+    @Autowired
+    private MiniSpiderService miniSpiderService;
+
+    @Autowired
+    private TipService tipService;
+
     /**
      * 小程序配置
      */
@@ -56,6 +69,7 @@ public class MiniController {
      * Session_key 在 Redis 里前缀
      */
     private static final String SESSION_ID = "SESSION_ID";
+
 
     /**
      * 此登录接口只有在首次使用或登录过期时才使用
@@ -147,5 +161,72 @@ public class MiniController {
             return JSONResult.build(null, "未登录", 400);
         }
         return JSONResult.build(null, "已登录", 200);
+    }
+
+    /**
+     * 提示信息，天气等
+     * 女性返回化妆信息
+     *
+     * @param sessionId 用于判断男女
+     * @param province
+     * @param city
+     * @return
+     */
+    @GetMapping("tip")
+    @ApiOperation(value = "提示信息", notes = "提示信息的接口，请求参数是 sessionId")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "province", value = "省", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "city", value = "市", required = true, dataType = "String", paramType = "query"),
+    })
+    public JSONResult tip(@RequestParam String sessionId, @RequestParam String province, @RequestParam String city) {
+        Integer time = Math.toIntExact(System.currentTimeMillis() / 1000 / 60 / 60);
+        Tip oldTip = tipService.selectById(1);
+        Tip tip = new Tip();
+        // 已存在天气数据
+        if (oldTip != null) {
+            // 判断是否要爬取更新，小于一小时，直接返回旧数据
+            if (oldTip.getTime() <= time) {
+                BeanUtils.copyProperties(oldTip, tip);
+            }
+            // 更新旧数据
+            else {
+                tip = miniSpiderService.tip(province, city);
+                tip.setId(1);
+                tip.setTime(time);
+                tipService.update(tip);
+            }
+        }
+        // 不存在天气，爬取并新增
+        else {
+            tip = miniSpiderService.tip(province, city);
+            tip.setId(1);
+            tip.setTime(time);
+            tipService.insert(tip);
+        }
+
+        if (tip.getId() != null) {
+            // 根据 sessionId 查询是男是女
+            String openid = redisUtil.get(sessionId).split(":")[0];
+            WxUser wxUser = wxUserService.selectByOpenid(openid);
+            TipDto tipDto = new TipDto();
+            if (wxUser != null) {
+                Boolean gender = wxUser.getGender();
+                BeanUtils.copyProperties(tip, tipDto);
+
+                List<String> list = new ArrayList<>();
+                list.add(tip.getChill());
+                list.add(tip.getTip1());
+                list.add(tip.getTip2());
+                // false 男，true 女，女性增加化妆信息
+                if (gender != null && gender) {
+                    list.add(tip.getMakeup());
+                }
+                tipDto.setTips(list);
+
+            }
+            return JSONResult.build(tipDto, "获取提示成功", 200);
+        }
+        return JSONResult.build(null, "获取提示失败", 400);
     }
 }

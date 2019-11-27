@@ -135,7 +135,11 @@ logistics:
   # 最近维修数量的 url
   recentUrl: https://nanqu.56team.com/web/app/user/my/maintenance/router.action
 
+
 # 小程序配置
 mini:
   appId: wxe1f564d00f76340a
   secret: ec547e58ed84fcbbee3a7e24a5823cc8
+  spider:
+    # 爬取天气，此 url 不是很规范
+    tipUrl: https://wis.qq.com/weather/common?source=pc&weather_type=observe%7Cindex%7Calarm%7Ctips&province=

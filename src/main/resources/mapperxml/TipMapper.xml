@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.duniqb.mobile.mapper.TipMapper">
+  <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.Tip">
+    <!--@mbg.generated generated on Wed Nov 27 16:01:42 CST 2019.-->
+    <!--@Table tip-->
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="time" jdbcType="INTEGER" property="time" />
+    <result column="degree" jdbcType="VARCHAR" property="degree" />
+    <result column="weather" jdbcType="VARCHAR" property="weather" />
+    <result column="chill" jdbcType="VARCHAR" property="chill" />
+    <result column="makeup" jdbcType="VARCHAR" property="makeup" />
+    <result column="tip1" jdbcType="VARCHAR" property="tip1" />
+    <result column="tip2" jdbcType="VARCHAR" property="tip2" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated generated on Wed Nov 27 16:01:42 CST 2019.-->
+    id, `time`, `degree`, weather, chill, makeup, tip1, tip2
+  </sql>
+</mapper>
