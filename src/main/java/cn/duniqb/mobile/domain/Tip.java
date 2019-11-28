@@ -45,6 +45,12 @@ public class Tip implements Serializable {
     private String makeup;
 
     /**
+     * 感冒
+     */
+    @Column(name = "clod")
+    private String clod;
+
+    /**
      * 提示1
      */
     @Column(name = "tip1")

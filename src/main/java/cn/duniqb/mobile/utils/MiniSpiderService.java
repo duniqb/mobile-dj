@@ -57,6 +57,8 @@ public class MiniSpiderService {
             tips.setChill(doc.text().split("chill")[1].split("\"")[4]);
             // 化妆
             tips.setMakeup(doc.text().split("makeup")[1].split("\"")[4]);
+            // 感冒
+            tips.setClod(doc.text().split("cold")[1].split("\"")[4]);
             // 提示 两条
             tips.setTip1(doc.text().split("tips")[1].split("\"")[6]);
             tips.setTip2(doc.text().split("tips")[1].split("\"")[10]);

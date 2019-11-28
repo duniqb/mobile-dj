@@ -18,6 +18,14 @@ public interface WxUserService {
      * @return
      */
     int insertWxUser(WxUser wxUser);
+
+    /**
+     * 根据 openid 更新
+     *
+     * @param wxUser
+     * @return
+     */
+    int updateWxUser(WxUser wxUser);
 }
 
 

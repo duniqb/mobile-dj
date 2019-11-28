@@ -5,6 +5,7 @@ import cn.duniqb.mobile.domain.WxUser;
 import cn.duniqb.mobile.dto.Code2Session;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.TipDto;
+import cn.duniqb.mobile.dto.WxUserDto;
 import cn.duniqb.mobile.service.TipService;
 import cn.duniqb.mobile.service.WxUserService;
 import cn.duniqb.mobile.utils.MiniSpiderService;
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -186,7 +188,7 @@ public class MiniController {
         // 已存在天气数据
         if (oldTip != null) {
             // 判断是否要爬取更新，小于一小时，直接返回旧数据
-            if (oldTip.getTime() <= time) {
+            if (oldTip.getTime().equals(time)) {
                 BeanUtils.copyProperties(oldTip, tip);
             }
             // 更新旧数据
@@ -207,26 +209,134 @@ public class MiniController {
 
         if (tip.getId() != null) {
             // 根据 sessionId 查询是男是女
-            String openid = redisUtil.get(sessionId).split(":")[0];
-            WxUser wxUser = wxUserService.selectByOpenid(openid);
-            TipDto tipDto = new TipDto();
-            if (wxUser != null) {
-                Boolean gender = wxUser.getGender();
-                BeanUtils.copyProperties(tip, tipDto);
+            String sessionIdValue = redisUtil.get(sessionId);
+            if (sessionIdValue != null) {
+                String openid = sessionIdValue.split(":")[0];
+                WxUser wxUser = wxUserService.selectByOpenid(openid);
+                TipDto tipDto = new TipDto();
+                if (wxUser != null) {
+                    Boolean gender = wxUser.getGender();
+                    BeanUtils.copyProperties(tip, tipDto);
 
-                List<String> list = new ArrayList<>();
-                list.add(tip.getChill());
-                list.add(tip.getTip1());
-                list.add(tip.getTip2());
-                // false 男，true 女，女性增加化妆信息
-                if (gender != null && gender) {
-                    list.add(tip.getMakeup());
+                    List<String> list = new ArrayList<>();
+                    list.add(tip.getChill());
+                    list.add(tip.getClod());
+                    list.add(tip.getTip1());
+                    list.add(tip.getTip2());
+                    // false 男，true 女，女性增加化妆信息
+                    if (gender != null && !gender) {
+                        list.add(tip.getMakeup());
+                    }
+                    tipDto.setTips(list);
+
                 }
-                tipDto.setTips(list);
-
+                return JSONResult.build(tipDto, "获取提示成功", 200);
             }
-            return JSONResult.build(tipDto, "获取提示成功", 200);
         }
         return JSONResult.build(null, "获取提示失败", 400);
     }
+
+    /**
+     * 添加/更新用户
+     * 要携带 SessionId
+     *
+     * @param
+     * @return
+     */
+    @PostMapping("add")
+    @ApiOperation(value = "添加用户", notes = "添加用户的接口，请求参数是 wxUser")
+    @ApiImplicitParam(name = "wxUser", value = "微信账号信息", required = true, dataType = "WxUserDto", paramType = "body")
+    public JSONResult add(@RequestParam String sessionId, @RequestParam String avatarUrl,
+                          @RequestParam String city, @RequestParam String country,
+                          @RequestParam Boolean gender, @RequestParam String language,
+                          @RequestParam String nickName, @RequestParam String province) {
+        // 根据 sessionId 获取 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openid = sessionIdValue.split(":")[0];
+            // 检测是否存在，存在则更新
+            WxUser wxUser = wxUserService.selectByOpenid(openid);
+            if (wxUser != null) {
+                wxUser.setAvatarUrl(avatarUrl);
+                wxUser.setCity(city);
+                wxUser.setCountry(country);
+                wxUser.setGender(gender);
+                wxUser.setLanguage(language);
+                wxUser.setNickname(nickName);
+                wxUser.setProvince(province);
+                wxUser.setCtime(new Date());
+
+                int i = wxUserService.updateWxUser(wxUser);
+                if (i > 0) {
+                    return JSONResult.build(wxUser, "更新用户成功", 200);
+                }
+            }
+            // 不存在则插入
+            else {
+                WxUser newWxUser = new WxUser();
+                newWxUser.setOpenid(openid);
+                newWxUser.setAvatarUrl(avatarUrl);
+                newWxUser.setCity(city);
+                newWxUser.setCountry(country);
+                newWxUser.setGender(gender);
+                newWxUser.setLanguage(language);
+                newWxUser.setNickname(nickName);
+                newWxUser.setProvince(province);
+                newWxUser.setCtime(new Date());
+
+                int i = wxUserService.insertWxUser(newWxUser);
+                if (i > 0) {
+                    return JSONResult.build(newWxUser, "新增用户成功", 200);
+                }
+            }
+        }
+        return JSONResult.build(null, "添加/更新用户失败", 400);
+    }
+
+    /**
+     * 获取用户信息
+     *
+     * @param sessionId
+     * @return
+     */
+    @GetMapping("query")
+    @ApiOperation(value = "获取用户信息", notes = "获取用户信息的接口，请求参数是 sessionId")
+    @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
+    public JSONResult query(@RequestParam String sessionId) {
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openid = sessionIdValue.split(":")[0];
+            WxUser wxUser = wxUserService.selectByOpenid(openid);
+            if (wxUser != null) {
+                return JSONResult.build(wxUser, "获取用户信息成功", 200);
+            }
+        }
+        return JSONResult.build(null, "获取用户信息失败", 400);
+    }
+
+    /**
+     * 检查是否真正的在数据库注册，而不仅是登录态
+     *
+     * @param sessionId
+     * @return
+     */
+    @GetMapping("register")
+    @ApiOperation(value = "检查是否真正的在数据库注册", notes = "检查是否真正的在数据库注册的接口，请求参数是 sessionId")
+    @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
+    public JSONResult register(@RequestParam String sessionId) {
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openid = sessionIdValue.split(":")[0];
+            WxUser wxUser = wxUserService.selectByOpenid(openid);
+            if (wxUser != null) {
+                // 已注册
+                if (wxUser.getCtime() != null) {
+                    return JSONResult.build(wxUser, "用户已注册", 200);
+                }
+            }
+        }
+        return JSONResult.build(null, "用户未注册", 400);
+    }
+
+
 }

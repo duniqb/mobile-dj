@@ -39,7 +39,20 @@ public class WxUserServiceImpl implements WxUserService {
      */
     @Override
     public int insertWxUser(WxUser wxUser) {
+
         return wxUserMapper.insert(wxUser);
+    }
+
+    /**
+     * 根据 openid 更新
+     *
+     * @param wxUser
+     * @return
+     */
+    @Override
+    public int updateWxUser(WxUser wxUser) {
+
+        return wxUserMapper.updateByPrimaryKeySelective(wxUser);
     }
 }
 
