@@ -186,12 +186,19 @@ public class NewsSpiderService {
                 newsDto.setTitle(doc.select("section .minfo h1").text());
                 // 新闻类型
                 newsDto.setType(type);
+
+                String string = doc.select("section .minfo h5").text().toString();
                 // 发布时间：从详情中获取的
-                newsDto.setTime(doc.select("section .minfo h5").toString().split("<span>")[0].split("ioth\">")[1].trim());
-                // 来源
-                newsDto.setFrom(doc.select("section .minfo h5").toString().split("</span>")[1].split("<span>")[0].trim());
+                newsDto.setTime(string.split(" ")[0] + " " + string.split(" ")[1]);
                 // 浏览数
-                newsDto.setBrowse(doc.select("section .minfo h5").toString().split("</span>")[2].split("</h5>")[0]);
+                newsDto.setBrowse(string.split("浏览：")[1]);
+                if (string.contains("来源")) {
+                    // 来源
+                    newsDto.setFrom(string.split("来源：")[1].split("浏览：")[0].trim());
+                }else {
+                    newsDto.setFrom("");
+                }
+
                 // 内容
                 Elements elements = doc.select("section .minfo .content div[style]");
                 List<String> contentList = new ArrayList<>();
@@ -241,8 +248,9 @@ public class NewsSpiderService {
             e.printStackTrace();
         } finally {
             try {
-                assert fileOutputStream != null;
-                fileOutputStream.close();
+                if (fileOutputStream != null) {
+                    fileOutputStream.close();
+                }
             } catch (IOException e) {
                 e.printStackTrace();
             }
