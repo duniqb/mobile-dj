@@ -193,7 +193,7 @@ public class NewsSpiderService {
                 // 浏览数
                 newsDto.setBrowse(doc.select("section .minfo h5").toString().split("</span>")[2].split("</h5>")[0]);
                 // 内容
-                Elements elements = doc.select("section .minfo .content div");
+                Elements elements = doc.select("section .minfo .content div[style]");
                 List<String> contentList = new ArrayList<>();
                 for (int i = 0; i < elements.size(); i++) {
                     contentList.add(elements.get(i).text().trim());
