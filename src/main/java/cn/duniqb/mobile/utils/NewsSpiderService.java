@@ -124,7 +124,9 @@ public class NewsSpiderService {
                     // 当前序号
                     newsDto.setCurNo(i);
                     // 唯一 id
-                    newsDto.setId(elements.get(i).select("a").attr("href").split("/")[2].split("\\.")[0]);
+                    if (elements.get(i).select("a").attr("href").contains("html")) {
+                        newsDto.setId(elements.get(i).select("a").attr("href").split("/")[2].split("\\.")[0]);
+                    }
                     // 标题
                     newsDto.setTitle(elements.get(i).select("a").text());
                     // 日期：从列表中获取的

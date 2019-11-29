@@ -48,6 +48,13 @@ public class NewsController {
         return JSONResult.build(null, "获取失败", 400);
     }
 
+    /**
+     * 获取新闻详情
+     *
+     * @param type
+     * @param id
+     * @return
+     */
     @GetMapping("detail")
     @ApiOperation(value = "获取新闻详情", notes = "获取新闻详情的接口，请求参数是 type，id")
     @ApiImplicitParams({
@@ -61,7 +68,6 @@ public class NewsController {
         }
         return JSONResult.build(null, "获取失败", 400);
     }
-
 
 
 }

@@ -214,22 +214,21 @@ public class MiniController {
                 String openid = sessionIdValue.split(":")[0];
                 WxUser wxUser = wxUserService.selectByOpenid(openid);
                 TipDto tipDto = new TipDto();
+                BeanUtils.copyProperties(tip, tipDto);
+
+                List<String> list = new ArrayList<>();
+                list.add(tip.getChill());
+                list.add(tip.getClod());
+                list.add(tip.getTip1());
+                list.add(tip.getTip2());
                 if (wxUser != null) {
                     Boolean gender = wxUser.getGender();
-                    BeanUtils.copyProperties(tip, tipDto);
-
-                    List<String> list = new ArrayList<>();
-                    list.add(tip.getChill());
-                    list.add(tip.getClod());
-                    list.add(tip.getTip1());
-                    list.add(tip.getTip2());
                     // false 男，true 女，女性增加化妆信息
                     if (gender != null && !gender) {
                         list.add(tip.getMakeup());
                     }
-                    tipDto.setTips(list);
-
                 }
+                tipDto.setTips(list);
                 return JSONResult.build(tipDto, "获取提示成功", 200);
             }
         }
