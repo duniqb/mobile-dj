@@ -201,12 +201,14 @@ public class MiniController {
         // 不存在天气，爬取并新增
         else {
             tip = miniSpiderService.tip(province, city);
-            tip.setId(1);
-            tip.setTime(time);
-            tipService.insert(tip);
+            if (tip != null) {
+                tip.setId(1);
+                tip.setTime(time);
+                tipService.insert(tip);
+            }
         }
 
-        if (tip.getId() != null) {
+        if (tip != null && tip.getId() != null) {
             // 根据 sessionId 查询是男是女
             String sessionIdValue = redisUtil.get(sessionId);
             if (sessionIdValue != null) {

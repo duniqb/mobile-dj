@@ -33,14 +33,22 @@ public class MiniSpiderService {
      * @param city
      */
     public Tip tip(String province, String city) {
+        if ("undefined".equals(province) || "undefined".equals(city)) {
+            return null;
+        }
         HttpGet getTip = new HttpGet(tipUrl + province + "&city=" + city);
-
-        getTip.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        System.out.println(tipUrl + province + "&city=" + city);
+        getTip.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
         getTip.setHeader("Accept-Encoding", "gzip, deflate, br");
-        getTip.setHeader("Accept-Language", "zh-CN,zh;q=0.8,en-US;q=0.6,en;q=0.4,de-DE;q=0.2");
+        getTip.setHeader("Accept-Language", "zh-CN,zh;q=0.9");
+        getTip.setHeader("Cache-Control", "max-age=0");
         getTip.setHeader("Connection", "keep-alive");
         getTip.setHeader("Host", "wis.qq.com");
-        getTip.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:70.0) Gecko/20100101 Firefox/70.0");
+        getTip.setHeader("Sec-Fetch-Mode", "navigate");
+        getTip.setHeader("Sec-Fetch-Site", "none");
+        getTip.setHeader("Sec-Fetch-User", "?1");
+        getTip.setHeader("Upgrade-Insecure-Requests", "1");
+        getTip.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
 
         HttpResponse response;
         HttpClient client = HttpClients.createDefault();
