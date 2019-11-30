@@ -175,7 +175,9 @@ public class LibrarySpiderService {
             } else if (split[i].contains("ISBN")) {
                 bookDto.setISBN(split[i].split("：")[1].trim());
             } else if (split[i].contains("可借") || split[i].contains("不详") || split[i].contains("留本")) {
-                list.add(split[i].split("、")[1].trim());
+                if (split[i].contains("、")) {
+                    list.add(split[i].split("、")[1].trim());
+                }
             }
         }
         bookDto.setId(id);
