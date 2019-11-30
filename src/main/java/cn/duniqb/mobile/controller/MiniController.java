@@ -5,7 +5,6 @@ import cn.duniqb.mobile.domain.WxUser;
 import cn.duniqb.mobile.dto.Code2Session;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.TipDto;
-import cn.duniqb.mobile.dto.WxUserDto;
 import cn.duniqb.mobile.service.TipService;
 import cn.duniqb.mobile.service.WxUserService;
 import cn.duniqb.mobile.utils.MiniSpiderService;
@@ -336,6 +335,4 @@ public class MiniController {
         }
         return JSONResult.build(null, "用户未注册", 400);
     }
-
-
 }
