@@ -62,5 +62,11 @@ public class Tip implements Serializable {
     @Column(name = "tip2")
     private String tip2;
 
+    /**
+     * 提示3
+     */
+    @Column(name = "tip3")
+    private String tip3;
+
     private static final long serialVersionUID = 1L;
 }

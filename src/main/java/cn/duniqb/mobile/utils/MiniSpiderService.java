@@ -68,8 +68,16 @@ public class MiniSpiderService {
             // 感冒
             tips.setClod(doc.text().split("cold")[1].split("\"")[4]);
             // 提示 两条
-            tips.setTip1(doc.text().split("tips")[1].split("\"")[6]);
-            tips.setTip2(doc.text().split("tips")[1].split("\"")[10]);
+            String string = doc.text().split("tips")[1];
+            if (string.contains("forecast")) {
+                tips.setTip1(string.split("\"")[6]);
+                String str = doc.text().split("tips")[1].split("observe")[1];
+                tips.setTip2(str.split("\"")[4]);
+                tips.setTip3(str.split("\"")[8]);
+            } else {
+                tips.setTip1(doc.text().split("tips")[1].split("\"")[6]);
+                tips.setTip2(doc.text().split("tips")[1].split("\"")[10]);
+            }
             return tips;
         } catch (IOException e) {
             e.printStackTrace();
