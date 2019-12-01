@@ -1,6 +1,6 @@
 package cn.duniqb.mobile.utils;
 
-import cn.duniqb.mobile.domain.Tip;
+import cn.duniqb.mobile.dto.Tip;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
