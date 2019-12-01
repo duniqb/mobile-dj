@@ -92,7 +92,9 @@ public class JWSpiderService {
         }
         Document doc = null;
         try {
-            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+            if (response != null) {
+                doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -135,8 +137,9 @@ public class JWSpiderService {
                 } else if (tit.get(i).text().contains("邮政编码")) {
                     student.setZipCode(info.get(i).text());
                 }
-                student.setSalt(UUID.randomUUID().toString().substring(0, 5));
-                student.setPassword(MobileUtil.MD5(password) + student.getSalt());
+//                student.setSalt(UUID.randomUUID().toString().substring(0, 5));
+//                student.setPassword(MobileUtil.MD5(password) + student.getSalt());
+                student.setPassword(password);
             }
         }
 
@@ -369,7 +372,8 @@ public class JWSpiderService {
                 gradeExam.setGrade(6);
             }
             gradeExam.setTicketNumber(trd.get(2).text());
-            gradeExam.setExamTime(trd.get(1).text());
+            gradeExam.setExamDate(trd.get(1).text().split(" ")[0]);
+            gradeExam.setExamTime(trd.get(1).text().split(" ")[1]);
             gradeExam.setScore(trd.get(4).text());
             gradeExam.setApproved(trd.get(5).text());
             int insert = gradeExamMapper.insert(gradeExam);

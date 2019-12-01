@@ -4,6 +4,8 @@ import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.news.NewsDto;
 import cn.duniqb.mobile.dto.news.NewsList;
 import cn.duniqb.mobile.utils.NewsSpiderService;
+import cn.duniqb.mobile.utils.RedisUtil;
+import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -27,6 +29,19 @@ public class NewsController {
     @Autowired
     private NewsSpiderService newsSpiderService;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
+    /**
+     * 新闻列表在 Redis 里的前缀
+     */
+    private static final String NEWS_LIST = "NEWS_LIST";
+
+    /**
+     * 新闻详情在 Redis 里的前缀
+     */
+    private static final String NEWS_DETAIL = "NEWS_DETAIL";
+
     /**
      * 获取新闻列表
      *
@@ -41,8 +56,13 @@ public class NewsController {
             @ApiImplicitParam(name = "page", value = "页数 page", dataType = "String", paramType = "query")
     })
     public JSONResult list(@RequestParam String type, @RequestParam(required = false) String page) {
+        String res = redisUtil.get(NEWS_LIST + ":" + type + ":" + page);
+        if (res != null) {
+            return JSONResult.build(JSON.parseObject(res, NewsList.class), "新闻列表 - 缓存获取成功", 200);
+        }
         NewsList list = newsSpiderService.list(type, page);
         if (list != null) {
+            redisUtil.set(NEWS_LIST + ":" + type + ":" + page, JSON.toJSONString(list), 60 * 60 * 24);
             return JSONResult.build(list, list.getType() + " - 获取成功", 200);
         }
         return JSONResult.build(null, "获取失败", 400);
@@ -62,8 +82,13 @@ public class NewsController {
             @ApiImplicitParam(name = "id", value = "新闻 id", required = true, dataType = "String", paramType = "query")
     })
     public JSONResult detail(@RequestParam String type, @RequestParam String id) {
+        String res = redisUtil.get(NEWS_DETAIL + ":" + type + ":" + id);
+        if (res != null) {
+            return JSONResult.build(JSON.parseObject(res, NewsDto.class), "新闻详情 - 缓存获取成功", 200);
+        }
         NewsDto detail = newsSpiderService.detail(type, id);
         if (detail != null) {
+            redisUtil.set(NEWS_DETAIL + ":" + type + ":" + id, JSON.toJSONString(detail), 60 * 60 * 24);
             return JSONResult.build(detail, detail.getType() + " - 获取成功", 200);
         }
         return JSONResult.build(null, "获取失败", 400);

@@ -25,6 +25,12 @@ public class GradeExam implements Serializable {
     private String examName;
 
     /**
+     * 考试日期
+     */
+    @Column(name = "exam_date")
+    private String examDate;
+
+    /**
      * 考试时间
      */
     @Column(name = "exam_time")

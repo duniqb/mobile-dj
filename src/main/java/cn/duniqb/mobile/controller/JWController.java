@@ -71,12 +71,6 @@ public class JWController {
     private String localhost;
 
     /**
-     * 登录教务的 url
-     */
-    @Value("${jw.login.loginUrl}")
-    private String loginUrl;
-
-    /**
      * 发起教务登录的 url
      */
     @Value("${jw.login.loginPostUrl}")
@@ -189,8 +183,9 @@ public class JWController {
 
         if (user.getUsername() != null && user.getPassword() != null) {
             // 校验学号和加密过的密码
-            Student studentUser = studentService.selectOneByStuNoPwd(user.getUsername(),
-                    MobileUtil.MD5(user.getPassword()) + studentService.selectOneByNo(user.getUsername()).getSalt());
+//            Student studentUser = studentService.selectOneByStuNoPwd(user.getUsername(),
+//                    MobileUtil.MD5(user.getPassword()) + studentService.selectOneByNo(user.getUsername()).getSalt());
+            Student studentUser = studentService.selectOneByStuNoPwd(user.getUsername(), user.getPassword());
             if (studentUser == null) {
                 return JSONResult.build(user.getUsername(), "学号/密码错误", 400);
             } else {
