@@ -3,17 +3,10 @@ package cn.duniqb.mobile.dto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Id;
 import java.util.List;
 
 @Data
 public class TipDto {
-    /**
-     * 上次更新时间
-     */
-    private Integer id;
-
     /**
      * 温度
      */

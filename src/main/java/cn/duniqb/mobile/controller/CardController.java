@@ -3,7 +3,7 @@ package cn.duniqb.mobile.controller;
 import cn.duniqb.mobile.dto.CardInfo;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.User;
-import cn.duniqb.mobile.utils.CardSpiderService;
+import cn.duniqb.mobile.utils.spider.CardSpiderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiOperation;

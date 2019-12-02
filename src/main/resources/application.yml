@@ -135,7 +135,16 @@ logistics:
   # 最近维修数量的 url
   recentUrl: https://nanqu.56team.com/web/app/user/my/maintenance/router.action
 
-
+# 就业爬虫的相关配置
+job:
+  # 查询招聘会列表的 url
+  recruitListUrl: http://jobs.djtu.edu.cn/Recruits.html
+  # 查询招聘会详情的 url
+  recruitUrl: http://jobs.djtu.edu.cn/Recruits/
+  # 查询单位需求列表的 url
+  demandListUrl: http://jobs.djtu.edu.cn/Demands.html
+  # 查询单位需求详情的 url
+  demandUrl: http://jobs.djtu.edu.cn/Demands/
 # 小程序配置
 mini:
   appId: wxe1f564d00f76340a

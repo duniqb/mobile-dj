@@ -1,4 +1,4 @@
-package cn.duniqb.mobile.utils;
+package cn.duniqb.mobile.utils.spider;
 
 import cn.duniqb.mobile.domain.*;
 import cn.duniqb.mobile.mapper.*;

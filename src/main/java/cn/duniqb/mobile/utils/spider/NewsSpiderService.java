@@ -1,4 +1,4 @@
-package cn.duniqb.mobile.utils;
+package cn.duniqb.mobile.utils.spider;
 
 import cn.duniqb.mobile.domain.ImgUrl;
 import cn.duniqb.mobile.dto.news.NewsDto;
@@ -32,6 +32,7 @@ public class NewsSpiderService {
 
     @Autowired
     private ImgUrlService imgUrlService;
+
     /**
      * 交大要闻的 url
      */

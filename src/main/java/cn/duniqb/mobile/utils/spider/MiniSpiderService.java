@@ -1,4 +1,4 @@
-package cn.duniqb.mobile.utils;
+package cn.duniqb.mobile.utils.spider;
 
 import cn.duniqb.mobile.dto.Tip;
 import org.apache.http.HttpResponse;

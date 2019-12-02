@@ -3,7 +3,7 @@ package cn.duniqb.mobile.controller;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.news.NewsDto;
 import cn.duniqb.mobile.dto.news.NewsList;
-import cn.duniqb.mobile.utils.NewsSpiderService;
+import cn.duniqb.mobile.utils.spider.NewsSpiderService;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;

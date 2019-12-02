@@ -6,7 +6,7 @@ import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.Tip;
 import cn.duniqb.mobile.dto.TipDto;
 import cn.duniqb.mobile.service.WxUserService;
-import cn.duniqb.mobile.utils.MiniSpiderService;
+import cn.duniqb.mobile.utils.spider.MiniSpiderService;
 import cn.duniqb.mobile.utils.MobileUtil;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;

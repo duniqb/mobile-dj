@@ -5,7 +5,7 @@ import cn.duniqb.mobile.dto.BookDto;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.profession.ProfessionHotDto;
 import cn.duniqb.mobile.service.BookCateService;
-import cn.duniqb.mobile.utils.LibrarySpiderService;
+import cn.duniqb.mobile.utils.spider.LibrarySpiderService;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
