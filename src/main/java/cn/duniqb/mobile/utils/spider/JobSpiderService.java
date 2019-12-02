@@ -1,13 +1,15 @@
 package cn.duniqb.mobile.utils.spider;
 
-import cn.duniqb.mobile.dto.job.Demand;
-import cn.duniqb.mobile.dto.job.DemandList;
-import cn.duniqb.mobile.dto.job.Recruit;
-import cn.duniqb.mobile.dto.job.RecruitList;
+import cn.duniqb.mobile.dto.job.*;
+import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +51,12 @@ public class JobSpiderService {
      */
     @Value("${job.demandUrl}")
     private String demandUrl;
+
+    /**
+     * 招聘日历的 url
+     */
+    @Value("${job.calendarUrl}")
+    private String calendarUrl;
 
     /**
      * 招聘会列表
@@ -264,7 +273,6 @@ public class JobSpiderService {
             Demand demand = new Demand();
             demand.setId(id);
             // 标题
-            String title = doc.select("body section .minfo .ititle").first().text();
             demand.setTitle(doc.select("body section .minfo .ititle").first().text());
             // 来源，发布日期，浏览数
             String string = doc.select("body section .minfo .ioth").first().toString();
@@ -273,9 +281,7 @@ public class JobSpiderService {
                 demand.setReleaseDate(string.split("</span>")[2].split("<span>")[0].trim());
                 demand.setBrowser(string.split("</span>")[3].split("</h5>")[0].trim());
             } else {
-                String releaseDate = string.split("</span>")[1].split("<span>")[0].trim();
                 demand.setReleaseDate(string.split("</span>")[1].split("<span>")[0].trim());
-                String browser = string.split("</span>")[2].split("</h5>")[0].trim();
                 demand.setBrowser(string.split("</span>")[2].split("</h5>")[0].trim());
             }
 
@@ -288,6 +294,50 @@ public class JobSpiderService {
             return demand;
         } catch (IOException e) {
             e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 招聘日历
+     *
+     * @param year
+     * @param month
+     */
+    public List<Calendar> calendar(String year, String month) {
+        HttpClient client = HttpClients.createDefault();
+
+        ArrayList<NameValuePair> postData = new ArrayList<>();
+        postData.add(new BasicNameValuePair("year", year));
+        postData.add(new BasicNameValuePair("month", month));
+
+        HttpPost post = new HttpPost(calendarUrl);
+        try {
+            post.setEntity(new UrlEncodedFormEntity(postData));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        HttpResponse response = null;
+        try {
+            response = client.execute(post);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            if (response != null) {
+                doc = Jsoup.parse(EntityUtils.toString(response.getEntity()));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        String string = null;
+        if (doc != null) {
+            string = doc.select("body").text().replace("\\", "");
+        }
+        if (string != null) {
+            return JSON.parseArray(string.substring(1, string.length() - 1), Calendar.class);
         }
         return null;
     }

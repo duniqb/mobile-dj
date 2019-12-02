@@ -145,6 +145,8 @@ job:
   demandListUrl: http://jobs.djtu.edu.cn/Demands.html
   # 查询单位需求详情的 url
   demandUrl: http://jobs.djtu.edu.cn/Demands/
+  # 查询招聘日历的 url
+  calendarUrl: http://jobs.djtu.edu.cn/ajax/job
 # 小程序配置
 mini:
   appId: wxe1f564d00f76340a
