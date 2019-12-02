@@ -88,4 +88,9 @@ public class Recruit {
      * 内容
      */
     private List<String> content;
+
+    /**
+     * 包含企业信息
+     */
+    private Boolean companyInfo;
 }

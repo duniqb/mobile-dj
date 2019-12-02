@@ -149,6 +149,7 @@ public class JobSpiderService {
 
             // 企业信息
             if (doc.select("body section .minfo .info-company").first() != null) {
+                recruit.setCompanyInfo(true);
                 Elements companyInfo = doc.select("body section .minfo .info-company").first().select("ul li");
                 for (int i = 0; i < companyInfo.size(); i++) {
                     if (companyInfo.get(i).text().contains("企业名称")) {
@@ -165,6 +166,8 @@ public class JobSpiderService {
                         recruit.setZipCode(companyInfo.get(i).select("b").text());
                     }
                 }
+            } else {
+                recruit.setCompanyInfo(false);
             }
 
             // 招聘信息
