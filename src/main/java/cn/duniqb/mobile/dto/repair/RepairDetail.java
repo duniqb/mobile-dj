@@ -2,6 +2,8 @@ package cn.duniqb.mobile.dto.repair;
 
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 报修详情
  */
@@ -28,9 +30,9 @@ public class RepairDetail {
      */
     private String state;
     /**
-     * 链接
+     * 序列号
      */
-    private String url;
+    private String listNumber;
     /**
      * 房间号
      */
@@ -39,4 +41,13 @@ public class RepairDetail {
      * 故障描述
      */
     private String description;
+    /**
+     * 是否已评价
+     */
+    private Boolean showEvaluate;
+
+    /**
+     * 时间线
+     */
+    private List<TimeLine> timeLineList;
 }

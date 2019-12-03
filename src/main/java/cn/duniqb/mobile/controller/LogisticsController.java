@@ -114,4 +114,27 @@ public class LogisticsController {
         }
         return JSONResult.build(null, "查询最近维修数量失败", 400);
     }
+
+    /**
+     * 发起报修
+     */
+    @PostMapping("report")
+    @ApiOperation(value = "发起报修", notes = "发起报修的接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "userTel", value = "报修电话", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "distinctId", value = "校区", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "buildingId", value = "建筑物", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "roomId", value = "房间号", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "equipmentId", value = "设备", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "place", value = "房间/位置", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "description", value = "描述信息", required = true, dataType = "String", paramType = "query"),
+    })
+    public JSONResult report(String userTel, String distinctId, String buildingId, String roomId, String equipmentId, String place, String description) {
+        String listDescription = "房间号 " + place + " " + description;
+        Report report = logisticsSpiderService.report(userTel, distinctId, buildingId, roomId, equipmentId, listDescription);
+        if (report != null) {
+            return JSONResult.build(report, "发起报修成功", 200);
+        }
+        return JSONResult.build(null, "发起报修失败", 400);
+    }
 }

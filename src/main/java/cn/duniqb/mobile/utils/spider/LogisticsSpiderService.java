@@ -1,14 +1,14 @@
 package cn.duniqb.mobile.utils.spider;
 
-import cn.duniqb.mobile.dto.repair.Notice;
-import cn.duniqb.mobile.dto.repair.Recent;
-import cn.duniqb.mobile.dto.repair.RepairDetail;
+import cn.duniqb.mobile.dto.repair.*;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -75,6 +76,12 @@ public class LogisticsSpiderService {
      */
     @Value("${logistics.recentUrl}")
     private String recentUrl;
+
+    /**
+     * 发起报修的 url
+     */
+    @Value("${logistics.reportUrl}")
+    private String reportUrl;
 
     /**
      * 故障报修 查询各项数据清单
@@ -161,11 +168,15 @@ public class LogisticsSpiderService {
 
             response = client.execute(post);
             Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
-            System.out.println(response);
             Elements elements = doc.select("div.page-current div.content>a");
 
             for (int i = 0; i < elements.size(); i++) {
                 RepairDetail repairDetail = new RepairDetail();
+                if (elements.get(i).select("form input") != null) {
+                    repairDetail.setShowEvaluate(true);
+                } else {
+                    repairDetail.setShowEvaluate(false);
+                }
                 repairDetail.setPhone(userTel);
                 // 报修时间
                 repairDetail.setDate(elements.get(i).select("p.color-gray").text().split("\\.")[0]);
@@ -176,7 +187,7 @@ public class LogisticsSpiderService {
                 // 提交状态
                 repairDetail.setState(elements.get(i).select("div.card-content div[style] div[style] p").text());
                 // 链接
-                repairDetail.setUrl(elements.get(i).select("a").attr("href"));
+                repairDetail.setListNumber(elements.get(i).select("a").attr("href").split("/")[6].split("\\.")[0]);
 
                 list.add(repairDetail);
             }
@@ -190,8 +201,8 @@ public class LogisticsSpiderService {
     /**
      * 报修单详情
      */
-    public RepairDetail detail(String url) {
-        HttpGet detailGet = new HttpGet(logisticsHost + url);
+    public RepairDetail detail(String listNumber) {
+        HttpGet detailGet = new HttpGet(logisticsHost + "/web/app/user/select/oneMaintenance/" + listNumber + ".action");
 
         detailGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         detailGet.setHeader("Accept-Encoding", "gzip, deflate");
@@ -213,14 +224,28 @@ public class LogisticsSpiderService {
                 Element element = doc.select("div.page-current div.card-content-inner").first();
 
                 RepairDetail repairDetail = new RepairDetail();
+                if (element.select("form input") != null) {
+                    repairDetail.setShowEvaluate(true);
+                } else {
+                    repairDetail.setShowEvaluate(false);
+                }
                 repairDetail.setDate(element.select("p.color-gray").text().split("\\.")[0]);
                 repairDetail.setTitle(element.select("p[style]").first().text());
                 repairDetail.setRoom(element.select("div.card-content-inner>p[style]").last().text().split(" ")[1]);
                 repairDetail.setDescription(element.select("div.card-content-inner>p[style]").last().text().split(" ")[2]);
                 repairDetail.setId(element.select("div.color-gray").text().split(":")[1]);
                 repairDetail.setState(element.select("div.card-content-inner>div[style] p").text());
-                repairDetail.setPhone(doc.select("div.page-current div.card-content-inner").last().select(".item-inner .item-after").text().split(" ")[0]);
 
+                List<TimeLine> timeLineList = new ArrayList<>();
+
+                Elements timelineElement = doc.select("div.page-current div.card-content-inner").last().select("ul li");
+                for (int i = 0; i < timelineElement.size(); i++) {
+                    TimeLine timeLine = new TimeLine();
+                    timeLine.setTime(timelineElement.get(i).select(".item-title").text().split("\\.")[0]);
+                    timeLine.setComment(timelineElement.get(i).select(".item-after").text());
+                    timeLineList.add(timeLine);
+                }
+                repairDetail.setTimeLineList(timeLineList);
                 return repairDetail;
             } catch (IOException e) {
                 e.printStackTrace();
@@ -309,5 +334,61 @@ public class LogisticsSpiderService {
             e.printStackTrace();
         }
         return list;
+    }
+
+    /**
+     * 发起报修
+     *
+     * @param userTel
+     * @param distinctId
+     * @param buildingId
+     * @param roomId
+     * @param equipmentId
+     * @param listDescription
+     * @return
+     */
+    public Report report(String userTel, String distinctId, String buildingId, String roomId, String equipmentId, String listDescription) {
+        HttpResponse response;
+        HttpClient client = HttpClients.createDefault();
+
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+//        entityBuilder.addBinaryBody("img",file, ContentType.MULTIPART_FORM_DATA,fileName);
+        entityBuilder.addTextBody("userTel", userTel);
+        entityBuilder.addTextBody("distinctId", distinctId);
+        entityBuilder.addTextBody("buildingId", buildingId);
+        entityBuilder.addTextBody("roomId", roomId);
+        entityBuilder.addTextBody("equipmentId", equipmentId);
+        entityBuilder.addTextBody("listDescription", listDescription);
+
+        HttpEntity entity = entityBuilder.build();
+        HttpPost post = new HttpPost(reportUrl);
+        post.setEntity(entity);
+
+        try {
+            response = client.execute(post);
+            Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+            if (doc.text().contains("我们已经受理您的报修")) {
+                Report report = new Report();
+                Elements elements = doc.select(".content .card .card-content-inner .list-block ul li");
+                for (int i = 0; i < elements.size(); i++) {
+                    if (elements.get(i).text().contains("报修单号")) {
+                        report.setId(elements.get(i).select(".item-after").text());
+                    } else if (elements.get(i).text().contains("报修时间")) {
+                        report.setTime(elements.get(i).select(".item-after").text().split("\\.")[0]);
+                    } else if (elements.get(i).text().contains("您的手机")) {
+                        report.setPhone(elements.get(i).select(".item-after").text());
+                    } else if (elements.get(i).text().contains("您所在校区的待办报修单数")) {
+                        report.setPending(elements.get(i).select(".item-after").text().split("条")[0]);
+                    } else if (elements.get(i).text().contains("您所在校区的在办报修单数")) {
+                        report.setRepairing(elements.get(i).select(".item-after").text().split("条")[0]);
+                    }
+                }
+                return report;
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
