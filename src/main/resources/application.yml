@@ -136,6 +136,8 @@ logistics:
   recentUrl: https://nanqu.56team.com/web/app/user/my/maintenance/router.action
   # 发起报修的 url
   reportUrl: https://nanqu.56team.com/web/app/user/add/do.action
+  # 评价的 url
+  evaluateUrl: https://nanqu.56team.com/web/app/user/judgement/do.action
 
 # 就业爬虫的相关配置
 job:

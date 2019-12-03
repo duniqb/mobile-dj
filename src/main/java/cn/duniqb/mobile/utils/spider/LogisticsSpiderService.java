@@ -1,6 +1,7 @@
 package cn.duniqb.mobile.utils.spider;
 
 import cn.duniqb.mobile.dto.repair.*;
+import com.alibaba.fastjson.JSON;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -20,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -84,6 +86,12 @@ public class LogisticsSpiderService {
     private String reportUrl;
 
     /**
+     * 评价的 url
+     */
+    @Value("${logistics.evaluateUrl}")
+    private String evaluateUrl;
+
+    /**
      * 故障报修 查询各项数据清单
      */
     public String data(String id, String value) {
@@ -128,11 +136,11 @@ public class LogisticsSpiderService {
 
             response = client.execute(post);
             Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
-            return doc.text();
+            return JSON.toJSONString(doc.text());
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "";
+        return null;
     }
 
     /**
@@ -172,7 +180,7 @@ public class LogisticsSpiderService {
 
             for (int i = 0; i < elements.size(); i++) {
                 RepairDetail repairDetail = new RepairDetail();
-                if (elements.get(i).select("form input") != null) {
+                if (elements.get(i).select("form input[value]").last() != null) {
                     repairDetail.setShowEvaluate(true);
                 } else {
                     repairDetail.setShowEvaluate(false);
@@ -181,7 +189,7 @@ public class LogisticsSpiderService {
                 // 报修时间
                 repairDetail.setDate(elements.get(i).select("p.color-gray").text().split("\\.")[0]);
                 // 标题
-                repairDetail.setTitle(elements.get(i).select("a .card-content-inner>p[style]").text());
+                repairDetail.setTitle(elements.get(i).select("a .card-content-inner>p[style]").last().text());
                 // 报修单号
                 repairDetail.setId(elements.get(i).select("div.color-gray").text().split(":")[1]);
                 // 提交状态
@@ -224,18 +232,22 @@ public class LogisticsSpiderService {
                 Element element = doc.select("div.page-current div.card-content-inner").first();
 
                 RepairDetail repairDetail = new RepairDetail();
-                if (element.select("form input") != null) {
+                if (element.select("form input[value]").last() != null) {
                     repairDetail.setShowEvaluate(true);
                 } else {
                     repairDetail.setShowEvaluate(false);
                 }
                 repairDetail.setDate(element.select("p.color-gray").text().split("\\.")[0]);
-                repairDetail.setTitle(element.select("p[style]").first().text());
+                if(element.select("p[style]").get(0).text().contains("_")) {
+                    repairDetail.setTitle(element.select("p[style]").first().text());
+                } else {
+                    repairDetail.setTitle(element.select("p[style]").get(2).text());
+                }
                 repairDetail.setRoom(element.select("div.card-content-inner>p[style]").last().text().split(" ")[1]);
                 repairDetail.setDescription(element.select("div.card-content-inner>p[style]").last().text().split(" ")[2]);
                 repairDetail.setId(element.select("div.color-gray").text().split(":")[1]);
                 repairDetail.setState(element.select("div.card-content-inner>div[style] p").text());
-
+                repairDetail.setListNumber(listNumber);
                 List<TimeLine> timeLineList = new ArrayList<>();
 
                 Elements timelineElement = doc.select("div.page-current div.card-content-inner").last().select("ul li");
@@ -390,5 +402,38 @@ public class LogisticsSpiderService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * 评价
+     */
+    public void evaluate(String listNumber, String phone, String listScore, String listWord) {
+        String url = evaluateUrl;
+
+        HttpClient client = HttpClients.createDefault();
+        ArrayList<NameValuePair> postData = new ArrayList<>();
+        postData.add(new BasicNameValuePair("listNumber", listNumber));
+        postData.add(new BasicNameValuePair("userTel", phone));
+        postData.add(new BasicNameValuePair("listScore", listScore));
+        postData.add(new BasicNameValuePair("listWord", listWord));
+
+        HttpPost post = new HttpPost(url);
+        post.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
+        post.setHeader("Accept-Encoding", "gzip, deflate, br");
+        post.setHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3");
+        post.setHeader("Connection", "keep-alive");
+        post.setHeader("Content-Type", "application/x-www-form-urlencoded");
+        post.setHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1");
+
+        try {
+            post.setEntity(new UrlEncodedFormEntity(postData));
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        try {
+            client.execute(post);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
