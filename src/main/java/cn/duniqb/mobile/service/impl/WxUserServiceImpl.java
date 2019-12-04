@@ -52,7 +52,7 @@ public class WxUserServiceImpl implements WxUserService {
     @Override
     public int updateWxUser(WxUser wxUser) {
 
-        return wxUserMapper.updateByPrimaryKeySelective(wxUser);
+        return wxUserMapper.updateByPrimaryKey(wxUser);
     }
 }
 

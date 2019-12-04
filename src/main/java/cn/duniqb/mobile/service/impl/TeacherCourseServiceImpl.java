@@ -26,6 +26,19 @@ public class TeacherCourseServiceImpl implements TeacherCourseService {
         example.createCriteria().andEqualTo("stuNo", stuNo).andEqualTo("courseId", courseId);
         return teacherCourseMapper.selectOneByExample(example);
     }
+
+    /**
+     * 根据学号删除关联信息
+     *
+     * @param stuNo
+     * @return
+     */
+    @Override
+    public int deleteByStuNo(String stuNo) {
+        Example example = new Example(TeacherCourse.class);
+        example.createCriteria().andEqualTo("stuNo", stuNo);
+        return teacherCourseMapper.deleteByExample(example);
+    }
 }
 
 

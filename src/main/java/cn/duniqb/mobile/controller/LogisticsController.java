@@ -176,7 +176,7 @@ public class LogisticsController {
     @GetMapping("report")
     @ApiOperation(value = "发起报修", notes = "发起报修的接口")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "userTel", value = "报修电话", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "phone", value = "报修电话", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "distinctId", value = "校区", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "buildingId", value = "建筑物", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "roomId", value = "房间号", required = true, dataType = "String", paramType = "query"),
@@ -184,9 +184,9 @@ public class LogisticsController {
             @ApiImplicitParam(name = "place", value = "房间/位置", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "description", value = "描述信息", required = true, dataType = "String", paramType = "query"),
     })
-    public JSONResult report(String userTel, String distinctId, String buildingId, String roomId, String equipmentId, String place, String description) {
+    public JSONResult report(String phone, String distinctId, String buildingId, String roomId, String equipmentId, String place, String description) {
         String listDescription = "房间号 " + place + " " + description;
-        Report report = logisticsSpiderService.report(userTel, distinctId, buildingId, roomId, equipmentId, listDescription);
+        Report report = logisticsSpiderService.report(phone, distinctId, buildingId, roomId, equipmentId, listDescription);
         if (report != null) {
             return JSONResult.build(report, "发起报修成功", 200);
         }

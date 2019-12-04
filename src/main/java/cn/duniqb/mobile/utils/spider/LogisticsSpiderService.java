@@ -351,7 +351,7 @@ public class LogisticsSpiderService {
     /**
      * 发起报修
      *
-     * @param userTel
+     * @param phone
      * @param distinctId
      * @param buildingId
      * @param roomId
@@ -359,13 +359,13 @@ public class LogisticsSpiderService {
      * @param listDescription
      * @return
      */
-    public Report report(String userTel, String distinctId, String buildingId, String roomId, String equipmentId, String listDescription) {
+    public Report report(String phone, String distinctId, String buildingId, String roomId, String equipmentId, String listDescription) {
         HttpResponse response;
         HttpClient client = HttpClients.createDefault();
 
         MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
 //        entityBuilder.addBinaryBody("img",file, ContentType.MULTIPART_FORM_DATA,fileName);
-        entityBuilder.addTextBody("userTel", userTel);
+        entityBuilder.addTextBody("userTel", phone);
         entityBuilder.addTextBody("distinctId", distinctId);
         entityBuilder.addTextBody("buildingId", buildingId);
         entityBuilder.addTextBody("roomId", roomId);
@@ -375,7 +375,6 @@ public class LogisticsSpiderService {
         HttpEntity entity = entityBuilder.build();
         HttpPost post = new HttpPost(reportUrl);
         post.setEntity(entity);
-
         try {
             response = client.execute(post);
             Document doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
