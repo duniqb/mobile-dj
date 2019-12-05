@@ -1,6 +1,9 @@
 package cn.duniqb.mobile.utils.spider;
 
 import cn.duniqb.mobile.domain.*;
+import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.jw.Notice;
+import cn.duniqb.mobile.dto.jw.NoticeList;
 import cn.duniqb.mobile.mapper.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -73,6 +76,18 @@ public class JWSpiderService {
      */
     @Value("${jw.getGradeExam}")
     private String getGradeExam;
+
+    /**
+     * 获取等级考试的 url
+     */
+    @Value("${jw.noticeListUrl}")
+    private String noticeListUrl;
+
+    /**
+     * 获取等级考试的 url
+     */
+    @Value("${jw.noticeUrl}")
+    private String noticeUrl;
 
     /**
      * 获取个人信息与学分信息
@@ -384,5 +399,118 @@ public class JWSpiderService {
             }
         }
         return map;
+    }
+
+    /**
+     * 获取通知列表
+     *
+     * @param page
+     * @return
+     */
+    public NoticeList noticeList(String page) {
+        HttpClient client = HttpClients.createDefault();
+        HttpResponse response = null;
+        try {
+            response = client.execute(new HttpGet(noticeListUrl + page));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            if (response != null) {
+                doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", "").replace("&amp;", ""));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Elements elements = null;
+        if (doc != null) {
+            elements = doc.select("body .thirdBody #thirdmiddle #thirdcontent ul.articleList li");
+        }
+        NoticeList noticeList = new NoticeList();
+        if (doc != null) {
+            noticeList.setPage(doc.select("body .thirdBody #thirdmiddle #thirdcontent .navigation ul li.curpage").text());
+        }
+
+        List<Notice> list = new ArrayList<>();
+        if (elements != null) {
+            for (int i = 0; i < elements.size(); i++) {
+                Notice notice = new Notice();
+                notice.setTitle(elements.get(i).select("a").text());
+                notice.setReleaseDate(elements.get(i).select("span").text());
+                if (elements.get(i).select("a").attr("href").contains("articleId")) {
+                    notice.setId(elements.get(i).select("a").attr("href").split("articleId=")[1].split("&")[0]);
+                }
+                list.add(notice);
+            }
+            noticeList.setList(list);
+        }
+        return noticeList;
+    }
+
+    /**
+     * 获取通知详情
+     *
+     * @throws Exception
+     */
+    public Notice notice(String id) {
+        HttpClient client = HttpClients.createDefault();
+        HttpGet httpGet = new HttpGet(noticeUrl + id + "&columnId=313");
+        httpGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+        httpGet.setHeader("Accept-Encoding", "gzip, deflate");
+        httpGet.setHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3");
+        httpGet.setHeader("Connection", "keep-alive");
+        httpGet.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0");
+
+        HttpResponse response = null;
+        try {
+            response = client.execute(httpGet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            if (response != null) {
+                doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", "").replace("&amp;", ""));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Element element = null;
+        if (doc != null) {
+            element = doc.select("#article div.body input").get(0);
+        }
+
+        String string = null;
+        if (element != null) {
+            string = element.select("input").attr("value");
+        }
+
+        Document input = Jsoup.parse(string != null ? string.replace("nbsp;", "").replace("amp;", "") : null);
+        Elements elements = input.select("p");
+        Notice notice = new Notice();
+
+        if (elements.size() == 0) {
+            List<String> list = new ArrayList<>();
+            elements = input.select("div");
+            for (int i = 1; i < elements.size() - 1; i++) {
+                if (!"".equals(elements.get(i).text().trim())) {
+                    list.add(elements.get(i).text());
+                }
+            }
+            notice.setContent(list);
+            notice.setTitle(elements.get(0).text());
+        } else {
+            List<String> list = new ArrayList<>();
+            for (int i = 1; i < elements.size() - 1; i++) {
+                if (!"".equals(elements.get(i).text().trim())) {
+                    list.add(elements.get(i).text());
+                }
+            }
+            notice.setContent(list);
+            notice.setTitle(elements.get(0).text());
+        }
+        return notice;
     }
 }

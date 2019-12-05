@@ -3,9 +3,13 @@ package cn.duniqb.mobile.controller;
 import cn.duniqb.mobile.domain.Student;
 import cn.duniqb.mobile.domain.WxUser;
 import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.jw.Notice;
+import cn.duniqb.mobile.dto.jw.NoticeList;
+import cn.duniqb.mobile.dto.news.NewsList;
 import cn.duniqb.mobile.service.*;
 import cn.duniqb.mobile.utils.RedisUtil;
 import cn.duniqb.mobile.utils.spider.JWSpiderService;
+import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
@@ -24,6 +28,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -37,9 +42,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 与登录教务相关的接口
@@ -77,6 +80,16 @@ public class JWController {
 
     @Autowired
     private RedisUtil redisUtil;
+
+    /**
+     * 通知列表在 Redis 里的前缀
+     */
+    private static final String NOTICE_LIST = "NOTICE_LIST";
+
+    /**
+     * 通知详情在 Redis 里的前缀
+     */
+    private static final String NOTICE_DETAIL = "NOTICE_DETAIL";
 
     private CookieStore cookieStore = null;
 
@@ -319,6 +332,51 @@ public class JWController {
             }
         }
         return JSONResult.build(null, "学生未登录教务", 400);
+    }
+
+    /**
+     * 获取通知列表
+     *
+     * @throws Exception
+     */
+    @ApiOperation(value = "获取通知列表", notes = "获取通知列表")
+    @ApiImplicitParam(name = "page", value = "页数", required = true, dataType = "String", paramType = "query")
+    @GetMapping("noticeList")
+    public JSONResult noticeList(String page) {
+        String res = redisUtil.get(NOTICE_LIST + ":" + page);
+        if (res != null) {
+            return JSONResult.build(JSON.parseObject(res, NoticeList.class), "通知列表 - 缓存获取成功", 200);
+        }
+        NoticeList noticeList = jWSpiderService.noticeList(page);
+        if (!noticeList.getList().isEmpty()) {
+            redisUtil.set(NOTICE_LIST + ":" + page, JSON.toJSONString(noticeList), 60 * 60 * 12);
+            return JSONResult.build(noticeList, "获取通知列表成功", 200);
+        }
+        return JSONResult.build(null, "获取通知列表失败", 400);
+    }
+
+    /**
+     * 获取通知详情
+     *
+     * @throws Exception
+     */
+    @ApiOperation(value = "获取通知详情", notes = "获取通知详情")
+    @ApiImplicitParam(name = "id", value = "id", required = true, dataType = "String", paramType = "query")
+    @GetMapping("notice")
+    public JSONResult notice(String id) {
+        if ("null".equals(id)) {
+            return JSONResult.build(null, "获取通知详情失败", 400);
+        }
+        String res = redisUtil.get(NOTICE_DETAIL + ":" + id);
+        if (res != null) {
+            return JSONResult.build(JSON.parseObject(res, Notice.class), "通知详情 - 缓存获取成功", 200);
+        }
+        Notice notice = jWSpiderService.notice(id);
+        if (notice!= null && !notice.getContent().isEmpty()) {
+            redisUtil.set(NOTICE_DETAIL + ":" + id, JSON.toJSONString(notice), 60 * 60 * 24);
+            return JSONResult.build(notice, "获取通知详情成功", 200);
+        }
+        return JSONResult.build(null, "获取通知详情失败", 400);
     }
 }
 

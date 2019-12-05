@@ -39,6 +39,10 @@ jw:
   getScoreParamUrl: http://202.199.128.21/academic/manager/score/studentOwnScore.do
   # 获取等级考试的 url
   getGradeExam: http://202.199.128.21/academic/student/skilltest/skilltest.jsdo
+  # 获取教务通知列表的 url
+  noticeListUrl: http://202.199.128.21/homepage/infoArticleList.do?sortColumn=publicationDate&pagingNumberPer=10&columnId=10182&sortDirection=-1&pagingPage=
+  # 获取教务通知详情的 url
+  noticeUrl: http://202.199.128.21/homepage/infoSingleArticle.do?articleId=
   # 设置 Cookie 的参数
   cookie:
     domain: 202.199.128.21
