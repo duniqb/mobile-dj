@@ -60,6 +60,9 @@ public class CardSpiderService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        if (doc != null && "".equals(doc.text())) {
+            return null;
+        }
         assert doc != null;
         Elements elements = doc.select("body .userInfoR p");
 
@@ -74,7 +77,7 @@ public class CardSpiderService {
         String[] split = stringBuilder.toString().split(",");
         for (int i = 0; i < split.length; i++) {
             cardInfo.setName(split[0]);
-            cardInfo.setStuNo(split[1]);
+//            cardInfo.setStuNo(split[1]);
             cardInfo.setId(split[2]);
             cardInfo.setBalance(split[3]);
             cardInfo.setTransition(split[4]);

@@ -83,7 +83,7 @@ public class StudentController {
      * @return
      */
     @ApiOperation(value = "查询学生学分", notes = "查询学生学分的接口，请求参数是学号")
-    @ApiImplicitParam(name = "username", value = "学号", required = true, dataType = "String", paramType = "query")
+    @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
     @GetMapping("credit")
     public JSONResult credit(@RequestParam String sessionId) {
         String sessionIdValue = redisUtil.get(sessionId);
@@ -134,42 +134,54 @@ public class StudentController {
     /**
      * 根据学号，学年，学期获取分数
      *
-     * @param username
+     * @param sessionId
      * @param year
      * @param term
      * @return
      */
     @ApiOperation(value = "查询学生分数", notes = "查询学生分数的接口，请求参数是学号，学年，学期")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "username", value = "学号", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "year", value = "学年", dataType = "Integer", paramType = "query"),
             @ApiImplicitParam(name = "term", value = "学期 0-春、1-秋", dataType = "Integer", paramType = "query")
     })
     @GetMapping("score")
-    public JSONResult score(@RequestParam String username,
+    public JSONResult score(@RequestParam String sessionId,
                             @RequestParam(required = false) Integer year,
                             @RequestParam(required = false) Integer term) {
-        // 按照学号查询全部成绩
-        if (year == null && term == null) {
-            List<ScoreDto> scoreDtoList = scoreService.selectOneByStuNo(username);
-            if (!scoreDtoList.isEmpty()) {
-                return JSONResult.build(scoreDtoList, "获取学生分数成功", 200);
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openid = sessionIdValue.split(":")[0];
+            // 检测是否存在
+            WxUser wxUser = wxUserService.selectByOpenid(openid);
+            if (wxUser != null) {
+                String stuNo = wxUser.getStuNo();
+                if (stuNo != null) {
+                    // 按照学号查询全部成绩
+                    if (year == null && term == null) {
+                        List<ScoreDto> scoreDtoList = scoreService.selectOneByStuNo(stuNo);
+                        if (!scoreDtoList.isEmpty()) {
+                            return JSONResult.build(scoreDtoList, "获取学生分数成功", 200);
+                        }
+                    }
+                    // 按照学号 + 学年查询成绩
+                    if (year != null && term == null) {
+                        List<ScoreDto> scoreDtoList = scoreService.selectOneByStuNoYear(stuNo, year);
+                        if (!scoreDtoList.isEmpty()) {
+                            return JSONResult.build(scoreDtoList, "获取学生分数成功", 200);
+                        }
+                    }
+                    // 按照学号 + 学年 + 学期查询成绩
+                    if (year != null) {
+                        List<ScoreDto> scoreDtoList = scoreService.selectOneByStuNoYearTerm(stuNo, year, term);
+                        if (!scoreDtoList.isEmpty()) {
+                            return JSONResult.build(scoreDtoList, "获取学生分数成功", 200);
+                        }
+                    }
+                }
             }
         }
-        // 按照学号 + 学年查询成绩
-        if (year != null && term == null) {
-            List<ScoreDto> scoreDtoList = scoreService.selectOneByStuNoYear(username, year);
-            if (!scoreDtoList.isEmpty()) {
-                return JSONResult.build(scoreDtoList, "获取学生分数成功", 200);
-            }
-        }
-        // 按照学号 + 学年 + 学期查询成绩
-        if (year != null) {
-            List<ScoreDto> scoreDtoList = scoreService.selectOneByStuNoYearTerm(username, year, term);
-            if (!scoreDtoList.isEmpty()) {
-                return JSONResult.build(scoreDtoList, "获取学生分数成功", 200);
-            }
-        }
+
         return JSONResult.build(null, "获取学生分数失败", 400);
     }
 }

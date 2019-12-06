@@ -21,6 +21,13 @@ spring:
 
 mybatis:
   config-location: classpath:mybatis-config.xml
+#server:
+#  port: 443
+#  ssl:
+#    key-store: classpath:duniqb.jks
+#    key-store-password: 6VivSq6w
+#    key-store-type: JKS
+#    key-alias: alias
 
 # 教务爬虫的各种配置
 jw:
@@ -49,6 +56,7 @@ jw:
     path: /academic
   # 验证码存放的本机文件夹
   verifyPath: D:\verify\
+#  verifyPath: /usr/local/djtu/verify/
 
 # 图书馆爬虫的各种配置
 lib:
@@ -87,6 +95,7 @@ card:
   verifyUrl: http://ykt.djtu.edu.cn/Account/GetCheckCodeImg
   # 验证码存放的本机文件夹
   verifyPath: D:\verify\
+#  verifyPath: /usr/local/djtu/verify
   # 获取卡信息的 url
   infoUrl: http://ykt.djtu.edu.cn/CardManage/CardInfo/BasicInfo
   # 登录一卡通的 url
@@ -111,6 +120,7 @@ news:
     noticesDetailUrl: http://www.djtu.edu.cn/Notices
   # 文章图片存放的本机文件夹
   imagePath: D:\img\
+#  imagePath: /usr/local/djtu/img
   # 学校主站地址
   schoolHost: http://www.djtu.edu.cn
   # 本机 url，以供展示图片
@@ -159,6 +169,10 @@ job:
 mini:
   appId: wxe1f564d00f76340a
   secret: ec547e58ed84fcbbee3a7e24a5823cc8
+  # 轮播图片存放的本机文件夹
+  slidePath: D:\slide\
+#  slidePath: /usr/local/djtu/slide
   spider:
     # 爬取天气，此 url 不是很规范
     tipUrl: https://wis.qq.com/weather/common?source=pc&weather_type=observe%7Cindex%7Calarm%7Ctips&province=
+

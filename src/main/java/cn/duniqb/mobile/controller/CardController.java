@@ -6,6 +6,7 @@ import cn.duniqb.mobile.dto.User;
 import cn.duniqb.mobile.utils.spider.CardSpiderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -85,21 +86,24 @@ public class CardController {
     /**
      * 登录一卡通
      *
-     * @param user
      * @return
      */
     @ApiOperation(value = "登录一卡通", notes = "登录一卡通的接口，请求体是 User，包含学号，密码和验证码")
-    @ApiImplicitParam(name = "user", value = "请求对象 user，包含学号，密码和验证码", required = true, dataType = "User", paramType = "body")
-    @PostMapping("login")
-    public JSONResult login(@RequestBody User user) {
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "stuNo", value = "学号", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "password", value = "密码", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "verifyCode", value = "验证码", required = true, dataType = "String", paramType = "query"),
+    })
+    @GetMapping("login")
+    public JSONResult login(@RequestParam String stuNo, @RequestParam String password, @RequestParam String verifyCode) {
         try {
             HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
 
             ArrayList<NameValuePair> postData = new ArrayList<>();
             postData.add(new BasicNameValuePair("signtype", "SynSno"));
-            postData.add(new BasicNameValuePair("username", user.getUsername()));
-            postData.add(new BasicNameValuePair("password", user.getPassword()));
-            postData.add(new BasicNameValuePair("checkcode", user.getVerifyCode()));
+            postData.add(new BasicNameValuePair("username", stuNo));
+            postData.add(new BasicNameValuePair("password", password));
+            postData.add(new BasicNameValuePair("checkcode", verifyCode));
             postData.add(new BasicNameValuePair("isUsedKeyPad", "false"));
 
             HttpPost post = new HttpPost(loginUrl);
@@ -121,7 +125,9 @@ public class CardController {
             System.out.println(response);
             if (response.toString().contains("200")) {
                 CardInfo info = cardSpiderService.info(cookieStore);
-                return JSONResult.build(info, "一卡通登录成功", 200);
+                if (info != null) {
+                    return JSONResult.build(info, "一卡通登录成功", 200);
+                }
             }
         } catch (IOException e) {
             e.printStackTrace();

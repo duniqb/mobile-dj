@@ -176,11 +176,14 @@ public class MiniController {
     @GetMapping("tip")
     @ApiOperation(value = "提示信息", notes = "提示信息的接口，请求参数是 sessionId")
     @ApiImplicitParams({
-            @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query"),
+            @ApiImplicitParam(name = "sessionId", value = "sessionId", required = false, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "province", value = "省", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "city", value = "市", required = true, dataType = "String", paramType = "query"),
     })
-    public JSONResult tip(@RequestParam String sessionId, @RequestParam String province, @RequestParam String city) {
+    public JSONResult tip(@RequestParam(required = false) String sessionId, @RequestParam String province, @RequestParam String city) {
+        if ("undefined".equals(sessionId) || "undefined".equals(province) || "undefined".equals(city)) {
+            return JSONResult.build(null, "获取提示失败", 400);
+        }
         String res = redisUtil.get(TIP + ":" + province + ":" + city);
         if (res != null) {
             // 根据 sessionId 查询是男是女
@@ -212,19 +215,20 @@ public class MiniController {
         }
 
         Tip tip = miniSpiderService.tip(province, city);
+        TipDto tipDto = new TipDto();
+        BeanUtils.copyProperties(tip, tipDto);
+
+        List<String> list = new ArrayList<>();
+        list.add(tip.getChill());
+        list.add(tip.getClod());
+        list.add(tip.getTip1());
+        list.add(tip.getTip2());
         // 根据 sessionId 查询是男是女
         String sessionIdValue = redisUtil.get(sessionId);
         if (sessionIdValue != null) {
             String openid = sessionIdValue.split(":")[0];
             WxUser wxUser = wxUserService.selectByOpenid(openid);
-            TipDto tipDto = new TipDto();
-            BeanUtils.copyProperties(tip, tipDto);
 
-            List<String> list = new ArrayList<>();
-            list.add(tip.getChill());
-            list.add(tip.getClod());
-            list.add(tip.getTip1());
-            list.add(tip.getTip2());
             if (wxUser != null) {
                 Boolean gender = wxUser.getGender();
                 // false 男，true 女，女性增加化妆信息
@@ -235,8 +239,10 @@ public class MiniController {
             tipDto.setTips(list);
             redisUtil.set(TIP + ":" + province + ":" + city, JSON.toJSONString(tip), 60 * 60);
             return JSONResult.build(tipDto, "获取提示成功", 200);
+        } else {
+            tipDto.setTips(list);
+            return JSONResult.build(tipDto, "获取提示成功", 200);
         }
-        return JSONResult.build(null, "获取提示失败", 400);
     }
 
     /**
