@@ -6,7 +6,7 @@
 
 ## 前端
 
-（此处放仓库地址）
+https://github.com/aitwzl/mobile-dj-mini
 
 感谢以下优秀小程序开源组件库，掌上大交小程序前端基于 `Color UI` 以及 `Vant Weapp` 组件库。
 
