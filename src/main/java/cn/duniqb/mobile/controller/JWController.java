@@ -372,7 +372,7 @@ public class JWController {
             return JSONResult.build(JSON.parseObject(res, Notice.class), "通知详情 - 缓存获取成功", 200);
         }
         Notice notice = jWSpiderService.notice(id);
-        if (notice!= null && !notice.getContent().isEmpty()) {
+        if (notice != null && !notice.getContent().isEmpty()) {
             redisUtil.set(NOTICE_DETAIL + ":" + id, JSON.toJSONString(notice), 60 * 60 * 24);
             return JSONResult.build(notice, "获取通知详情成功", 200);
         }

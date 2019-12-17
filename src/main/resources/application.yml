@@ -167,7 +167,8 @@ job:
   calendarUrl: http://jobs.djtu.edu.cn/ajax/job
 # 小程序配置
 mini:
-
+  appId: wxe1f564d00f76340a
+  secret: ec547e58ed84fcbbee3a7e24a5823cc8
   # 轮播图片存放的本机文件夹
   slidePath: D:\slide\
 #  slidePath: /usr/local/djtu/slide

@@ -71,12 +71,31 @@ public class LibrarySpiderService {
     public List<BookDto> query(String name) {
         HttpClient client = HttpClients.createDefault();
 
+        // 先获取会变化的某项值
+        HttpResponse response = null;
+        try {
+            response = client.execute(new HttpGet("http://wxlib.djtu.edu.cn/wx/search.aspx"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Document doc = null;
+        try {
+            assert response != null;
+            doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", ""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert doc != null;
+        String viewState = doc.select("body form input").get(0).attr("value");
+
         // 构造 POST 参数
         ArrayList<NameValuePair> postData = new ArrayList<>();
         postData.add(new BasicNameValuePair("content2", name));
         postData.add(new BasicNameValuePair("searchBooks", "检索"));
-        postData.add(new BasicNameValuePair("__VIEWSTATE", "/wEPDwULLTExMzM4OTQyNTUPFgYeA3BhZwUCMzAeCGFsbENvdW50BQQxNTM5HgR3b3JkBQPlpb0WAgIBD2QWAgIFDxYCHgRUZXh0BYYnPGJyIC8+5oC76K6hOjE1MzkmbmJzcDsmbmJzcDs8YSBocmVmPSJqYXZhc2NyaXB0Ol9fZG9Qb3N0QmFjaygnZm4nLCdDOzE1Mzk7MTszMCcpIj7pppbpobU8L2E+Jm5ic3A7PGEgaHJlZj0iamF2YXNjcmlwdDpfX2RvUG9zdEJhY2soJ2ZuJywnQzsxNTM5OzE7MzAnKSI+5LiK6aG1PC9hPiZuYnNwOzImbmJzcDs8YSBocmVmPSJqYXZhc2NyaXB0Ol9fZG9Qb3N0QmFjaygnZm4nLCdDOzE1Mzk7MzszMCcpIj7kuIvpobU8L2E+Jm5ic3A7PGEgaHJlZj0iamF2YXNjcmlwdDpfX2RvUG9zdEJhY2soJ2ZuJywnQzsxNTM5OzUyOzMwJykiPuWwvumhtTwvYT48aHIgLz4zMS48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwODk0NDYiPuS4u+WKqOacjeWKoTrmpoLlv7XjgIHnu5PmnoTkuI7lrp7njrA8L2E+PGJyIC8+5byg5bCn5a2mLCDmlrnlrZjlpb3okZcs56eR5a2m5Ye654mI56S+PGJyIC8+VFAzOTMuNC82MDI1PGhyIC8+MzIuPGEgaHJlZj0iU2hvd0Jvb2suYXNweD9pZD0wMDAwMDc4MTc0Ij7kuobop6PkvaDnmoTku7flgLw6566h5aW96Ieq5bex55qE55+l6K+G5bm25LuO5Lit6I635YipPC9hPjxiciAvPijoi7Ep57Gz5YWLwrfmn6/mma4oTWlrZSBDb3BlKeiRlyznlLXlrZDlt6XkuJrlh7rniYjnpL48YnIgLz5DOTEyLjEvNDE3NDxociAvPjMzLjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA3MzI5MiI+5Lq655qE5LyY5Yq/OumAmui/h+abtOWlveeahOmBtOmAieS4juS4mue7qeaUueWWhOe7j+iQpeaIkOaenDwvYT48YnIgLz4o6IuxKeWGhee7tOWwlMK36LSd5oGpLCDmr5TlsJTCt+aiheS9qeiRlyznu4/mtY7nrqHnkIblh7rniYjnpL48YnIgLz5GMjcyLjkyLzYyMDA8aHIgLz4zNC48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNjY2OTciPuWImOawuOWlveWIm+mAoOi0ouWvjOeahDY2562W55WlPC9hPjxiciAvPui/n+WPjOaYjue8luiRlyzlvZPku6PkuJbnlYzlh7rniYjnpL48YnIgLz5GMjc5LjI0NS83Mjg4PGhyIC8+MzUuPGEgaHJlZj0iU2hvd0Jvb2suYXNweD9pZD0wMDAwMDg2NTExIj7liJvpgKDlpb3ov5A8L2E+PGJyIC8+KOe+jinpqazlhYvCt+exs+WwlOaWryhNYXJjIE15ZXJzKeiRlyzlm73pmYXmlofljJblh7rniYjlhazlj7g8YnIgLz5CODQ4LjQvODE4MDxociAvPjM2LjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA3ODE0NyI+5aW955yL5bCP6K+0PC9hPjxiciAvPuOAiuWMl+S6rOaWh+WtpuOAiyDnvJbovpHpg6jnvJYs54+g5rW35Ye654mI56S+PGJyIC8+STI0Ny43LzYzNDUoMSk8aHIgLz4zNy48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwMDQyOTIiPuWlveiOseWdnuWQjeeJh+mAj+inhjwvYT48YnIgLz7lkajpu47mmI7okZcs5bm/5Lic5Lq65rCR5Ye654mI56S+PGJyIC8+STEwNi4zMy82Mzk4PGhyIC8+MzguPGEgaHJlZj0iU2hvd0Jvb2suYXNweD9pZD0wMDAwMDY2NjQxIj7lpb3ojrHlnZ7njrDlnLrmiqXpgZM8L2E+PGJyIC8+5ZGo6buO5piO6JGXLOa1t+WNl+WHuueJiOekvjxiciAvPko5MDUuNzEyLzYzOTg8aHIgLz4zOS48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNjE4ODEiPuWunuWKoeaTjeS9nDrot5/miJHlrabpooblr7zmioDmnK88L2E+PGJyIC8+5ZGo5oyv5p6X77yM546L5oiQ546J77yM6Zm25reR6Imz5Li757yWLOS4reWbvee7j+a1juWHuueJiOekvjxiciAvPkM5MzMvNjM2OTxociAvPjQwLjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA1NzQ5MiI+5bCP55qE5piv576O5aW955qEPC9hPjxiciAvPlvoi7Fd6IiS6ams6LWr6JGXLOWVhuWKoeWNsOS5pummhjxiciAvPkYxMTIvODQ4NTxociAvPjQxLjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA4NjcwOSI+5byg5ZW45p6X56eY5LygOuS4iua1t+a7qeacgOWlveaWl+eahOWPmOiJsum+mTwvYT48YnIgLz7lj7jpqazng4jkurrokZcs5Lit5Zu95paH5Y+y5Ye654mI56S+PGJyIC8+SzgyOC45Lzg4OTk8aHIgLz40Mi48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNzA2NjAiPuW9k+S7o+aXpeaxieWPjOino+i+nuWFuDwvYT48YnIgLz7kuK3nlLDlub/pg47vvIzpgpPlkK/mmIznvJbokZcs5Lit5pel5Y+L5aW956CU56m256S+PGJyIC8+SDM2Ni82MTM5PGhyIC8+NDMuPGEgaHJlZj0iU2hvd0Jvb2suYXNweD9pZD0wMDAwMDU1NDM3Ij7lvZPlpb3oh6rlt7HnmoTigJzllabllabpmJ/igJ0tLS0t6Ieq5oiR5r+A5YqxPC9hPjxiciAvPuacseWwkeWNju+8jOm+muW5s+iRlyzkuIrmtbfotKLnu4/lpKflrablh7rniYjnpL48YnIgLz5ENDMyLjYzIC82NDg1PGhyIC8+NDQuPGEgaHJlZj0iU2hvd0Jvb2suYXNweD9pZD0wMDAwMDc2NzkwIj7mgI7moLflvZPlpb3lhazlj7jnu4/nkIY8L2E+PGJyIC8+6ZmI6bmk55qL5Li757yWLOeJqei1hOWHuueJiOekvjxiciAvPkYyNzIuOTEvNzE1MzxociAvPjQ1LjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA0OTU1NiI+5oCO5qC35b2T5aW955Sf5Lqn6LWE5paZ5L+h5omY5pyN5Yqh5ZGYPC9hPjxiciAvPuiNo+S6qOajo+iRlyznianotKjlh7rniYjnpL48YnIgLz5GNzIxLzkzNTA8aHIgLz40Ni48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNjk5MzEiPuaAjuagt+aJvuS4gOS4quWlveW3peS9nDwvYT48YnIgLz7lva3mlrDmnbDnvJbokZcs5rW35rSL5Ye654mI56S+PGJyIC8+QzkxMy4yLzcxNTM8aHIgLz40Ny48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNDg1ODMiPuaWsOWNjuekvuWlveeov+mAiS4xOTg35bm0PC9hPjxiciAvPuaWsOWNjuekvuaWsOmXu+eglOeptuaJgOe8lizmlrDljY7lh7rniYjnpL48YnIgLz5HMjE5LjE0LzU1ODU8aHIgLz40OC48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNzY2NTkiPuaWueS4juWchjrotaLlnKjmgbDliLDlpb3lpIQ8L2E+PGJyIC8+5LmQ5rqQ6JGXLOmHkeWfjuWHuueJiOekvjxiciAvPkI4NDguNC85MTI0PGhyIC8+NDkuPGEgaHJlZj0iU2hvd0Jvb2suYXNweD9pZD0wMDAwMDYzMDgyIj7ml6Dnur/nlLXniLHlpb3ogIXor7vmnKwu5LiK5Lit5LiL5YaMPC9hPjxiciAvPuacrOS5pue8luWGmee7hOe8luiRlyzkurrmsJHpgq7nlLXlh7rniYjnpL48YnIgLz5UTjgwLTQ5LzY4NjUoMSk8aHIgLz41MC48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNzYxNzMiPuacgOWlveeahOi+qeaKpDwvYT48YnIgLz4o576OKeiJvuS8psK35b636IKW5b6u6Iyo6JGXLOazleW+i+WHuueJiOekvjxiciAvPkQ5NzEuMjY1LzA1NDc8aHIgLz41MS48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNjY2NjgiPuatu+iAheeahOecvOedmzrplb/nr4fmgZDmgJblsI/or7Q8L2E+PGJyIC8+5L2Z5Lul6ZSu6JGXLOS4reWbveeUteW9seWHuueJiOekvjxiciAvPkkyNDcuNS8yNTIzPGhyIC8+NTIuPGEgaHJlZj0iU2hvd0Jvb2suYXNweD9pZD0wMDAwMDc0ODcxIj7msYLogYzlsLHkuJrmjIfljZc8L2E+PGJyIC8+5ZGo5Zu95pilLCDorrjlpb3kuIcsIOeOi+azouiRlyzlhpzmnZHor7vnianlh7rniYjnpL48YnIgLz5DOTEzLjIvNjMzNzxociAvPjUzLjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA3NzA1MyI+55S15a2Q5py65qKw5YWl6ZeoPC9hPjxiciAvPijml6Up5paw55S15rCU57yW6L6R6YOo57yWLOenkeWtpuWHuueJiOekvjxiciAvPlRILTM5LzUwNDY8aHIgLz41NC48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNjI3MDEiPueUteWtkOeIseWlveiAheWunueUqOaJi+WGjDwvYT48YnIgLz7pmYjlm73ljY7nvJYs5Lq65rCR6YKu55S15Ye654mI56S+PGJyIC8+VE4tNjIvNzEzNTxociAvPjU1LjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA3OTcxNyI+55S15a2Q55S16LevKOS4iik8L2E+PGJyIC8+KOaXpSkg6Zuo5a6r5aW95paH6JGXLOenkeWtpuWHuueJiOekvjxiciAvPlRONzEwLzIzNTQ8aHIgLz41Ni48YSBocmVmPSJTaG93Qm9vay5hc3B4P2lkPTAwMDAwNzk3MTgiPueUteWtkOeUtei3ryjkuIspPC9hPjxiciAvPijml6UpIOmbqOWuq+WlveaWh+iRlyznp5Hlrablh7rniYjnpL48YnIgLz5UVE43MTAvMjM1NDxociAvPjU3LjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA2MjM5NCI+55m+5oqY5LiN5oygOuWBmuWlveWIm+S4mueahOW/g+eQhuWHhuWkhzwvYT48YnIgLz7vvIjnvo7vvInln4Pov6rlhYvokZcs5aSp5rSl56eR5oqA57+76K+R5Ye654mI5YWs5Y+4PGJyIC8+RjI3OS43MTIvMDIwNDxociAvPjU4LjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA1MDEzOSI+57uP6JCl566h55CG5YWo6ZuGLjE3Oue+juWlveeahOaYjuWkqTwvYT48YnIgLz7mnb7kuIvlubjkuYvliqnokZcs5ZCN5Lq65Ye654mI5LqL5Lia6IKh5Lu95pyJ6ZmQ5YWs5Y+4PGJyIC8+RjQzMS4zNS84NTU2KDE2KTxociAvPjU5LjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA2MDQ1MSI+57uZ5Lq65aW95Y2w6LGh55qE6Ieq5oiR6KGo546w5pyvPC9hPjxiciAvPigp5aSa5rmW6L6J6JGXLOWkp+WxleWHuueJiOekvjxiciAvPkI4NDIvMDQ1NTxociAvPjYwLjxhIGhyZWY9IlNob3dCb29rLmFzcHg/aWQ9MDAwMDA3NTI3MiI+6Ziz5YWJ55S35a2pIOS9oOWHhuWkh+WlveS6huWQlz88L2E+PGJyIC8+546L5bGx57Gz5Li757yWLOenkeWtpuaKgOacr+aWh+eMruWHuueJiOekvjxiciAvPkc0NzkvNDA4ODxociAvPuaAu+iuoToxNTM5Jm5ic3A7Jm5ic3A7PGEgaHJlZj0iamF2YXNjcmlwdDpfX2RvUG9zdEJhY2soJ2ZuJywnQzsxNTM5OzE7MzAnKSI+6aaW6aG1PC9hPiZuYnNwOzxhIGhyZWY9ImphdmFzY3JpcHQ6X19kb1Bvc3RCYWNrKCdmbicsJ0M7MTUzOTsxOzMwJykiPuS4iumhtTwvYT4mbmJzcDsyJm5ic3A7PGEgaHJlZj0iamF2YXNjcmlwdDpfX2RvUG9zdEJhY2soJ2ZuJywnQzsxNTM5OzM7MzAnKSI+5LiL6aG1PC9hPiZuYnNwOzxhIGhyZWY9ImphdmFzY3JpcHQ6X19kb1Bvc3RCYWNrKCdmbicsJ0M7MTUzOTs1MjszMCcpIj7lsL7pobU8L2E+ZGRLJ2kwC6EVoMjySQTBtsBrHoNR8BTsFMlE+aAbD+x6bg=="));
+        postData.add(new BasicNameValuePair("__VIEWSTATE", viewState));
         postData.add(new BasicNameValuePair("__VIEWSTATEGENERATOR", "B5EA1942"));
+        postData.add(new BasicNameValuePair("__EVENTARGUMENT", ""));
+        postData.add(new BasicNameValuePair("__EVENTTARGET", ""));
 
         HttpPost post = new HttpPost(searchUrl);
         post.addHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
@@ -92,13 +111,12 @@ public class LibrarySpiderService {
         post.setHeader("Connection", "keep-alive");
         post.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36");
 
-        HttpResponse response = null;
         try {
             response = client.execute(post);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        Document doc = null;
+        doc = null;
         try {
             assert response != null;
             doc = Jsoup.parse(EntityUtils.toString(response.getEntity()).replace("&nbsp;", "").replace("&gt;", ""));
