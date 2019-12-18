@@ -21,12 +21,6 @@ import java.io.IOException;
 @Service
 public class MiniSpiderService {
     /**
-     * 查询校区 id，返回建筑 id的 url
-     */
-    @Value("${mini.spider.tipUrl}")
-    private String tipUrl;
-
-    /**
      * 提示信息，天气等
      *
      * @param province
@@ -36,8 +30,7 @@ public class MiniSpiderService {
         if ("undefined".equals(province) || "undefined".equals(city)) {
             return null;
         }
-        HttpGet getTip = new HttpGet(tipUrl + province + "&city=" + city);
-        System.out.println(tipUrl + province + "&city=" + city);
+        HttpGet getTip = new HttpGet("https://wis.qq.com/weather/common?source=pc&weather_type=observe%7Cindex%7Calarm%7Ctips&province=" + province + "&city=" + city);
         getTip.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3");
         getTip.setHeader("Accept-Encoding", "gzip, deflate, br");
         getTip.setHeader("Accept-Language", "zh-CN,zh;q=0.9");

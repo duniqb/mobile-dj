@@ -61,7 +61,6 @@ public class JobController {
      */
     private static final String CALENDAR = "CALENDAR";
 
-
     /**
      * 招聘会列表
      *

@@ -27,37 +27,6 @@ import java.util.List;
  */
 @Service
 public class JobSpiderService {
-
-    /**
-     * 招聘会列表的 url
-     */
-    @Value("${job.recruitListUrl}")
-    private String recruitListUrl;
-
-    /**
-     * 招聘会列表的 url
-     */
-    @Value("${job.recruitUrl}")
-    private String recruitUrl;
-
-    /**
-     * 单位需求列表的 url
-     */
-    @Value("${job.demandListUrl}")
-    private String demandListUrl;
-
-    /**
-     * 单位需求详情的 url
-     */
-    @Value("${job.demandUrl}")
-    private String demandUrl;
-
-    /**
-     * 招聘日历的 url
-     */
-    @Value("${job.calendarUrl}")
-    private String calendarUrl;
-
     /**
      * 招聘会列表
      * http://jobs.djtu.edu.cn/Recruits.html?page=2
@@ -65,7 +34,7 @@ public class JobSpiderService {
      * @param page
      */
     public RecruitList recruitList(String page) {
-        String url = recruitListUrl + "?page=" + page;
+        String url = "http://jobs.djtu.edu.cn/Recruits.html" + "?page=" + page;
         HttpGet getNews = new HttpGet(url);
 
         getNews.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -115,7 +84,7 @@ public class JobSpiderService {
      * @param id
      */
     public Recruit recruit(String id) {
-        String url = recruitUrl + id + ".html";
+        String url = "http://jobs.djtu.edu.cn/Recruits/" + id + ".html";
         HttpGet getNews = new HttpGet(url);
 
         getNews.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -204,7 +173,7 @@ public class JobSpiderService {
      * @param page
      */
     public DemandList demandList(String page) {
-        String url = demandListUrl + "?page=" + page;
+        String url = "http://jobs.djtu.edu.cn/Demands.html" + "?page=" + page;
         HttpGet getNews = new HttpGet(url);
 
         getNews.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -257,7 +226,7 @@ public class JobSpiderService {
      * @param id
      */
     public Demand demand(String id) {
-        String url = demandUrl + id + ".html";
+        String url = "http://jobs.djtu.edu.cn/Demands/" + id + ".html";
         HttpGet getNews = new HttpGet(url);
 
         getNews.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -314,7 +283,7 @@ public class JobSpiderService {
         postData.add(new BasicNameValuePair("year", year));
         postData.add(new BasicNameValuePair("month", month));
 
-        HttpPost post = new HttpPost(calendarUrl);
+        HttpPost post = new HttpPost("http://jobs.djtu.edu.cn/ajax/job");
         try {
             post.setEntity(new UrlEncodedFormEntity(postData));
         } catch (UnsupportedEncodingException e) {

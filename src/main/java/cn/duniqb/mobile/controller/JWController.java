@@ -5,7 +5,6 @@ import cn.duniqb.mobile.domain.WxUser;
 import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.jw.Notice;
 import cn.duniqb.mobile.dto.jw.NoticeList;
-import cn.duniqb.mobile.dto.news.NewsList;
 import cn.duniqb.mobile.service.*;
 import cn.duniqb.mobile.utils.RedisUtil;
 import cn.duniqb.mobile.utils.spider.JWSpiderService;
@@ -28,7 +27,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
@@ -42,7 +40,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * 与登录教务相关的接口
@@ -96,39 +96,20 @@ public class JWController {
     /**
      * 本机 url，以供回传验证码地址
      */
-    @Value("${jw.localhost}")
+    @Value("${local.host}")
     private String localhost;
 
     /**
-     * 发起教务登录的 url
+     * 教务主机 ip
      */
-    @Value("${jw.login.loginPostUrl}")
-    private String loginPostUrl;
-
-    /**
-     * 获取验证码的 url
-     */
-    @Value("${jw.verifyUrl}")
-    private String verifyUrl;
-
-    /**
-     * 设置 Cookie 的参数 domain
-     */
-    @Value("${jw.cookie.domain}")
-    private String domain;
-
-    /**
-     * 设置 Cookie 的参数 path
-     */
-    @Value("${jw.cookie.path}")
-    private String path;
+    @Value("${jw.host}")
+    private String host;
 
     /**
      * 设置验证码存放路径
      */
-    @Value("${jw.verifyPath}")
+    @Value("${local.verifyPath}")
     private String verifyPath;
-
 
     /**
      * 进入登录页面时或点击刷新，返回一个验证码
@@ -172,7 +153,7 @@ public class JWController {
             postData.add(new BasicNameValuePair("j_password", password));
             postData.add(new BasicNameValuePair("j_captcha", verifyCode));
 
-            HttpPost post = new HttpPost(loginPostUrl);
+            HttpPost post = new HttpPost("http://" + host + "/academic/j_acegi_security_check");
             post.setEntity(new UrlEncodedFormEntity(postData));
             HttpResponse response = client.execute(post);
 
@@ -266,7 +247,7 @@ public class JWController {
      * @return 保存的唯一名字
      */
     private String saveVerifyCode() {
-        HttpGet getVerifyCode = new HttpGet(verifyUrl);
+        HttpGet getVerifyCode = new HttpGet("http://" + host + "/academic/getCaptcha.do");
         FileOutputStream fileOutputStream = null;
         String fileName = System.currentTimeMillis() + "";
         // 把验证码图片保存到本地
@@ -300,8 +281,8 @@ public class JWController {
         String JSESSIONID = setCookie.substring("JSESSIONID=".length(), setCookie.indexOf(";"));
         BasicClientCookie cookie = new BasicClientCookie("JSESSIONID", JSESSIONID);
         cookie.setVersion(0);
-        cookie.setDomain(domain);
-        cookie.setPath(path);
+        cookie.setDomain(host);
+        cookie.setPath("/academic");
         cookieStore.addCookie(cookie);
     }
 

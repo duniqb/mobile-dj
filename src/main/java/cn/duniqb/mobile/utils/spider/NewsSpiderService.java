@@ -34,59 +34,16 @@ public class NewsSpiderService {
     private ImgUrlService imgUrlService;
 
     /**
-     * 交大要闻的 url
-     */
-    @Value("${news.list.newsUrl}")
-    private String newsUrl;
-
-    /**
-     * 综合报道的 url
-     */
-    @Value("${news.list.reportUrl}")
-    private String reportUrl;
-
-    /**
-     * 通知公告的 url
-     */
-    @Value("${news.list.noticesUrl}")
-    private String noticesUrl;
-
-    /**
-     * 交大要闻详情的 url
-     */
-    @Value("${news.detail.newsDetailUrl}")
-    private String newsDetailUrl;
-
-    /**
-     * 综合报道详情的 url
-     */
-    @Value("${news.detail.reportDetailUrl}")
-    private String reportDetailUrl;
-
-    /**
-     * 通知公告详情的 url
-     */
-    @Value("${news.detail.noticesDetailUrl}")
-    private String noticesDetailUrl;
-
-    /**
      * 文章图片存放的本机文件夹
      */
-    @Value("${news.imagePath}")
+    @Value("${local.image}")
     private String imagePath;
-
-    /**
-     * 学校主站地址
-     */
-    @Value("${news.schoolHost}")
-    private String schoolHost;
 
     /**
      * 本机 url，以供回传图片地址
      */
-    @Value("${jw.localhost}")
+    @Value("${local.host}")
     private String localhost;
-
 
     /**
      * 新闻列表
@@ -97,11 +54,11 @@ public class NewsSpiderService {
     public NewsList list(String type, String page) {
         String url = null;
         if ("1".equals(type)) {
-            url = newsUrl + "?page=" + page;
+            url = "http://www.djtu.edu.cn/News" + "?page=" + page;
         } else if ("2".equals(type)) {
-            url = reportUrl + "?page=" + page;
+            url = "http://www.djtu.edu.cn/Report.html" + "?page=" + page;
         } else if ("3".equals(type)) {
-            url = noticesUrl + "?page=" + page;
+            url = "http://www.djtu.edu.cn/Notices.html" + "?page=" + page;
         }
         HttpGet getNews = new HttpGet(url);
 
@@ -159,11 +116,11 @@ public class NewsSpiderService {
     public NewsDto detail(String type, String id) {
         String url = null;
         if ("1".equals(type)) {
-            url = newsDetailUrl + "/" + id + ".html";
+            url = "http://www.djtu.edu.cn/News" + "/" + id + ".html";
         } else if ("2".equals(type)) {
-            url = reportDetailUrl + "/" + id + ".html";
+            url = "http://www.djtu.edu.cn/Report" + "/" + id + ".html";
         } else if ("3".equals(type)) {
-            url = noticesDetailUrl + "/" + id + ".html";
+            url = "http://www.djtu.edu.cn/Notices" + "/" + id + ".html";
         }
         HttpGet getNews = new HttpGet(url);
 
@@ -196,7 +153,7 @@ public class NewsSpiderService {
                 if (string.contains("来源")) {
                     // 来源
                     newsDto.setFrom(string.split("来源：")[1].split("浏览：")[0].trim());
-                }else {
+                } else {
                     newsDto.setFrom("");
                 }
 
@@ -237,7 +194,7 @@ public class NewsSpiderService {
      * @return
      */
     private String saveImage(String imgUrl) {
-        HttpGet getVerifyCode = new HttpGet(schoolHost + imgUrl);
+        HttpGet getVerifyCode = new HttpGet("http://www.djtu.edu.cn" + imgUrl);
         FileOutputStream fileOutputStream = null;
         String filename = imgUrl.split("/")[4];
         try {

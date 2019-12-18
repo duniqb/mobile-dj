@@ -10,7 +10,6 @@ import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -22,13 +21,6 @@ import java.io.IOException;
  */
 @Service
 public class CardSpiderService {
-
-    /**
-     * 获取卡信息的 url
-     */
-    @Value("${card.infoUrl}")
-    private String infoUrl;
-
     /**
      * 校园卡管理-基本信息
      *
@@ -36,7 +28,7 @@ public class CardSpiderService {
      */
     public CardInfo info(CookieStore cookieStore) {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
-        HttpGet httpGet = new HttpGet(infoUrl);
+        HttpGet httpGet = new HttpGet("http://ykt.djtu.edu.cn/CardManage/CardInfo/BasicInfo");
 
         httpGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         httpGet.setHeader("Accept-Encoding", "gzip, deflate");

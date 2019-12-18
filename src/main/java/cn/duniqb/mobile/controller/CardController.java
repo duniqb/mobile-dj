@@ -2,7 +2,6 @@ package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.dto.CardInfo;
 import cn.duniqb.mobile.dto.JSONResult;
-import cn.duniqb.mobile.dto.User;
 import cn.duniqb.mobile.utils.spider.CardSpiderService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -22,7 +21,10 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,35 +41,22 @@ import java.util.ArrayList;
 @RestController
 @RequestMapping("/api/v1/card/")
 public class CardController {
-
     @Autowired
     private CardSpiderService cardSpiderService;
 
     private CookieStore cookieStore = null;
 
     /**
-     * 获取验证码的 url
-     */
-    @Value("${card.verifyUrl}")
-    private String verifyUrl;
-
-    /**
      * 验证码存放的本机文件夹
      */
-    @Value("${card.verifyPath}")
+    @Value("${local.verifyPath}")
     private String verifyPath;
-
-    /**
-     * 登录一卡通的 url
-     */
-    @Value("${card.loginUrl}")
-    private String loginUrl;
 
 
     /**
      * 本机 url，以供回传验证码地址
      */
-    @Value("${jw.localhost}")
+    @Value("${local.host}")
     private String localhost;
 
 
@@ -106,7 +95,7 @@ public class CardController {
             postData.add(new BasicNameValuePair("checkcode", verifyCode));
             postData.add(new BasicNameValuePair("isUsedKeyPad", "false"));
 
-            HttpPost post = new HttpPost(loginUrl);
+            HttpPost post = new HttpPost("http://ykt.djtu.edu.cn/Account/MiniCheckIn");
             post.setEntity(new UrlEncodedFormEntity(postData));
 
             // 重要的 Header
@@ -141,7 +130,7 @@ public class CardController {
      * @param
      */
     private String saveVerifyCode() {
-        HttpGet getVerifyCode = new HttpGet(verifyUrl + "/Flag=" + System.currentTimeMillis());
+        HttpGet getVerifyCode = new HttpGet("http://ykt.djtu.edu.cn/Account/GetCheckCodeImg" + "/Flag=" + System.currentTimeMillis());
         FileOutputStream fileOutputStream = null;
         String fileName = System.currentTimeMillis() + "";
         // 把验证码图片保存到本地
@@ -179,5 +168,4 @@ public class CardController {
         cookie.setPath("/");
         cookieStore.addCookie(cookie);
     }
-
 }

@@ -16,7 +16,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,37 +30,6 @@ import java.util.List;
  */
 @Service
 public class LibrarySpiderService {
-
-    /**
-     * 发起馆藏查询的 url
-     */
-    @Value("${lib.searchUrl}")
-    private String searchUrl;
-
-    /**
-     * 显示图书详情的 url
-     */
-    @Value("${lib.showBookUrl}")
-    private String showBookUrl;
-
-    /**
-     * 学院列表的 url
-     */
-    @Value("${lib.collegeUrl}")
-    private String collegeUrl;
-
-    /**
-     * 专业查询的 url
-     */
-    @Value("${lib.majorUrl}")
-    private String majorUrl;
-
-    /**
-     * 学院+专业查询的 url
-     */
-    @Value("${lib.collegeMajorUrl}")
-    private String collegeMajorUrl;
-
     /**
      * 馆藏查询
      *
@@ -97,7 +65,7 @@ public class LibrarySpiderService {
         postData.add(new BasicNameValuePair("__EVENTARGUMENT", ""));
         postData.add(new BasicNameValuePair("__EVENTTARGET", ""));
 
-        HttpPost post = new HttpPost(searchUrl);
+        HttpPost post = new HttpPost("http://wxlib.djtu.edu.cn/wx/search.aspx");
         post.addHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8");
 
         try {
@@ -158,7 +126,7 @@ public class LibrarySpiderService {
         HttpClient client = HttpClients.createDefault();
         HttpResponse response = null;
         try {
-            response = client.execute(new HttpGet(showBookUrl + "?id=" + id));
+            response = client.execute(new HttpGet("http://wxlib.djtu.edu.cn/wx/ShowBook.aspx" + "?id=" + id));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -260,7 +228,7 @@ public class LibrarySpiderService {
      */
     public ProfessionHotDto college() {
         HttpClient client = HttpClients.createDefault();
-        String url = collegeUrl;
+        String url = "http://wxlib.djtu.edu.cn/br/ReaderInstitute.aspx";
         HttpResponse response = null;
         try {
             response = client.execute(new HttpGet(url));
@@ -299,9 +267,9 @@ public class LibrarySpiderService {
         String url = null;
         // 查询专业列表
         if (major == null && college != null) {
-            url = majorUrl + "?sq=" + college;
+            url = "http://wxlib.djtu.edu.cn/br/ReaderProfession.aspx" + "?sq=" + college;
         } else if (major != null && college != null) {
-            url = collegeMajorUrl + "?zy=" + major + "&xy=" + college;
+            url = "http://wxlib.djtu.edu.cn/br/ReaderFenLeiHao.aspx" + "?zy=" + major + "&xy=" + college;
         }
         HttpResponse response = null;
         try {

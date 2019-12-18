@@ -23,7 +23,6 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -32,64 +31,10 @@ import java.util.List;
 @Service
 public class LogisticsSpiderService {
     /**
-     * 查询校区 id，返回建筑 id的 url
+     * 报修网站的主机
      */
-    @Value("${logistics.data.distinctIdUrl}")
-    private String distinctIdUrl;
-
-    /**
-     * 查询建筑 id，返回房间 id的 url
-     */
-    @Value("${logistics.data.buildingIdUrl}")
-    private String buildingIdUrl;
-
-    /**
-     * 查询房间 id，返回设备 id的 url
-     */
-    @Value("${logistics.data.roomIdUrl}")
-    private String roomIdUrl;
-
-    /**
-     * 查询设备 id，返回设备详情的 url
-     */
-    @Value("${logistics.data.equipmentIdUrl}")
-    private String equipmentIdUrl;
-
-    /**
-     * 根据报修手机号查询报修列表的 url
-     */
-    @Value("${logistics.detail.listUrl}")
-    private String listUrl;
-
-    /**
-     * 报修网站的主机地址
-     */
-    @Value("${logistics.logisticsHost}")
+    @Value("${logistics.host}")
     private String logisticsHost;
-
-    /**
-     * 最新通知的 url
-     */
-    @Value("${logistics.noticeUrl}")
-    private String noticeUrl;
-
-    /**
-     * 最近维修数量的 url
-     */
-    @Value("${logistics.recentUrl}")
-    private String recentUrl;
-
-    /**
-     * 发起报修的 url
-     */
-    @Value("${logistics.reportUrl}")
-    private String reportUrl;
-
-    /**
-     * 评价的 url
-     */
-    @Value("${logistics.evaluateUrl}")
-    private String evaluateUrl;
 
     /**
      * 故障报修 查询各项数据清单
@@ -98,19 +43,19 @@ public class LogisticsSpiderService {
         String url = null;
         // 查询校区 id，返回建筑 id
         if ("distinctId".equals(id)) {
-            url = distinctIdUrl;
+            url = logisticsHost + "/web/app/user/buildings.action";
         }
         // 查询建筑 id，返回房间 id
         else if ("buildingId".equals(id)) {
-            url = buildingIdUrl;
+            url = logisticsHost + "/web/app/user/placeRoom.action";
         }
         // 查询房间 id，返回设备 id
         else if ("roomId".equals(id)) {
-            url = roomIdUrl;
+            url = logisticsHost + "/web/app/user/equipment.action";
         }
         // 查询设备 id，返回设备详情
         else if ("equipmentId".equals(id)) {
-            url = equipmentIdUrl;
+            url = logisticsHost + "/web/app/user/equipment/detail.action";
         }
 
         HttpResponse response;
@@ -156,7 +101,7 @@ public class LogisticsSpiderService {
             ArrayList<NameValuePair> postData = new ArrayList<>();
             postData.add(new BasicNameValuePair("userTel", userTel));
 
-            HttpPost post = new HttpPost(listUrl);
+            HttpPost post = new HttpPost(logisticsHost + "/web/app/user/select/all/maintenance.action");
 
             post.setEntity(new UrlEncodedFormEntity(postData));
 
@@ -238,7 +183,7 @@ public class LogisticsSpiderService {
                     repairDetail.setShowEvaluate(false);
                 }
                 repairDetail.setDate(element.select("p.color-gray").text().split("\\.")[0]);
-                if(element.select("p[style]").get(0).text().contains("_")) {
+                if (element.select("p[style]").get(0).text().contains("_")) {
                     repairDetail.setTitle(element.select("p[style]").first().text());
                 } else {
                     repairDetail.setTitle(element.select("p[style]").get(2).text());
@@ -270,7 +215,7 @@ public class LogisticsSpiderService {
      * 最新通知
      */
     public Notice notice() {
-        HttpGet noticeGet = new HttpGet(noticeUrl);
+        HttpGet noticeGet = new HttpGet(logisticsHost + "/web/app/user/index.action");
 
         noticeGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         noticeGet.setHeader("Accept-Encoding", "gzip, deflate");
@@ -311,7 +256,7 @@ public class LogisticsSpiderService {
      * 最近维修数量
      */
     public List<Recent> recent() {
-        HttpGet recentGet = new HttpGet(recentUrl);
+        HttpGet recentGet = new HttpGet(logisticsHost + "/web/app/user/my/maintenance/router.action");
 
         recentGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         recentGet.setHeader("Accept-Encoding", "gzip, deflate");
@@ -373,7 +318,7 @@ public class LogisticsSpiderService {
         entityBuilder.addTextBody("listDescription", listDescription);
 
         HttpEntity entity = entityBuilder.build();
-        HttpPost post = new HttpPost(reportUrl);
+        HttpPost post = new HttpPost(logisticsHost + "/web/app/user/add/do.action");
         post.setEntity(entity);
         try {
             response = client.execute(post);
@@ -407,7 +352,7 @@ public class LogisticsSpiderService {
      * 评价
      */
     public void evaluate(String listNumber, String phone, String listScore, String listWord) {
-        String url = evaluateUrl;
+        String url = logisticsHost + "/web/app/user/judgement/do.action";
 
         HttpClient client = HttpClients.createDefault();
         ArrayList<NameValuePair> postData = new ArrayList<>();

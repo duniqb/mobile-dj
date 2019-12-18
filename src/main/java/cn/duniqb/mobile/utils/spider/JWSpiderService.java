@@ -1,7 +1,6 @@
 package cn.duniqb.mobile.utils.spider;
 
 import cn.duniqb.mobile.domain.*;
-import cn.duniqb.mobile.dto.JSONResult;
 import cn.duniqb.mobile.dto.jw.Notice;
 import cn.duniqb.mobile.dto.jw.NoticeList;
 import cn.duniqb.mobile.mapper.*;
@@ -28,7 +27,10 @@ import tk.mybatis.mapper.entity.Example;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 爬取教务
@@ -60,34 +62,10 @@ public class JWSpiderService {
     private GradeExamMapper gradeExamMapper;
 
     /**
-     * 获取个人信息的 url
+     * 教务主机 ip
      */
-    @Value("${jw.getInfoUrl}")
-    private String getInfoUrl;
-
-    /**
-     * 获取成绩的 url
-     */
-    @Value("${jw.getScoreParamUrl}")
-    private String getScoreParamUrl;
-
-    /**
-     * 获取等级考试的 url
-     */
-    @Value("${jw.getGradeExam}")
-    private String getGradeExam;
-
-    /**
-     * 获取等级考试的 url
-     */
-    @Value("${jw.noticeListUrl}")
-    private String noticeListUrl;
-
-    /**
-     * 获取等级考试的 url
-     */
-    @Value("${jw.noticeUrl}")
-    private String noticeUrl;
+    @Value("${jw.host}")
+    private String host;
 
     /**
      * 获取个人信息与学分信息
@@ -101,7 +79,7 @@ public class JWSpiderService {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         HttpResponse response = null;
         try {
-            response = client.execute(new HttpGet(getInfoUrl));
+            response = client.execute(new HttpGet("http://" + host + "/academic/showPersonalInfo.do"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -152,8 +130,6 @@ public class JWSpiderService {
                 } else if (tit.get(i).text().contains("邮政编码")) {
                     student.setZipCode(info.get(i).text());
                 }
-//                student.setSalt(UUID.randomUUID().toString().substring(0, 5));
-//                student.setPassword(MobileUtil.MD5(password) + student.getSalt());
                 student.setPassword(password);
             }
         }
@@ -204,7 +180,7 @@ public class JWSpiderService {
     @Transactional(propagation = Propagation.REQUIRED)
     public Map<Integer, String> getScoreParam(CookieStore cookieStore, String stuNo) {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
-        HttpPost post = new HttpPost(getScoreParamUrl);
+        HttpPost post = new HttpPost("http://" + host + "/academic/manager/score/studentOwnScore.do");
         ArrayList<NameValuePair> postData = new ArrayList<>();
 
         postData.add(new BasicNameValuePair("year", null));
@@ -321,7 +297,7 @@ public class JWSpiderService {
      */
     public HttpResponse getTimeTable(HttpClient client, Integer year, Integer term) {
         try {
-            String url = "http://202.199.128.21/academic/student/currcourse/currcourse.jsdo";
+            String url = "http://" + host + "/academic/student/currcourse/currcourse.jsdo";
 
             HttpGet httpGet = new HttpGet(url + "year=" + year + "&term=" + term);
 
@@ -360,7 +336,7 @@ public class JWSpiderService {
         HttpClient client = HttpClients.custom().setDefaultCookieStore(cookieStore).build();
         HttpResponse response = null;
         try {
-            response = client.execute(new HttpGet(getGradeExam));
+            response = client.execute(new HttpGet("http://" + host + "/academic/student/skilltest/skilltest.jsdo"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -411,7 +387,7 @@ public class JWSpiderService {
         HttpClient client = HttpClients.createDefault();
         HttpResponse response = null;
         try {
-            response = client.execute(new HttpGet(noticeListUrl + page));
+            response = client.execute(new HttpGet("http://" + host + "/homepage/infoArticleList.do?sortColumn=publicationDate&pagingNumberPer=10&columnId=10182&sortDirection=-1&pagingPage=" + page));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -455,7 +431,7 @@ public class JWSpiderService {
      */
     public Notice notice(String id) {
         HttpClient client = HttpClients.createDefault();
-        HttpGet httpGet = new HttpGet(noticeUrl + id + "&columnId=313");
+        HttpGet httpGet = new HttpGet("http://" + host + "/homepage/infoSingleArticle.do?articleId=" + id + "&columnId=313");
         httpGet.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         httpGet.setHeader("Accept-Encoding", "gzip, deflate");
         httpGet.setHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3");

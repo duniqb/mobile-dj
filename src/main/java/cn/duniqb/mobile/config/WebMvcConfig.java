@@ -10,19 +10,19 @@ public class WebMvcConfig implements WebMvcConfigurer {
     /**
      * 设置验证码存放路径
      */
-    @Value("${jw.verifyPath}")
+    @Value("${local.verifyPath}")
     private String verifyPath;
 
     /**
      * 图片的存放路径
      */
-    @Value("${news.imagePath}")
+    @Value("${local.image}")
     private String imagePath;
 
     /**
      * 轮播图存放路径
      */
-    @Value("${mini.slidePath}")
+    @Value("${local.slidePath}")
     private String slidePath;
 
     @Override

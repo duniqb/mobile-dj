@@ -25,7 +25,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/news/")
 public class NewsController {
-
     @Autowired
     private NewsSpiderService newsSpiderService;
 
@@ -93,6 +92,4 @@ public class NewsController {
         }
         return JSONResult.build(null, "获取失败", 400);
     }
-
-
 }

@@ -1,12 +1,9 @@
 spring:
-  application:
-    name: mobile-dj
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.71.136:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false
     username: root
     password: root
-  # Redis 配置
   redis:
     database: 0
     host: 192.168.71.136
@@ -29,150 +26,23 @@ mybatis:
 #    key-store-type: JKS
 #    key-alias: alias
 
-# 教务爬虫的各种配置
+local:
+  host: http://192.168.1.10:8080/
+  # 验证码图片放置的本机文件夹
+  verifyPath: D:\verify\
+  image: D:\img\
+  # 轮播图片存放的本机文件夹
+  slidePath: D:\slide\
+
+# 教务
 jw:
-  # 本机 url，以供回传验证码地址
-  localhost: http://192.168.1.10:8080/
-  login:
-    # 登录教务的 url
-    loginUrl: http://202.199.128.21/academic/common/security/login.jsp
-    # 发起教务登录的 url
-    loginPostUrl: http://202.199.128.21/academic/j_acegi_security_check
-  # 获取验证码的 url
-  verifyUrl: http://202.199.128.21/academic/getCaptcha.do
-  # 获取个人信息的 url
-  getInfoUrl: http://202.199.128.21/academic/showPersonalInfo.do
-  # 获取成绩的 url
-  getScoreParamUrl: http://202.199.128.21/academic/manager/score/studentOwnScore.do
-  # 获取等级考试的 url
-  getGradeExam: http://202.199.128.21/academic/student/skilltest/skilltest.jsdo
-  # 获取教务通知列表的 url
-  noticeListUrl: http://202.199.128.21/homepage/infoArticleList.do?sortColumn=publicationDate&pagingNumberPer=10&columnId=10182&sortDirection=-1&pagingPage=
-  # 获取教务通知详情的 url
-  noticeUrl: http://202.199.128.21/homepage/infoSingleArticle.do?articleId=
-  # 设置 Cookie 的参数
-  cookie:
-    domain: 202.199.128.21
-    path: /academic
-  # 验证码存放的本机文件夹
-  verifyPath: D:\verify\
-#  verifyPath: /usr/local/djtu/verify/
-
-# 图书馆爬虫的各种配置
-lib:
-  # 发起馆藏查询的 url
-  searchUrl: http://wxlib.djtu.edu.cn/wx/search.aspx
-  # 显示图书详情的 url
-  showBookUrl: http://wxlib.djtu.edu.cn/wx/ShowBook.aspx
-  # 读者热点-近2年入藏复本平均量的 url
-  readerHotAvgUrl: http://wxlib.djtu.edu.cn/br/ReaderScoreHot.aspx
-  # 读者热点-近2年入藏复本总借量的 url
-  readerHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderScoreHot2.aspx
-  # 荐购热点-近5年入藏复本平均量的 url
-  recommendHotAvgUrl: http://wxlib.djtu.edu.cn/br/ReaderRecommanded.aspx
-  # 荐购热点-近5年入藏复本总借量的 url
-  recommendHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderRecommanded2.aspx
-  # 新书热度-近90天内入藏复本总借量的 url
-  newHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderNewBook.aspx
-  # 专业热点查询的 url
-  majorHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderHot3.aspx
-  # 分类热度-近2年入藏复本平均量的 url
-  cateHotAvgUrl: http://wxlib.djtu.edu.cn/br/ReaderHot4.aspx
-  # 分类热度-近2年入藏复本总借量的 url
-  cateHotSumUrl: http://wxlib.djtu.edu.cn/br/ReaderHot.aspx
-  # 学院列表的 url
-  collegeUrl: http://wxlib.djtu.edu.cn/br/ReaderInstitute.aspx
-  # 专业查询的 url
-  majorUrl: http://wxlib.djtu.edu.cn/br/ReaderProfession.aspx
-  # 学院+专业查询的 url
-  collegeMajorUrl: http://wxlib.djtu.edu.cn/br/ReaderFenLeiHao.aspx
-
-# 一卡通爬虫的各种配置
-card:
-  # 本机 url，以供回传验证码地址
-  localhost: http://192.168.1.10:8080/
-  # 获取验证码的 url
-  verifyUrl: http://ykt.djtu.edu.cn/Account/GetCheckCodeImg
-  # 验证码存放的本机文件夹
-  verifyPath: D:\verify\
-#  verifyPath: /usr/local/djtu/verify
-  # 获取卡信息的 url
-  infoUrl: http://ykt.djtu.edu.cn/CardManage/CardInfo/BasicInfo
-  # 登录一卡通的 url
-  loginUrl: http://ykt.djtu.edu.cn/Account/MiniCheckIn
-
-# 新闻爬虫的各种配置
-news:
-  list:
-    # 交大要闻的 url
-    newsUrl: http://www.djtu.edu.cn/News
-    # 综合报道的 url
-    reportUrl: http://www.djtu.edu.cn/Report.html
-    # 通知公告的 url
-    noticesUrl: http://www.djtu.edu.cn/Notices.html
-  # 新闻详情的 url
-  detail:
-    # 交大要闻详情的 url
-    newsDetailUrl: http://www.djtu.edu.cn/News
-    # 综合报道详情的 url
-    reportDetailUrl: http://www.djtu.edu.cn/Report
-    # 通知公告详情的 url
-    noticesDetailUrl: http://www.djtu.edu.cn/Notices
-  # 文章图片存放的本机文件夹
-  imagePath: D:\img\
-#  imagePath: /usr/local/djtu/img
-  # 学校主站地址
-  schoolHost: http://www.djtu.edu.cn
-  # 本机 url，以供展示图片
-  localhost: http://192.168.1.10:8080/
+  host: 202.199.128.21
 
 # 后勤爬虫的各种配置
 logistics:
-  # 报修网站的主机地址
-  logisticsHost: https://nanqu.56team.com
-  # 故障报修 查询各项数据清单
-  data:
-    # 查询校区 id，返回建筑 id的 url
-    distinctIdUrl: https://nanqu.56team.com/web/app/user/buildings.action
-    # 查询建筑 id，返回房间 id的 url
-    buildingIdUrl: https://nanqu.56team.com/web/app/user/placeRoom.action
-    # 查询房间 id，返回设备 id的 url
-    roomIdUrl: https://nanqu.56team.com/web/app/user/equipment.action
-    # 查询设备 id，返回设备详情的 url
-    equipmentIdUrl: https://nanqu.56team.com/web/app/user/equipment/detail.action
-  # 报修详情
-  detail:
-    # 根据报修手机号查询报修列表的 url
-    listUrl: https://nanqu.56team.com/web/app/user/select/all/maintenance.action
-  # 最新通知的 url
-  noticeUrl: https://nanqu.56team.com/web/app/user/index.action
-  # 最近维修数量的 url
-  recentUrl: https://nanqu.56team.com/web/app/user/my/maintenance/router.action
-  # 发起报修的 url
-  reportUrl: https://nanqu.56team.com/web/app/user/add/do.action
-  # 评价的 url
-  evaluateUrl: https://nanqu.56team.com/web/app/user/judgement/do.action
+  host: https://nanqu.56team.com
 
-# 就业爬虫的相关配置
-job:
-  # 查询招聘会列表的 url
-  recruitListUrl: http://jobs.djtu.edu.cn/Recruits.html
-  # 查询招聘会详情的 url
-  recruitUrl: http://jobs.djtu.edu.cn/Recruits/
-  # 查询单位需求列表的 url
-  demandListUrl: http://jobs.djtu.edu.cn/Demands.html
-  # 查询单位需求详情的 url
-  demandUrl: http://jobs.djtu.edu.cn/Demands/
-  # 查询招聘日历的 url
-  calendarUrl: http://jobs.djtu.edu.cn/ajax/job
 # 小程序配置
 mini:
   appId: wxe1f564d00f76340a
   secret: ec547e58ed84fcbbee3a7e24a5823cc8
-  # 轮播图片存放的本机文件夹
-  slidePath: D:\slide\
-#  slidePath: /usr/local/djtu/slide
-  spider:
-    # 爬取天气，此 url 不是很规范
-    tipUrl: https://wis.qq.com/weather/common?source=pc&weather_type=observe%7Cindex%7Calarm%7Ctips&province=
-

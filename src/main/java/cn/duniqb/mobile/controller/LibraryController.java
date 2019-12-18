@@ -38,54 +38,6 @@ public class LibraryController {
     @Autowired
     private BookCateService bookCateService;
 
-    /**
-     * 读者热点-近2年入藏复本平均量的 url
-     */
-    @Value("${lib.readerHotAvgUrl}")
-    private String readerHotAvgUrl;
-
-    /**
-     * 读者热点-近2年入藏复本总借量的 url
-     */
-    @Value("${lib.readerHotSumUrl}")
-    private String readerHotSumUrl;
-
-    /**
-     * 荐购热点-近5年入藏复本平均量的 url
-     */
-    @Value("${lib.recommendHotAvgUrl}")
-    private String recommendHotAvgUrl;
-
-    /**
-     * 荐购热点-近5年入藏复本总借量的 url
-     */
-    @Value("${lib.recommendHotSumUrl}")
-    private String recommendHotSumUrl;
-
-    /**
-     * 新书热度-近90天内入藏复本总借量的 url
-     */
-    @Value("${lib.newHotSumUrl}")
-    private String newHotSumUrl;
-
-    /**
-     * 分类热度-近2年入藏复本平均量的 url
-     */
-    @Value("${lib.cateHotAvgUrl}")
-    private String cateHotAvgUrl;
-
-    /**
-     * 分类热度-近2年入藏复本总借量的 url
-     */
-    @Value("${lib.cateHotSumUrl}")
-    private String cateHotSumUrl;
-
-    /**
-     * 专业热点查询的 url
-     */
-    @Value("${lib.majorHotSumUrl}")
-    private String majorHotSumUrl;
-
 
     @Autowired
     private RedisUtil redisUtil;
@@ -192,31 +144,31 @@ public class LibraryController {
             return JSONResult.build(JSON.parseArray(res, BookDto.class), "热点图书 - 缓存获取成功", 200);
         }
         if ("1".equals(type) && sq == null) {
-            List<BookDto> bookDtoList = librarySpiderService.hot(readerHotAvgUrl);
+            List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderScoreHot.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
                 return JSONResult.build(bookDtoList, "读者热点-近2年入藏复本平均量，查询成功", 200);
             }
         } else if ("2".equals(type) && sq == null) {
-            List<BookDto> bookDtoList = librarySpiderService.hot(readerHotSumUrl);
+            List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderScoreHot2.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
                 return JSONResult.build(bookDtoList, "读者热点-近2年入藏复本总借量，查询成功", 200);
             }
         } else if ("3".equals(type) && sq == null) {
-            List<BookDto> bookDtoList = librarySpiderService.hot(recommendHotAvgUrl);
+            List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderRecommanded.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
                 return JSONResult.build(bookDtoList, "荐购热点-近5年入藏复本平均量，查询成功", 200);
             }
         } else if ("4".equals(type) && sq == null) {
-            List<BookDto> bookDtoList = librarySpiderService.hot(recommendHotSumUrl);
+            List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderRecommanded2.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
                 return JSONResult.build(bookDtoList, "荐购热点-近5年入藏复本总借量，查询成功", 200);
             }
         } else if ("5".equals(type) && sq == null) {
-            List<BookDto> bookDtoList = librarySpiderService.hot(newHotSumUrl);
+            List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderNewBook.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
                 return JSONResult.build(bookDtoList, "新书热度-近90天内入藏复本总借量，查询成功", 200);
@@ -226,7 +178,7 @@ public class LibraryController {
             if (res6 != null) {
                 return JSONResult.build(JSON.parseArray(res6, BookDto.class), "热点图书 - 缓存获取成功", 200);
             }
-            List<BookDto> bookDtoList = librarySpiderService.hot(majorHotSumUrl + "?sq=" + sq);
+            List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot3.aspx" + "?sq=" + sq);
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type + ":" + sq, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
                 return JSONResult.build(bookDtoList, "专业热点-近2年内入藏复本总借量，查询成功", 200);
@@ -262,13 +214,13 @@ public class LibraryController {
             return JSONResult.build(JSON.parseArray(res, BookDto.class), "分类热点 - 缓存获取成功", 200);
         }
         if ("1".equals(type)) {
-            List<BookDto> bookDtoList = librarySpiderService.hot(cateHotAvgUrl + "?sq=" + cate);
+            List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot4.aspx" + "?sq=" + cate);
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
                 return JSONResult.build(bookDtoList, "分类热点-近2年入藏复本平均量，查询成功", 200);
             }
         } else if ("2".equals(type)) {
-            List<BookDto> bookDtoList = librarySpiderService.hot(cateHotSumUrl + "?sq=" + cate);
+            List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot.aspx" + "?sq=" + cate);
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
                 return JSONResult.build(bookDtoList, "分类热点-近2年入藏复本总借量，查询成功", 200);
