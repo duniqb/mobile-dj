@@ -1,38 +1,43 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.71.136:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false
+    url: jdbc:mysql://dj.xiaoshi98.top:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false
     username: root
     password: root
   redis:
     database: 0
-    host: 192.168.71.136
+    host: dj.xiaoshi98.top
     port: 6379
+    password: root
     jedis:
       pool:
         max-active: 8
         max-wait: 0
         max-idle: 10
         min-idle: 0
-    timeout: 300
+    timeout: 3000
 
 mybatis:
   config-location: classpath:mybatis-config.xml
-#server:
-#  port: 443
-#  ssl:
-#    key-store: classpath:duniqb.jks
-#    key-store-password: 6VivSq6w
-#    key-store-type: JKS
-#    key-alias: alias
+# 证书配置
+server:
+  port: 443
+  ssl:
+    key-store: "classpath:dj.xiaoshi98.top.jks"
+    key-store-password: p0dV6nyi
+    key-store-type: JKS
+    key-alias: alias
 
 local:
-  host: http://192.168.1.10:8080/
+  host: https://dj.xiaoshi98.top:443/
   # 验证码图片放置的本机文件夹
-  verifyPath: D:\verify\
-  image: D:\img\
+  #  verifyPath: D:\verify\
+  verifyPath: /usr/local/dj/verify/
+  #  image: D:\img\
+  image: /usr/local/dj/img/
   # 轮播图片存放的本机文件夹
-  slidePath: D:\slide\
+  #  slidePath: D:\slide\
+  slidePath: /usr/local/dj/slide/
 
 # 教务
 jw:

@@ -17,16 +17,15 @@ import tk.mybatis.spring.annotation.MapperScan;
 public class MobileDjApplication {
 
     public static void main(String[] args) {
+
         SpringApplication.run(MobileDjApplication.class, args);
     }
-
 
     /**
      * http重定向到https
      *
      * @return
      */
-      /*
     @Bean
     public TomcatServletWebServerFactory servletContainer() {
         TomcatServletWebServerFactory tomcat = new TomcatServletWebServerFactory() {
@@ -55,5 +54,4 @@ public class MobileDjApplication {
         connector.setRedirectPort(443);
         return connector;
     }
-    */
 }
