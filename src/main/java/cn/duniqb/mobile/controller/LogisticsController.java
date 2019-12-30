@@ -84,7 +84,7 @@ public class LogisticsController {
         String string = logisticsSpiderService.data(id, value);
 
         String replace = string.replace("\\", "");
-        redisUtil.set(LOGISTICS_DATA + ":" + id + ":" + value, replace.substring(1, replace.length() - 1), 60 * 60 * 24);
+        redisUtil.set(LOGISTICS_DATA + ":" + id + ":" + value, replace.substring(1, replace.length() - 1), 60 * 60 * 24 * 3);
         if ("distinctId".equals(id)) {
             Buildings buildings = JSON.parseObject(replace.substring(1, replace.length() - 1), Buildings.class);
             if (!buildings.getBuildings().isEmpty()) {

@@ -146,31 +146,31 @@ public class LibraryController {
         if ("1".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderScoreHot.aspx");
             if (!bookDtoList.isEmpty()) {
-                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
+                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
                 return JSONResult.build(bookDtoList, "读者热点-近2年入藏复本平均量，查询成功", 200);
             }
         } else if ("2".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderScoreHot2.aspx");
             if (!bookDtoList.isEmpty()) {
-                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
+                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
                 return JSONResult.build(bookDtoList, "读者热点-近2年入藏复本总借量，查询成功", 200);
             }
         } else if ("3".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderRecommanded.aspx");
             if (!bookDtoList.isEmpty()) {
-                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
+                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
                 return JSONResult.build(bookDtoList, "荐购热点-近5年入藏复本平均量，查询成功", 200);
             }
         } else if ("4".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderRecommanded2.aspx");
             if (!bookDtoList.isEmpty()) {
-                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
+                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
                 return JSONResult.build(bookDtoList, "荐购热点-近5年入藏复本总借量，查询成功", 200);
             }
         } else if ("5".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderNewBook.aspx");
             if (!bookDtoList.isEmpty()) {
-                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
+                redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
                 return JSONResult.build(bookDtoList, "新书热度-近90天内入藏复本总借量，查询成功", 200);
             }
         } else if ("6".equals(type) && sq != null) {
@@ -180,7 +180,7 @@ public class LibraryController {
             }
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot3.aspx" + "?sq=" + sq);
             if (!bookDtoList.isEmpty()) {
-                redisUtil.set(HOT_BOOK + ":" + type + ":" + sq, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
+                redisUtil.set(HOT_BOOK + ":" + type + ":" + sq, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
                 return JSONResult.build(bookDtoList, "专业热点-近2年内入藏复本总借量，查询成功", 200);
             }
         }
@@ -216,13 +216,13 @@ public class LibraryController {
         if ("1".equals(type)) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot4.aspx" + "?sq=" + cate);
             if (!bookDtoList.isEmpty()) {
-                redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
+                redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
                 return JSONResult.build(bookDtoList, "分类热点-近2年入藏复本平均量，查询成功", 200);
             }
         } else if ("2".equals(type)) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot.aspx" + "?sq=" + cate);
             if (!bookDtoList.isEmpty()) {
-                redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
+                redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
                 return JSONResult.build(bookDtoList, "分类热点-近2年入藏复本总借量，查询成功", 200);
             }
         }
@@ -243,7 +243,7 @@ public class LibraryController {
         }
         List<BookCate> bookCateList = bookCateService.selectAll();
         if (!bookCateList.isEmpty()) {
-            redisUtil.set(BOOK_CATE, JSON.toJSONString(bookCateList), 60 * 60 * 24);
+            redisUtil.set(BOOK_CATE, JSON.toJSONString(bookCateList), 60 * 60 * 24 * 3);
             return JSONResult.build(bookCateList, "查询成功", 200);
         }
         return JSONResult.build(null, "查询失败", 400);
@@ -261,7 +261,7 @@ public class LibraryController {
         }
         ProfessionHotDto college = librarySpiderService.college();
         if (!college.getList().isEmpty()) {
-            redisUtil.set(COLLEGE_LIST, JSON.toJSONString(college), 60 * 60 * 24);
+            redisUtil.set(COLLEGE_LIST, JSON.toJSONString(college), 60 * 60 * 24 * 3);
             return JSONResult.build(college, "查询成功", 200);
         }
         return JSONResult.build(null, "查询失败", 400);
@@ -299,9 +299,9 @@ public class LibraryController {
         ProfessionHotDto professionHotDto = librarySpiderService.major(college, major);
         if (!professionHotDto.getList().isEmpty()) {
             if (major == null) {
-                redisUtil.set(MAJOR_HOT + ":" + college, JSON.toJSONString(professionHotDto), 60 * 60 * 24);
+                redisUtil.set(MAJOR_HOT + ":" + college, JSON.toJSONString(professionHotDto), 60 * 60 * 24 * 3);
             } else {
-                redisUtil.set(MAJOR_HOT + ":" + college + ":" + major, JSON.toJSONString(professionHotDto), 60 * 60 * 24);
+                redisUtil.set(MAJOR_HOT + ":" + college + ":" + major, JSON.toJSONString(professionHotDto), 60 * 60 * 24 * 3);
             }
             return JSONResult.build(professionHotDto, "查询成功", 200);
         }

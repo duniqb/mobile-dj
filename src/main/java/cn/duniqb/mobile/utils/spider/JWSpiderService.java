@@ -266,21 +266,21 @@ public class JWSpiderService {
                 map.put(3, "保存学生选课失败");
             }
 
-            Example example = new Example(TeacherCourse.class);
-            example.createCriteria().andEqualTo("courseId", trd.get(2).text());
-            List<TeacherCourse> teacherCourses = teacherCourseMapper.selectByExample(example);
-            if (teacherCourses.isEmpty()) {
-                TeacherCourse teacherCourse = new TeacherCourse();
-                teacherCourse.setStuNo(stuNo);
-                teacherCourse.setTeacherName(trd.get(14).text());
-                teacherCourse.setCourseId(trd.get(2).text());
-                int i4 = teacherCourseMapper.insert(teacherCourse);
-                if (i4 > 0) {
-                    map.put(4, "保存教师授课成功");
-                } else {
-                    map.put(4, "保存教师授课失败");
-                }
+//            Example example = new Example(TeacherCourse.class);
+//            example.createCriteria().andEqualTo("courseId", trd.get(2).text());
+//            List<TeacherCourse> teacherCourses = teacherCourseMapper.selectByExample(example);
+//            if (teacherCourses.isEmpty()) {
+            TeacherCourse teacherCourse = new TeacherCourse();
+            teacherCourse.setStuNo(stuNo);
+            teacherCourse.setTeacherName(trd.get(14).text());
+            teacherCourse.setCourseId(trd.get(2).text());
+            int i4 = teacherCourseMapper.insert(teacherCourse);
+            if (i4 > 0) {
+                map.put(4, "保存教师授课成功");
+            } else {
+                map.put(4, "保存教师授课失败");
             }
+//            }
         }
         return map;
     }
