@@ -2,7 +2,6 @@ package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.domain.WxUser;
 import cn.duniqb.mobile.dto.json.JSONResult;
-import cn.duniqb.mobile.nosql.mongodb.document.feed.Comment;
 import cn.duniqb.mobile.nosql.mongodb.document.feed.Title;
 import cn.duniqb.mobile.service.FeedService;
 import cn.duniqb.mobile.service.WxUserService;
@@ -48,14 +47,14 @@ public class FeedController {
         return JSONResult.build(null, "查询文章详情失败", 400);
     }
 
-    @ApiOperation(value = "分页查询文章", notes = "分页查询文章")
+    @ApiOperation(value = "分页倒序查询文章", notes = "分页倒序查询文章")
     @GetMapping("list")
     public JSONResult listDesc(@RequestParam Integer pageNum, @RequestParam Integer pageSize) {
         List<Title> titles = feedService.listDesc(pageNum, pageSize);
         if (!titles.isEmpty()) {
-            return JSONResult.build(titles, "分页查询文章成功", 200);
+            return JSONResult.build(titles, "分页倒序查询文章成功", 200);
         }
-        return JSONResult.build(null, "分页查询文章失败", 400);
+        return JSONResult.build(null, "分页倒序查询文章失败", 400);
     }
 
     @ApiOperation(value = "新增文章", notes = "新增文章")
@@ -81,7 +80,7 @@ public class FeedController {
             Title title = feedService.findById(titleId);
             if (title != null && StrUtil.equals(title.getOpenid(), openidFromRedis)) {
                 DeleteResult deleteResult = feedService.delete(titleId);
-                if (deleteResult != null) {
+                if (deleteResult.getDeletedCount() > 0) {
                     return JSONResult.build(deleteResult, "删除文章成功", 200);
                 }
             }
@@ -90,35 +89,78 @@ public class FeedController {
     }
 
     @ApiOperation(value = "添加评论", notes = "添加评论")
-    @PutMapping("comment")
-    public JSONResult comment(@RequestParam String sessionId, @RequestParam String titleId, @RequestBody String content) {
+    @PutMapping("addComment")
+    public JSONResult addComment(@RequestParam String sessionId, @RequestParam String titleId, @RequestParam String content) {
         // 找出 Redis 中映射的 openid
         String sessionIdValue = redisUtil.get(sessionId);
         if (sessionIdValue != null) {
             String openidFromRedis = sessionIdValue.split(":")[0];
             WxUser wxUser = wxUserService.selectByOpenid(openidFromRedis);
             if (wxUser != null) {
-                // 找出 mongoDB 中的文章
-                Title title = feedService.findById(titleId);
-                if (title != null) {
-                    Comment comment = new Comment();
-                    comment.setAvatar(wxUser.getAvatarUrl());
-                    comment.setContent(content);
-                    comment.setOpenid(openidFromRedis);
-                    comment.setDate(new Date());
-                    comment.setGroup(openidFromRedis);
-                    comment.setState(0);
-                    comment.setNickname(wxUser.getNickname());
-
-                    title.getCommentList().add(comment);
-                    Title res = feedService.save(title);
-                    if (res != null) {
-                        return JSONResult.build(res, "添加评论成功", 200);
-                    }
+                UpdateResult updateResult = feedService.addComment(openidFromRedis, titleId, content, wxUser);
+                if (updateResult != null && updateResult.getModifiedCount() > 0) {
+                    return JSONResult.build(null, "添加评论成功", 200);
                 }
             }
         }
         return JSONResult.build(null, "添加评论失败", 400);
+    }
+
+    @ApiOperation(value = "删除评论", notes = "删除添加评论")
+    @DeleteMapping("delComment")
+    public JSONResult delComment(@RequestParam String sessionId, @RequestParam String titleId, @RequestParam String commentId) {
+        // 找出 Redis 中映射的 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openidFromRedis = sessionIdValue.split(":")[0];
+            if (openidFromRedis != null) {
+                UpdateResult updateResult = feedService.delComment(openidFromRedis, titleId, commentId);
+                if (updateResult != null && updateResult.getModifiedCount() > 0) {
+                    return JSONResult.build(null, "删除评论成功", 200);
+                }
+            }
+        }
+        return JSONResult.build(null, "删除评论失败", 400);
+    }
+
+    @ApiOperation(value = "点赞评论", notes = "点赞评论")
+    @PutMapping("likeComment")
+    public JSONResult likeComment(@RequestParam String sessionId, @RequestParam String titleId, @RequestParam String commentId) {
+        // 找出 Redis 中映射的 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openidFromRedis = sessionIdValue.split(":")[0];
+            // 找出 mongoDB 中的文章
+            Title title = feedService.findById(titleId);
+            if (title != null) {
+                UpdateResult updateResult = feedService.likeComment(openidFromRedis, titleId, commentId);
+                if (updateResult != null && updateResult.getModifiedCount() > 0) {
+                    return JSONResult.build(updateResult, "点赞评论成功", 200);
+                } else if (updateResult == null) {
+                    return JSONResult.build(null, "重复点赞", 400);
+                }
+            }
+        }
+        return JSONResult.build(null, "点赞评论失败", 400);
+    }
+
+    @ApiOperation(value = "取消点赞评论", notes = "取消点赞评论")
+    @PutMapping("unlikeComment")
+    public JSONResult unlikeComment(@RequestParam String sessionId, @RequestParam String titleId, @RequestParam String commentId) {
+        // 找出 Redis 中映射的 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openidFromRedis = sessionIdValue.split(":")[0];
+            // 找出 mongoDB 中的文章
+            Title title = feedService.findById(titleId);
+            if (title != null) {
+                UpdateResult updateResult = feedService.unlikeComment(openidFromRedis, titleId, commentId);
+                if (updateResult != null && updateResult.getModifiedCount() > 0) {
+                    return JSONResult.build(updateResult, "取消点赞评论成功", 200);
+                }
+            }
+        }
+        return JSONResult.build(null, "取消点赞评论失败", 400);
     }
 
     @ApiOperation(value = "点赞文章", notes = "点赞文章")

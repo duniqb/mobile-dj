@@ -1,5 +1,8 @@
 package cn.duniqb.mobile.service.impl;
 
+import cn.duniqb.mobile.domain.WxUser;
+import cn.duniqb.mobile.dto.json.JSONResult;
+import cn.duniqb.mobile.nosql.mongodb.document.feed.Comment;
 import cn.duniqb.mobile.nosql.mongodb.document.feed.Like;
 import cn.duniqb.mobile.nosql.mongodb.document.feed.Title;
 import cn.duniqb.mobile.service.FeedService;
@@ -14,6 +17,7 @@ import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.awt.print.Book;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -113,7 +117,6 @@ public class FeedServiceImpl implements FeedService {
             Like like = new Like();
             like.setOpenid(openid);
             like.setTime(new Date());
-            like.setType("title");
             List<Like> likeList = title.getLikeList();
             // 判断重复点赞
             for (Like like1 : likeList) {
@@ -149,6 +152,142 @@ public class FeedServiceImpl implements FeedService {
                     Update update = new Update().set("likeList", likeList);
                     // updateFirst 更新查询返回结果集的第一条
                     return mongoTemplate.updateFirst(query, update, Title.class);
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * 添加评论
+     *
+     * @param openid
+     * @param titleId
+     * @param cmt
+     * @param wxUser
+     * @return
+     */
+    @Override
+    public UpdateResult addComment(String openid, String titleId, String cmt, WxUser wxUser) {
+        // 找出 mongoDB 中的文章
+        Title title = findById(titleId);
+        if (title != null) {
+            Comment comment = new Comment();
+            comment.setId(String.valueOf(System.currentTimeMillis()));
+            comment.setAvatar(wxUser.getAvatarUrl());
+            comment.setContent(cmt);
+            comment.setOpenid(openid);
+            comment.setDate(new Date());
+            comment.setGroup(openid);
+            comment.setState(0);
+            comment.setNickname(wxUser.getNickname());
+
+            List<Comment> commentList = title.getCommentList();
+            commentList.add(comment);
+
+            Query query = new Query(Criteria.where("_id").is(title.get_id()));
+            Update update = new Update().set("commentList", commentList);
+            // updateFirst 更新查询返回结果集的第一条
+            return mongoTemplate.updateFirst(query, update, Title.class);
+
+        }
+        return null;
+    }
+
+    /**
+     * 删除评论
+     *
+     * @param openid
+     * @param titleId
+     * @param commentId
+     * @return
+     */
+    @Override
+    public UpdateResult delComment(String openid, String titleId, String commentId) {
+        // 找出 mongoDB 中的文章
+        Title title = findById(titleId);
+        if (title != null) {
+            List<Comment> commentList = title.getCommentList();
+            commentList.removeIf(comment -> comment.getId().equals(commentId) && comment.getOpenid().equals(openid));
+            Query query = new Query(Criteria.where("_id").is(title.get_id()));
+            Update update = new Update().set("commentList", commentList);
+            // updateFirst 更新查询返回结果集的第一条
+            return mongoTemplate.updateFirst(query, update, Title.class);
+        }
+        return null;
+    }
+
+    /**
+     * 对评论点赞
+     *
+     * @param openid
+     * @param titleId
+     * @param commentId
+     * @return
+     */
+    @Override
+    public UpdateResult likeComment(String openid, String titleId, String commentId) {
+        // 找出 mongoDB 中的文章
+        Title title = findById(titleId);
+        if (title != null) {
+            List<Comment> commentList = title.getCommentList();
+            Like like = new Like();
+            like.setOpenid(openid);
+            like.setTime(new Date());
+            List<Like> likeList;
+            for (Comment comment : commentList) {
+                if (comment.getId().equals(commentId)) {
+                    likeList = comment.getLikeList();
+                    // 判断重复点赞
+                    if (likeList != null) {
+                        for (Like like1 : likeList) {
+                            if (like1.getOpenid().equals(openid)) {
+                                return null;
+                            }
+                        }
+                    } else {
+                        likeList = new ArrayList<>();
+                        likeList.add(like);
+                    }
+                    comment.setLikeList(likeList);
+                    break;
+                }
+            }
+            Query query = new Query(Criteria.where("_id").is(title.get_id()));
+            Update update = new Update().set("commentList", commentList);
+            // updateFirst 更新查询返回结果集的第一条
+            return mongoTemplate.updateFirst(query, update, Title.class);
+        }
+        return null;
+    }
+
+    /**
+     * 取消评论点赞
+     *
+     * @param openid
+     * @param titleId
+     * @param commentId
+     * @return
+     */
+    @Override
+    public UpdateResult unlikeComment(String openid, String titleId, String commentId) {
+        Title title = mongoTemplate.findById(titleId, Title.class);
+        if (title != null) {
+            List<Comment> commentList = title.getCommentList();
+            for (Comment comment : commentList) {
+                if (comment.getId().equals(commentId)) {
+                    List<Like> likeList = comment.getLikeList();
+                    for (Like like : likeList) {
+                        if (like.getOpenid().equals(openid)) {
+                            likeList.remove(like);
+                            comment.setLikeList(likeList);
+
+                            Query query = new Query(Criteria.where("_id").is(title.get_id()));
+                            Update update = new Update().set("commentList", commentList);
+                            // updateFirst 更新查询返回结果集的第一条
+                            return mongoTemplate.updateFirst(query, update, Title.class);
+                        }
+                    }
                 }
             }
         }

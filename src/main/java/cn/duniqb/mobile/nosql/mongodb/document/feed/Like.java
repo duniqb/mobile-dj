@@ -19,11 +19,6 @@ public class Like implements Serializable {
     private String openid;
 
     /**
-     * 点赞类型：对何种实体点赞
-     */
-    private String type;
-
-    /**
      * 点赞时间
      */
     private Date time;

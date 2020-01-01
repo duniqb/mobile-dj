@@ -1,5 +1,6 @@
 package cn.duniqb.mobile.service;
 
+import cn.duniqb.mobile.domain.WxUser;
 import cn.duniqb.mobile.nosql.mongodb.document.feed.Title;
 import com.mongodb.client.result.DeleteResult;
 import com.mongodb.client.result.UpdateResult;
@@ -58,5 +59,47 @@ public interface FeedService {
      * @return
      */
     UpdateResult unlikeTitle(String id, String openid);
+
+    /**
+     * 添加评论
+     *
+     * @param openid
+     * @param titleId
+     * @param comment
+     * @param wxUser
+     * @return
+     */
+    UpdateResult addComment(String openid, String titleId, String comment, WxUser wxUser);
+
+    /**
+     * 删除评论
+     *
+     * @param openid
+     * @param titleId
+     * @param commentId
+     * @return
+     */
+    UpdateResult delComment(String openid, String titleId, String commentId);
+
+    /**
+     * 对评论点赞
+     *
+     * @param openid
+     * @param titleId
+     * @param commentId
+     * @return
+     */
+    UpdateResult likeComment(String openid, String titleId, String commentId);
+
+    /**
+     * 取消评论点赞
+     *
+     * @param openid
+     * @param titleId
+     * @param commentId
+     * @return
+     */
+    UpdateResult unlikeComment(String openid, String titleId, String commentId);
+
 
 }
