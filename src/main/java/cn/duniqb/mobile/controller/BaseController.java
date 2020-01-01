@@ -1,6 +1,6 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.json.JSONResult;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;

@@ -1,4 +1,4 @@
-package cn.duniqb.mobile.dto;
+package cn.duniqb.mobile.dto.tip;
 
 import lombok.Data;
 

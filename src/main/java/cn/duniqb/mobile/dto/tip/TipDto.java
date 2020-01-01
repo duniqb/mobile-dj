@@ -1,4 +1,4 @@
-package cn.duniqb.mobile.dto;
+package cn.duniqb.mobile.dto.tip;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;

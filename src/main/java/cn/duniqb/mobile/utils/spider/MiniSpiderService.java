@@ -1,6 +1,6 @@
 package cn.duniqb.mobile.utils.spider;
 
-import cn.duniqb.mobile.dto.Tip;
+import cn.duniqb.mobile.dto.tip.Tip;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -8,7 +8,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;

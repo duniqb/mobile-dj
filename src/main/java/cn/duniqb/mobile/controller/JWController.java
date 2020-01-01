@@ -2,7 +2,7 @@ package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.domain.Student;
 import cn.duniqb.mobile.domain.WxUser;
-import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.json.JSONResult;
 import cn.duniqb.mobile.dto.jw.Notice;
 import cn.duniqb.mobile.dto.jw.NoticeList;
 import cn.duniqb.mobile.service.*;

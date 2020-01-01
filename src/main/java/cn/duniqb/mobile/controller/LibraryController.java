@@ -2,7 +2,7 @@ package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.domain.BookCate;
 import cn.duniqb.mobile.dto.BookDto;
-import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.json.JSONResult;
 import cn.duniqb.mobile.dto.profession.ProfessionHotDto;
 import cn.duniqb.mobile.service.BookCateService;
 import cn.duniqb.mobile.utils.spider.LibrarySpiderService;
@@ -13,7 +13,6 @@ import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

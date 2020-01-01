@@ -2,9 +2,9 @@ package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.domain.WxUser;
 import cn.duniqb.mobile.dto.Code2Session;
-import cn.duniqb.mobile.dto.JSONResult;
-import cn.duniqb.mobile.dto.Tip;
-import cn.duniqb.mobile.dto.TipDto;
+import cn.duniqb.mobile.dto.json.JSONResult;
+import cn.duniqb.mobile.dto.tip.Tip;
+import cn.duniqb.mobile.dto.tip.TipDto;
 import cn.duniqb.mobile.service.WxUserService;
 import cn.duniqb.mobile.utils.spider.MiniSpiderService;
 import cn.duniqb.mobile.utils.MobileUtil;

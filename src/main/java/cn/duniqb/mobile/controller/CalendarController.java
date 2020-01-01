@@ -1,6 +1,6 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.json.JSONResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,6 +1,6 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.json.JSONResult;
 import cn.duniqb.mobile.dto.repair.*;
 import cn.duniqb.mobile.utils.RedisUtil;
 import cn.duniqb.mobile.utils.spider.LogisticsSpiderService;

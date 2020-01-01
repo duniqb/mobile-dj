@@ -4,7 +4,7 @@ import cn.duniqb.mobile.domain.Credit;
 import cn.duniqb.mobile.domain.GradeExam;
 import cn.duniqb.mobile.domain.Student;
 import cn.duniqb.mobile.domain.WxUser;
-import cn.duniqb.mobile.dto.JSONResult;
+import cn.duniqb.mobile.dto.json.JSONResult;
 import cn.duniqb.mobile.dto.ScoreDto;
 import cn.duniqb.mobile.service.*;
 import cn.duniqb.mobile.utils.RedisUtil;
