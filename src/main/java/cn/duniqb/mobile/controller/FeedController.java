@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -38,6 +39,16 @@ public class FeedController {
     @Autowired
     private RedisUtil redisUtil;
 
+    @ApiOperation(value = "查询文章详情", notes = "查询文章详情")
+    @GetMapping("find")
+    public JSONResult find(@RequestParam String id) {
+        Title title = feedService.findById(id);
+        if (title != null) {
+            return JSONResult.build(title, "查询文章详情成功", 200);
+        }
+        return JSONResult.build(null, "查询文章详情失败", 200);
+    }
+
     @ApiOperation(value = "分页查询文章", notes = "分页查询文章")
     @GetMapping("list")
     public JSONResult listDesc(@RequestParam Integer pageNum, @RequestParam Integer pageSize) {
@@ -45,13 +56,14 @@ public class FeedController {
         if (!titles.isEmpty()) {
             return JSONResult.build(titles, "分页查询文章成功", 200);
         }
-        return JSONResult.build(titles, "分页查询文章失败", 200);
+        return JSONResult.build(null, "分页查询文章失败", 200);
     }
 
     @ApiOperation(value = "新增文章", notes = "新增文章")
     @PostMapping("create")
     public JSONResult create(@RequestBody Title title) {
-
+        title.set_id(System.currentTimeMillis() + "");
+        title.setDate(new Date());
         Title res = feedService.save(title);
         if (res != null) {
             return JSONResult.build(res, "新增文章成功", 200);

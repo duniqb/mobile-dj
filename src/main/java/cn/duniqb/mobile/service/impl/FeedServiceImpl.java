@@ -21,11 +21,23 @@ public class FeedServiceImpl implements FeedService {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    /**
+     * 保存文章
+     *
+     * @param title
+     * @return
+     */
     @Override
     public Title save(Title title) {
         return mongoTemplate.save(title);
     }
 
+    /**
+     * 删除文章
+     *
+     * @param id
+     * @return
+     */
     @Override
     public DeleteResult delete(String id) {
         Title title = new Title();
@@ -33,6 +45,13 @@ public class FeedServiceImpl implements FeedService {
         return mongoTemplate.remove(title);
     }
 
+    /**
+     * 分页查询文章
+     *
+     * @param pageNum
+     * @param pageSize
+     * @return
+     */
     @Override
     public List<Title> listDesc(int pageNum, int pageSize) {
         List<Title> titleList;
@@ -40,7 +59,7 @@ public class FeedServiceImpl implements FeedService {
         Query query = new Query();
 
         // 通过 _id 来排序
-        query.with(Sort.by(Sort.Direction.ASC, "_id"));
+        query.with(Sort.by(Sort.Direction.DESC, "date"));
 
         if (pageNum != 1) {
             // number 参数是为了查上一页的最后一条数据
@@ -65,6 +84,12 @@ public class FeedServiceImpl implements FeedService {
         return titleList;
     }
 
+    /**
+     * 根据 id 查询文章
+     *
+     * @param id
+     * @return
+     */
     @Override
     public Title findById(String id) {
         return mongoTemplate.findById(id, Title.class);

@@ -22,6 +22,7 @@ spring:
       port: 27017 # mongodb的连接端口号
       database: mall-port # mongodb的连接的数据库
 
+
 mybatis:
   config-location: classpath:mybatis-config.xml
 
