@@ -29,7 +29,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/feed/")
 public class FeedController {
-
     @Autowired
     private FeedService feedService;
 
@@ -141,6 +140,25 @@ public class FeedController {
             }
         }
         return JSONResult.build(null, "点赞文章失败", 400);
+    }
+
+    @ApiOperation(value = "取消点赞文章", notes = "取消点赞文章")
+    @PutMapping("unlikeTitle")
+    public JSONResult unlikeTitle(@RequestParam String sessionId, @RequestParam String titleId) {
+        // 找出 Redis 中映射的 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openidFromRedis = sessionIdValue.split(":")[0];
+            // 找出 mongoDB 中的文章
+            Title title = feedService.findById(titleId);
+            if (title != null) {
+                UpdateResult updateResult = feedService.unlikeTitle(titleId, openidFromRedis);
+                if (updateResult != null && updateResult.getModifiedCount() > 0) {
+                    return JSONResult.build(updateResult, "取消点赞文章成功", 200);
+                }
+            }
+        }
+        return JSONResult.build(null, "取消点赞文章失败", 400);
     }
 }
 

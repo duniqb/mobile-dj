@@ -49,4 +49,14 @@ public interface FeedService {
      * @return
      */
     UpdateResult likeTitle(String id, String openid);
+
+    /**
+     * 对文章取消点赞
+     *
+     * @param id
+     * @param openid
+     * @return
+     */
+    UpdateResult unlikeTitle(String id, String openid);
+
 }

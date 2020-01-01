@@ -129,4 +129,29 @@ public class FeedServiceImpl implements FeedService {
         }
         return null;
     }
+
+    /**
+     * 对文章取消点赞
+     *
+     * @param id
+     * @param openid
+     * @return
+     */
+    @Override
+    public UpdateResult unlikeTitle(String id, String openid) {
+        Title title = mongoTemplate.findById(id, Title.class);
+        if (title != null) {
+            List<Like> likeList = title.getLikeList();
+            for (Like like : likeList) {
+                if (like.getOpenid().equals(openid)) {
+                    likeList.remove(like);
+                    Query query = new Query(Criteria.where("_id").is(title.get_id()));
+                    Update update = new Update().set("likeList", likeList);
+                    // updateFirst 更新查询返回结果集的第一条
+                    return mongoTemplate.updateFirst(query, update, Title.class);
+                }
+            }
+        }
+        return null;
+    }
 }
