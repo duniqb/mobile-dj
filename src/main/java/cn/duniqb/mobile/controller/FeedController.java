@@ -9,6 +9,7 @@ import cn.duniqb.mobile.service.WxUserService;
 import cn.duniqb.mobile.utils.RedisUtil;
 import cn.hutool.core.util.StrUtil;
 import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 import java.util.List;
-import java.util.UUID;
 
 
 /**
@@ -46,7 +46,7 @@ public class FeedController {
         if (title != null) {
             return JSONResult.build(title, "查询文章详情成功", 200);
         }
-        return JSONResult.build(null, "查询文章详情失败", 200);
+        return JSONResult.build(null, "查询文章详情失败", 400);
     }
 
     @ApiOperation(value = "分页查询文章", notes = "分页查询文章")
@@ -56,13 +56,13 @@ public class FeedController {
         if (!titles.isEmpty()) {
             return JSONResult.build(titles, "分页查询文章成功", 200);
         }
-        return JSONResult.build(null, "分页查询文章失败", 200);
+        return JSONResult.build(null, "分页查询文章失败", 400);
     }
 
     @ApiOperation(value = "新增文章", notes = "新增文章")
     @PostMapping("create")
     public JSONResult create(@RequestBody Title title) {
-        title.set_id(System.currentTimeMillis() + "");
+        title.set_id(String.valueOf(System.currentTimeMillis()));
         title.setDate(new Date());
         Title res = feedService.save(title);
         if (res != null) {
@@ -119,7 +119,28 @@ public class FeedController {
                 }
             }
         }
-        return JSONResult.build(null, "添加评论失败", 200);
+        return JSONResult.build(null, "添加评论失败", 400);
+    }
+
+    @ApiOperation(value = "点赞文章", notes = "点赞文章")
+    @PutMapping("likeTitle")
+    public JSONResult likeTitle(@RequestParam String sessionId, @RequestParam String titleId) {
+        // 找出 Redis 中映射的 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openidFromRedis = sessionIdValue.split(":")[0];
+            // 找出 mongoDB 中的文章
+            Title title = feedService.findById(titleId);
+            if (title != null) {
+                UpdateResult updateResult = feedService.likeTitle(titleId, openidFromRedis);
+                if (updateResult != null && updateResult.getModifiedCount() > 0) {
+                    return JSONResult.build(updateResult, "点赞文章成功", 200);
+                } else if (updateResult == null) {
+                    return JSONResult.build(null, "重复点赞", 400);
+                }
+            }
+        }
+        return JSONResult.build(null, "点赞文章失败", 400);
     }
 }
 

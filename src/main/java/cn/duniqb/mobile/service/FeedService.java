@@ -2,6 +2,7 @@ package cn.duniqb.mobile.service;
 
 import cn.duniqb.mobile.nosql.mongodb.document.feed.Title;
 import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 
 import java.util.List;
 
@@ -39,4 +40,13 @@ public interface FeedService {
      * @return
      */
     Title findById(String id);
+
+    /**
+     * 对文章点赞
+     *
+     * @param id
+     * @param openid
+     * @return
+     */
+    UpdateResult likeTitle(String id, String openid);
 }

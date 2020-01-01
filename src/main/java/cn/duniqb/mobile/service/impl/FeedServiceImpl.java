@@ -1,15 +1,20 @@
 package cn.duniqb.mobile.service.impl;
 
+import cn.duniqb.mobile.nosql.mongodb.document.feed.Like;
 import cn.duniqb.mobile.nosql.mongodb.document.feed.Title;
 import cn.duniqb.mobile.service.FeedService;
 import com.mongodb.client.result.DeleteResult;
+import com.mongodb.client.result.UpdateResult;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
+import java.awt.print.Book;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -55,10 +60,9 @@ public class FeedServiceImpl implements FeedService {
     @Override
     public List<Title> listDesc(int pageNum, int pageSize) {
         List<Title> titleList;
-
         Query query = new Query();
 
-        // 通过 _id 来排序
+        // 通过日期倒序
         query.with(Sort.by(Sort.Direction.DESC, "date"));
 
         if (pageNum != 1) {
@@ -93,5 +97,36 @@ public class FeedServiceImpl implements FeedService {
     @Override
     public Title findById(String id) {
         return mongoTemplate.findById(id, Title.class);
+    }
+
+    /**
+     * 对文章点赞
+     *
+     * @param id
+     * @param openid
+     * @return
+     */
+    @Override
+    public UpdateResult likeTitle(String id, String openid) {
+        Title title = mongoTemplate.findById(id, Title.class);
+        if (title != null) {
+            Like like = new Like();
+            like.setOpenid(openid);
+            like.setTime(new Date());
+            like.setType("title");
+            List<Like> likeList = title.getLikeList();
+            // 判断重复点赞
+            for (Like like1 : likeList) {
+                if (like1.getOpenid().equals(openid)) {
+                    return null;
+                }
+            }
+            likeList.add(like);
+            Query query = new Query(Criteria.where("_id").is(title.get_id()));
+            Update update = new Update().set("likeList", likeList);
+            // updateFirst 更新查询返回结果集的第一条
+            return mongoTemplate.updateFirst(query, update, Title.class);
+        }
+        return null;
     }
 }
