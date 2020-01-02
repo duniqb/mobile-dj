@@ -14,17 +14,16 @@ import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
 import java.util.List;
 
 
 /**
- * 信息流，此处需要校验用户信息
+ * 校友圈，此处需要校验用户信息
  *
  * @author duniqb
  * @date 2019/12/30 22:46
  */
-@Api(value = "与信息流相关的接口", tags = {"与信息流相关的接口"})
+@Api(value = "与校友圈相关的接口", tags = {"与校友圈相关的接口"})
 @RestController
 @RequestMapping("/api/v1/feed/")
 public class FeedController {
@@ -59,12 +58,18 @@ public class FeedController {
 
     @ApiOperation(value = "新增文章", notes = "新增文章")
     @PostMapping("create")
-    public JSONResult create(@RequestBody Title title) {
-        title.set_id(String.valueOf(System.currentTimeMillis()));
-        title.setDate(new Date());
-        Title res = feedService.save(title);
-        if (res != null) {
-            return JSONResult.build(res, "新增文章成功", 200);
+    public JSONResult create(@RequestParam String sessionId, @RequestBody Title title) {
+        // 找出 Redis 中映射的 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openidFromRedis = sessionIdValue.split(":")[0];
+            WxUser wxUser = wxUserService.selectByOpenid(openidFromRedis);
+            if (wxUser != null) {
+                Title res = feedService.save(wxUser, title);
+                if (res != null) {
+                    return JSONResult.build(res, "新增文章成功", 200);
+                }
+            }
         }
         return JSONResult.build(null, "新增文章失败", 400);
     }

@@ -3,7 +3,7 @@ package cn.duniqb.mobile.nosql.mongodb.document.feed;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * 点赞
@@ -21,5 +21,5 @@ public class Like implements Serializable {
     /**
      * 点赞时间
      */
-    private Date time;
+    private LocalDateTime time;
 }

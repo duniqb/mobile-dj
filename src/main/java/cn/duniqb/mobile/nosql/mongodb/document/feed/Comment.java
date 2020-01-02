@@ -3,6 +3,7 @@ package cn.duniqb.mobile.nosql.mongodb.document.feed;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -42,7 +43,7 @@ public class Comment implements Serializable {
     /**
      * 评论时间
      */
-    private Date date;
+    private LocalDateTime time;
 
     /**
      * 默认 false.不是本人

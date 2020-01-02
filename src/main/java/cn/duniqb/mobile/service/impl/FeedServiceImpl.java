@@ -1,7 +1,6 @@
 package cn.duniqb.mobile.service.impl;
 
 import cn.duniqb.mobile.domain.WxUser;
-import cn.duniqb.mobile.dto.json.JSONResult;
 import cn.duniqb.mobile.nosql.mongodb.document.feed.Comment;
 import cn.duniqb.mobile.nosql.mongodb.document.feed.Like;
 import cn.duniqb.mobile.nosql.mongodb.document.feed.Title;
@@ -16,9 +15,8 @@ import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
-import java.awt.print.Book;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -37,7 +35,15 @@ public class FeedServiceImpl implements FeedService {
      * @return
      */
     @Override
-    public Title save(Title title) {
+    public Title save(WxUser wxUser, Title title) {
+        title.set_id(String.valueOf(System.currentTimeMillis()));
+        title.setTime(LocalDateTime.now());
+        title.setNickname(wxUser.getNickname());
+        title.setAvatar(wxUser.getAvatarUrl());
+        title.setOpenid(wxUser.getOpenid());
+        title.setState(0);
+        title.setCommentList(new ArrayList<>());
+        title.setLikeList(new ArrayList<>());
         return mongoTemplate.save(title);
     }
 
@@ -100,6 +106,7 @@ public class FeedServiceImpl implements FeedService {
      */
     @Override
     public Title findById(String id) {
+
         return mongoTemplate.findById(id, Title.class);
     }
 
@@ -116,7 +123,7 @@ public class FeedServiceImpl implements FeedService {
         if (title != null) {
             Like like = new Like();
             like.setOpenid(openid);
-            like.setTime(new Date());
+            like.setTime(LocalDateTime.now());
             List<Like> likeList = title.getLikeList();
             // 判断重复点赞
             for (Like like1 : likeList) {
@@ -177,10 +184,11 @@ public class FeedServiceImpl implements FeedService {
             comment.setAvatar(wxUser.getAvatarUrl());
             comment.setContent(cmt);
             comment.setOpenid(openid);
-            comment.setDate(new Date());
+            comment.setTime(LocalDateTime.now());
             comment.setGroup(openid);
             comment.setState(0);
             comment.setNickname(wxUser.getNickname());
+            comment.setLikeList(new ArrayList<>());
 
             List<Comment> commentList = title.getCommentList();
             commentList.add(comment);
@@ -189,7 +197,6 @@ public class FeedServiceImpl implements FeedService {
             Update update = new Update().set("commentList", commentList);
             // updateFirst 更新查询返回结果集的第一条
             return mongoTemplate.updateFirst(query, update, Title.class);
-
         }
         return null;
     }
@@ -230,33 +237,30 @@ public class FeedServiceImpl implements FeedService {
         // 找出 mongoDB 中的文章
         Title title = findById(titleId);
         if (title != null) {
+            System.out.println("点赞1");
             List<Comment> commentList = title.getCommentList();
             Like like = new Like();
             like.setOpenid(openid);
-            like.setTime(new Date());
+            like.setTime(LocalDateTime.now());
             List<Like> likeList;
             for (Comment comment : commentList) {
                 if (comment.getId().equals(commentId)) {
+                    System.out.println("点赞1");
                     likeList = comment.getLikeList();
                     // 判断重复点赞
-                    if (likeList != null) {
-                        for (Like like1 : likeList) {
-                            if (like1.getOpenid().equals(openid)) {
-                                return null;
-                            }
+                    for (Like like1 : likeList) {
+                        if (like1.getOpenid().equals(openid)) {
+                            return null;
                         }
-                    } else {
-                        likeList = new ArrayList<>();
-                        likeList.add(like);
                     }
+                    likeList.add(like);
                     comment.setLikeList(likeList);
-                    break;
+                    Query query = new Query(Criteria.where("_id").is(title.get_id()));
+                    Update update = new Update().set("commentList", commentList);
+                    // updateFirst 更新查询返回结果集的第一条
+                    return mongoTemplate.updateFirst(query, update, Title.class);
                 }
             }
-            Query query = new Query(Criteria.where("_id").is(title.get_id()));
-            Update update = new Update().set("commentList", commentList);
-            // updateFirst 更新查询返回结果集的第一条
-            return mongoTemplate.updateFirst(query, update, Title.class);
         }
         return null;
     }

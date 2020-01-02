@@ -5,6 +5,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class Title implements Serializable {
     /**
      * 创建时间
      */
-    private Date date;
+    private LocalDateTime time;
 
     /**
      * 标记是否是本人,默认是非本人

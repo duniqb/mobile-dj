@@ -15,7 +15,7 @@ public interface FeedService {
      * @param title
      * @return
      */
-    Title save(Title title);
+    Title save(WxUser wxUser, Title title);
 
     /**
      * 根据 id 删除文章
