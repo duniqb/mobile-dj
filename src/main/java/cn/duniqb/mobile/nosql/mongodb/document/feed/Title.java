@@ -37,6 +37,11 @@ public class Title implements Serializable {
     private String openid;
 
     /**
+     * 情感表白，控制匿名发表
+     */
+    private Boolean anonymous = false;
+
+    /**
      * 内容
      */
     private String content;

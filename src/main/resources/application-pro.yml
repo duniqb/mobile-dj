@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://dj.xiaoshi98.top:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false
+    url: jdbc:mysql://dj.xiaoshi98.top:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: zlb/zlb/zlb
   redis:

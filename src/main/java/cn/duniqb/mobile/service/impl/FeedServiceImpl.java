@@ -73,7 +73,7 @@ public class FeedServiceImpl implements FeedService {
         Query query = new Query();
 
         // 通过日期倒序
-        query.with(Sort.by(Sort.Direction.DESC, "date"));
+        query.with(Sort.by(Sort.Direction.DESC, "time"));
 
         if (pageNum != 1) {
             // number 参数是为了查上一页的最后一条数据

@@ -78,6 +78,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+        <!-- PageHelper -->
+        <dependency>
+            <groupId>com.github.pagehelper</groupId>
+            <artifactId>pagehelper-spring-boot-starter</artifactId>
+            <version>1.2.12</version>
+        </dependency>
         <!-- Hutool Java工具包 -->
         <dependency>
             <groupId>cn.hutool</groupId>

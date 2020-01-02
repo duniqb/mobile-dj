@@ -16,14 +16,13 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-
 /**
- * 校友圈，此处需要校验用户信息
+ * 信息流，此处需要校验用户信息
  *
  * @author duniqb
  * @date 2019/12/30 22:46
  */
-@Api(value = "与校友圈相关的接口", tags = {"与校友圈相关的接口"})
+@Api(value = "与信息流相关的接口", tags = {"与信息流相关的接口"})
 @RestController
 @RequestMapping("/api/v1/feed/")
 public class FeedController {
@@ -48,8 +47,8 @@ public class FeedController {
 
     @ApiOperation(value = "分页倒序查询文章", notes = "分页倒序查询文章")
     @GetMapping("list")
-    public JSONResult listDesc(@RequestParam Integer pageNum, @RequestParam Integer pageSize) {
-        List<Title> titles = feedService.listDesc(pageNum, pageSize);
+    public JSONResult listDesc(@RequestParam Integer page, @RequestParam Integer size) {
+        List<Title> titles = feedService.listDesc(page, size);
         if (!titles.isEmpty()) {
             return JSONResult.build(titles, "分页倒序查询文章成功", 200);
         }

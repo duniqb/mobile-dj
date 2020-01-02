@@ -1,23 +1,22 @@
 package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.domain.BookCate;
+import cn.duniqb.mobile.domain.LikeBook;
 import cn.duniqb.mobile.dto.BookDto;
 import cn.duniqb.mobile.dto.json.JSONResult;
 import cn.duniqb.mobile.dto.profession.ProfessionHotDto;
-import cn.duniqb.mobile.service.BookCateService;
+import cn.duniqb.mobile.service.LibraryService;
 import cn.duniqb.mobile.utils.spider.LibrarySpiderService;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
+import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,7 +34,7 @@ public class LibraryController {
     private LibrarySpiderService librarySpiderService;
 
     @Autowired
-    private BookCateService bookCateService;
+    private LibraryService libraryService;
 
 
     @Autowired
@@ -240,7 +239,7 @@ public class LibraryController {
         if (res != null) {
             return JSONResult.build(JSON.parseArray(res, BookCate.class), "图书分类法总类 - 缓存获取成功", 200);
         }
-        List<BookCate> bookCateList = bookCateService.selectAll();
+        List<BookCate> bookCateList = libraryService.selectAll();
         if (!bookCateList.isEmpty()) {
             redisUtil.set(BOOK_CATE, JSON.toJSONString(bookCateList), 60 * 60 * 24 * 3);
             return JSONResult.build(bookCateList, "查询成功", 200);
@@ -307,5 +306,53 @@ public class LibraryController {
         return JSONResult.build(null, "查询失败", 400);
     }
 
+    @ApiOperation(value = "收藏图书", notes = "收藏图书")
+    @PostMapping("likeBook")
+    public JSONResult likeBook(@RequestParam String sessionId, @RequestParam String bookId,
+                               @RequestParam String bookName, @RequestParam String author) {
+        // 找出 Redis 中映射的 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openidFromRedis = sessionIdValue.split(":")[0];
+            int i = libraryService.likeBook(openidFromRedis, bookId, bookName, author);
+            if (i > 0) {
+                return JSONResult.build(null, "收藏图书成功", 200);
+            } else if (i == -1) {
+                return JSONResult.build(null, "重复收藏", 400);
+            }
+        }
+        return JSONResult.build(null, "收藏图书失败", 400);
+    }
 
+    @ApiOperation(value = "取消收藏图书", notes = "取消收藏图书")
+    @PostMapping("unlikeBook")
+    public JSONResult unlikeBook(@RequestParam String sessionId, @RequestParam String bookId) {
+        // 找出 Redis 中映射的 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openidFromRedis = sessionIdValue.split(":")[0];
+            int i = libraryService.unlikeBook(openidFromRedis, bookId);
+            if (i > 0) {
+                return JSONResult.build(null, "取消收藏图书成功", 200);
+            } else if (i == -1) {
+                return JSONResult.build(null, "收藏不存在", 400);
+            }
+        }
+        return JSONResult.build(null, "取消收藏图书失败", 400);
+    }
+
+    @ApiOperation(value = "分页查询收藏图书列表", notes = "分页查询收藏图书列表")
+    @GetMapping("likeList")
+    public JSONResult likeList(@RequestParam String sessionId, Integer pageNum, Integer pageSize) {
+        // 找出 Redis 中映射的 openid
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openidFromRedis = sessionIdValue.split(":")[0];
+            PageInfo<LikeBook> likeList = libraryService.likeList(openidFromRedis, pageNum, pageSize);
+            if (likeList.getPages() > 0) {
+                return JSONResult.build(likeList, "分页查询收藏图书列表成功", 200);
+            }
+        }
+        return JSONResult.build(null, "分页查询收藏图书列表失败", 400);
+    }
 }
