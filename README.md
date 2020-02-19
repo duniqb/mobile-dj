@@ -2,8 +2,6 @@
 
 掌上大交小程序，提供教务信息，一卡通信息，图书查询，后勤报修，就业信息等服务。
 
-（此处放图片）
-
 ## 前端
 
 https://github.com/aitwzl/mobile-dj-mini
@@ -15,9 +13,7 @@ https://github.com/aitwzl/mobile-dj-mini
 
 ## 体验
 
-扫描二维码
-
-（此处放二维码）
+![扫码体验](https://wx2.sinaimg.cn/mw690/6cb17e18ly1gc1mwsqtoej20u01d8k13.jpg)
 
 ## 开发细节
 
