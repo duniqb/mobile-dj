@@ -15,9 +15,8 @@ https://github.com/aitwzl/mobile-dj-mini
 
 ## 体验
 
-扫描二维码
+![扫码体验](https://wx2.sinaimg.cn/mw690/6cb17e18ly1gc1mwsqtoej20u01d8k13.jpg)
 
-（此处放二维码）
 
 ## 开发细节
 
