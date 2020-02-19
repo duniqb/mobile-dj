@@ -27,7 +27,7 @@ mybatis:
   config-location: classpath:mybatis-config.xml
 
 local:
-  host: http://192.168.2.120:8080/
+  host: http://192.168.2.200:8080/
   # 验证码图片放置的本机文件夹
   verifyPath: D:\verify\
   image: D:\img\

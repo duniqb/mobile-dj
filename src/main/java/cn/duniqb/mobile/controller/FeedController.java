@@ -36,8 +36,8 @@ public class FeedController {
     private RedisUtil redisUtil;
 
     @ApiOperation(value = "查询文章详情", notes = "查询文章详情")
-    @GetMapping("find")
-    public JSONResult find(@RequestParam String id) {
+    @GetMapping("detail")
+    public JSONResult detail(@RequestParam String id) {
         Title title = feedService.findById(id);
         if (title != null) {
             return JSONResult.build(title, "查询文章详情成功", 200);
@@ -141,7 +141,7 @@ public class FeedController {
                 if (updateResult != null && updateResult.getModifiedCount() > 0) {
                     return JSONResult.build(updateResult, "点赞评论成功", 200);
                 } else if (updateResult == null) {
-                    return JSONResult.build(null, "重复点赞", 400);
+                    return JSONResult.build(null, "重复点赞", 401);
                 }
             }
         }
@@ -181,7 +181,7 @@ public class FeedController {
                 if (updateResult != null && updateResult.getModifiedCount() > 0) {
                     return JSONResult.build(updateResult, "点赞文章成功", 200);
                 } else if (updateResult == null) {
-                    return JSONResult.build(null, "重复点赞", 400);
+                    return JSONResult.build(null, "重复点赞", 401);
                 }
             }
         }

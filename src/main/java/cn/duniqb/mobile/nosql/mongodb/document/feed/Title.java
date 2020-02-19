@@ -6,7 +6,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -64,7 +64,7 @@ public class Title implements Serializable {
     /**
      * 点赞
      */
-    private List<Like> likeList;
+    private List<Like> likeList = new ArrayList<>();
 
     /**
      * 状态 0:正常，1：删除，2：禁止评论
@@ -74,5 +74,15 @@ public class Title implements Serializable {
     /**
      * 问题的回答列表
      */
-    private List<Comment> commentList;
+    private List<Comment> commentList = new ArrayList<>();
+
+    /**
+     * 当前页
+     */
+    private Integer page;
+
+    /**
+     * 总页数
+     */
+    private Integer totalPage;
 }
