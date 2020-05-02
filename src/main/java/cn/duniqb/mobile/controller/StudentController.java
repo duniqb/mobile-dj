@@ -1,187 +1,83 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.domain.Credit;
-import cn.duniqb.mobile.domain.GradeExam;
-import cn.duniqb.mobile.domain.Student;
-import cn.duniqb.mobile.domain.WxUser;
-import cn.duniqb.mobile.dto.json.JSONResult;
-import cn.duniqb.mobile.dto.ScoreDto;
-import cn.duniqb.mobile.service.*;
-import cn.duniqb.mobile.utils.RedisUtil;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
-import io.swagger.annotations.ApiOperation;
+import cn.duniqb.mobile.entity.StudentEntity;
+import cn.duniqb.mobile.service.StudentService;
+import cn.duniqb.mobile.utils.PageUtils;
+import cn.duniqb.mobile.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Arrays;
+import java.util.Map;
+
 
 /**
- * 与学生相关的接口
+ * 学籍信息表
  *
  * @author duniqb
+ * @email duniqb@qq.com
+ * @date 2020-04-30 19:36:16
  */
-@Api(value = "与学生相关的接口", tags = {"与学生相关的接口"})
 @RestController
-@RequestMapping("/api/v1/student/")
+@RequestMapping("mobile/student")
 public class StudentController {
     @Autowired
     private StudentService studentService;
 
-    @Autowired
-    private CreditService creditService;
+    /**
+     * 列表
+     */
+    @RequestMapping("/list")
+    // @RequiresPermissions("mobile:student:list")
+    public R list(@RequestParam Map<String, Object> params) {
+        PageUtils page = studentService.queryPage(params);
 
-    @Autowired
-    private GradeExamService gradeExamService;
+        return R.ok().put("page", page);
+    }
 
-    @Autowired
-    private ScoreService scoreService;
-
-    @Autowired
-    private RedisUtil redisUtil;
-
-    @Autowired
-    private WxUserService wxUserService;
 
     /**
-     * 根据学号获取学生信息
-     *
-     * @param sessionId
-     * @return
+     * 信息
      */
-    @ApiOperation(value = "查询学生信息", notes = "查询学生信息的接口，请求参数是学号")
-    @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
-    @GetMapping("info")
-    public JSONResult info(@RequestParam String sessionId) {
-        String sessionIdValue = redisUtil.get(sessionId);
-        if (sessionIdValue != null) {
-            String openid = sessionIdValue.split(":")[0];
-            // 检测是否存在
-            WxUser wxUser = wxUserService.selectByOpenid(openid);
-            if (wxUser != null) {
-                String stuNo = wxUser.getStuNo();
-                if (stuNo != null) {
-                    Student student = studentService.selectOneByNo(stuNo);
-                    if (student != null) {
-                        return JSONResult.build(student.getName(), "获取信息成功", 200);
-                    }
-                }
-            }
-        }
+    @RequestMapping("/info/{stuNo}")
+    // @RequiresPermissions("mobile:student:info")
+    public R info(@PathVariable("stuNo") String stuNo) {
+        StudentEntity student = studentService.getById(stuNo);
 
-        return JSONResult.build(null, "获取信息失败", 400);
+        return R.ok().put("student", student);
     }
 
     /**
-     * 根据学号获取学生学分
-     *
-     * @param sessionId
-     * @return
+     * 保存
      */
-    @ApiOperation(value = "查询学生学分", notes = "查询学生学分的接口，请求参数是学号")
-    @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
-    @GetMapping("credit")
-    public JSONResult credit(@RequestParam String sessionId) {
-        String sessionIdValue = redisUtil.get(sessionId);
-        if (sessionIdValue != null) {
-            String openid = sessionIdValue.split(":")[0];
-            // 检测是否存在
-            WxUser wxUser = wxUserService.selectByOpenid(openid);
-            if (wxUser != null) {
-                String stuNo = wxUser.getStuNo();
-                if (stuNo != null) {
-                    Credit credit = creditService.selectOneByNo(stuNo);
-                    if (credit != null) {
-                        return JSONResult.build(credit, "获取学分成功", 200);
-                    }
-                }
-            }
-        }
-        return JSONResult.build(null, "获取学分失败", 400);
+    @RequestMapping("/save")
+    // @RequiresPermissions("mobile:student:save")
+    public R save(@RequestBody StudentEntity student) {
+        studentService.save(student);
+
+        return R.ok();
     }
 
     /**
-     * 根据学号获取等级考试
-     *
-     * @return
+     * 修改
      */
-    @ApiOperation(value = "查询学生等级考试", notes = "查询学生等级考试的接口，请求参数是学号")
-    @ApiImplicitParam(name = "username", value = "学号", required = true, dataType = "String", paramType = "query")
-    @GetMapping("grade")
-    public JSONResult gradeExam(@RequestParam String sessionId) {
-        String sessionIdValue = redisUtil.get(sessionId);
-        if (sessionIdValue != null) {
-            String openid = sessionIdValue.split(":")[0];
-            // 检测是否存在
-            WxUser wxUser = wxUserService.selectByOpenid(openid);
-            if (wxUser != null) {
-                String stuNo = wxUser.getStuNo();
-                if (stuNo != null) {
-                    List<GradeExam> gradeExamList = gradeExamService.selectOneByStuNo(stuNo);
-                    if (!gradeExamList.isEmpty()) {
-                        return JSONResult.build(gradeExamList, "获取等级考试成功", 200);
-                    }
-                }
-            }
-        }
-        return JSONResult.build(null, "获取等级考试失败", 400);
+    @RequestMapping("/update")
+    // @RequiresPermissions("mobile:student:update")
+    public R update(@RequestBody StudentEntity student) {
+        studentService.updateById(student);
+
+        return R.ok();
     }
 
     /**
-     * 根据学号，学年，学期获取分数
-     *
-     * @param sessionId
-     * @param year
-     * @param term
-     * @return
+     * 删除
      */
-    @ApiOperation(value = "查询学生分数", notes = "查询学生分数的接口，请求参数是学号，学年，学期")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "year", value = "学年", dataType = "Integer", paramType = "query"),
-            @ApiImplicitParam(name = "term", value = "学期 0-春、1-秋", dataType = "Integer", paramType = "query")
-    })
-    @GetMapping("score")
-    public JSONResult score(@RequestParam String sessionId,
-                            @RequestParam(required = false) Integer year,
-                            @RequestParam(required = false) Integer term) {
-        String sessionIdValue = redisUtil.get(sessionId);
-        if (sessionIdValue != null) {
-            String openid = sessionIdValue.split(":")[0];
-            // 检测是否存在
-            WxUser wxUser = wxUserService.selectByOpenid(openid);
-            if (wxUser != null) {
-                String stuNo = wxUser.getStuNo();
-                if (stuNo != null) {
-                    // 按照学号查询全部成绩
-                    if (year == null && term == null) {
-                        List<ScoreDto> scoreDtoList = scoreService.selectOneByStuNo(stuNo);
-                        if (!scoreDtoList.isEmpty()) {
-                            return JSONResult.build(scoreDtoList, "获取学生分数成功", 200);
-                        }
-                    }
-                    // 按照学号 + 学年查询成绩
-                    if (year != null && term == null) {
-                        List<ScoreDto> scoreDtoList = scoreService.selectOneByStuNoYear(stuNo, year);
-                        if (!scoreDtoList.isEmpty()) {
-                            return JSONResult.build(scoreDtoList, "获取学生分数成功", 200);
-                        }
-                    }
-                    // 按照学号 + 学年 + 学期查询成绩
-                    if (year != null) {
-                        List<ScoreDto> scoreDtoList = scoreService.selectOneByStuNoYearTerm(stuNo, year, term);
-                        if (!scoreDtoList.isEmpty()) {
-                            return JSONResult.build(scoreDtoList, "获取学生分数成功", 200);
-                        }
-                    }
-                }
-            }
-        }
+    @RequestMapping("/delete")
+    // @RequiresPermissions("mobile:student:delete")
+    public R delete(@RequestBody String[] stuNos) {
+        studentService.removeByIds(Arrays.asList(stuNos));
 
-        return JSONResult.build(null, "获取学生分数失败", 400);
+        return R.ok();
     }
+
 }

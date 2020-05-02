@@ -29,7 +29,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .title("Mobile DJ 接口")
                 .contact(new Contact("duniqb", "null", "duniqb@qq.com"))
                 .version("v1")
-                .termsOfServiceUrl("localhost:8080/v1/")
+                .termsOfServiceUrl("localhost:8080/v2/")
                 .description("Mobile DJ 接口")
                 .build();
     }

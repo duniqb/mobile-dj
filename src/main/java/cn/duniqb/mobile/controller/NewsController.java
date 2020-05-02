@@ -1,9 +1,9 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.dto.json.JSONResult;
 import cn.duniqb.mobile.dto.news.NewsDto;
 import cn.duniqb.mobile.dto.news.NewsList;
-import cn.duniqb.mobile.utils.spider.NewsSpiderService;
+import cn.duniqb.mobile.spider.NewsSpiderService;
+import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Api(value = "与新闻相关的接口", tags = {"与新闻相关的接口"})
 @RestController
-@RequestMapping("/api/v1/news/")
+@RequestMapping("/api/v2/news/")
 public class NewsController {
     @Autowired
     private NewsSpiderService newsSpiderService;
@@ -54,17 +54,17 @@ public class NewsController {
             @ApiImplicitParam(name = "type", value = "新闻类型 type，1：交大要闻 2：综合报道 ，3：通知公告", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "page", value = "页数 page", dataType = "String", paramType = "query")
     })
-    public JSONResult list(@RequestParam String type, @RequestParam(required = false) String page) {
+    public R list(@RequestParam String type, @RequestParam(required = false) String page) {
         String res = redisUtil.get(NEWS_LIST + ":" + type + ":" + page);
         if (res != null) {
-            return JSONResult.build(JSON.parseObject(res, NewsList.class), "新闻列表 - 缓存获取成功", 200);
+            return R.ok().put("新闻列表 - 缓存获取成功", JSON.parseObject(res, NewsList.class));
         }
         NewsList list = newsSpiderService.list(type, page);
         if (list != null) {
             redisUtil.set(NEWS_LIST + ":" + type + ":" + page, JSON.toJSONString(list), 60 * 60 * 24);
-            return JSONResult.build(list, list.getType() + " - 获取成功", 200);
+            return R.ok().put(list.getType() + " - 获取成功", list);
         }
-        return JSONResult.build(null, "获取失败", 400);
+        return R.ok().put("获取失败", 400);
     }
 
     /**
@@ -80,16 +80,16 @@ public class NewsController {
             @ApiImplicitParam(name = "type", value = "新闻类型 type，1：交大要闻 2：综合报道 ，3：通知公告", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "id", value = "新闻 id", required = true, dataType = "String", paramType = "query")
     })
-    public JSONResult detail(@RequestParam String type, @RequestParam String id) {
+    public R detail(@RequestParam String type, @RequestParam Integer id) {
         String res = redisUtil.get(NEWS_DETAIL + ":" + type + ":" + id);
         if (res != null) {
-            return JSONResult.build(JSON.parseObject(res, NewsDto.class), "新闻详情 - 缓存获取成功", 200);
+            return R.ok().put("新闻详情 - 缓存获取成功", JSON.parseObject(res, NewsDto.class));
         }
         NewsDto detail = newsSpiderService.detail(type, id);
         if (detail != null) {
             redisUtil.set(NEWS_DETAIL + ":" + type + ":" + id, JSON.toJSONString(detail), 60 * 60 * 24);
-            return JSONResult.build(detail, detail.getType() + " - 获取成功", 200);
+            return R.ok().put(detail.getType() + " - 获取成功", detail);
         }
-        return JSONResult.build(null, "获取失败", 400);
+        return R.ok().put("获取失败", 400);
     }
 }

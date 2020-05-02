@@ -1,6 +1,6 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.dto.json.JSONResult;
+import cn.duniqb.mobile.utils.R;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,7 +16,7 @@ import java.util.*;
  */
 @Api(value = "与校历相关的接口", tags = {"与校历相关的接口"})
 @RestController
-@RequestMapping("/api/v1/calendar/")
+@RequestMapping("/api/v2/calendar/")
 public class CalendarController {
     /**
      * 日历
@@ -25,7 +25,7 @@ public class CalendarController {
      */
     @ApiOperation(value = "日历", notes = "日历的接口")
     @GetMapping("calendar")
-    public JSONResult calendar() {
+    public R calendar() {
         Map<String, Integer> map = new HashMap<>();
 
         Calendar calendar = Calendar.getInstance();
@@ -70,7 +70,7 @@ public class CalendarController {
             map.put("endOfVacationDay", (int) ((calendarEnd.getTimeInMillis() - calendar.getTimeInMillis()) / 1000 / 60 / 60 / 24));
         }
 
-        return JSONResult.build(map, "日历获取成功", 200);
+        return R.ok().put("日历获取成功", map);
     }
 
     /**
@@ -80,7 +80,7 @@ public class CalendarController {
      */
     @ApiOperation(value = "节假日提示", notes = "节假日提示的接口")
     @GetMapping("festival")
-    public JSONResult festival() {
+    public R festival() {
         List<String> list = new ArrayList<>();
 
         // 平安夜
@@ -154,6 +154,6 @@ public class CalendarController {
             list.add("正月十五月圆圆，万家灯火不夜天！");
             list.add("今天吃汤圆了吗？");
         }
-        return JSONResult.build(list, "节假日提示成功", 200);
+        return R.ok().put("节假日提示成功", list);
     }
 }

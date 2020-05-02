@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>通知邮件</title>
+    <style>
+        body {
+            text-align: center;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        #main {
+            text-align: center;
+            position: absolute;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+<div id="main">
+    <h3>轰炸结果通知</h3>
+    <br>
+    已对号码 <span style="color: coral" th:text="${bomb.phone}"></span> 进行了 <span style="color: coral"
+                                                                              th:text="${bomb.amount}"></span> 次轰炸。
+    其中成功 <span style="color: coral" th:text="${bomb.success}"></span> 次，失败 <span style="color: coral"
+                                                                                 th:text="${bomb.failure}"></span> 次。
+    <br>
+</div>
+</body>
+</html>

@@ -1,22 +1,23 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.domain.BookCate;
-import cn.duniqb.mobile.domain.LikeBook;
 import cn.duniqb.mobile.dto.BookDto;
-import cn.duniqb.mobile.dto.json.JSONResult;
 import cn.duniqb.mobile.dto.profession.ProfessionHotDto;
-import cn.duniqb.mobile.service.LibraryService;
-import cn.duniqb.mobile.utils.spider.LibrarySpiderService;
+import cn.duniqb.mobile.entity.BookCateEntity;
+import cn.duniqb.mobile.service.BookCateService;
+import cn.duniqb.mobile.spider.LibrarySpiderService;
+import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
-import com.github.pagehelper.PageInfo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
 import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -28,13 +29,13 @@ import java.util.List;
 @Api(value = "与图书馆相关的接口", tags = {"与图书馆相关的接口"})
 @Scope("session")
 @RestController
-@RequestMapping("/api/v1/library/")
+@RequestMapping("/api/v2/library/")
 public class LibraryController {
     @Autowired
     private LibrarySpiderService librarySpiderService;
 
     @Autowired
-    private LibraryService libraryService;
+    private BookCateService bookCateService;
 
 
     @Autowired
@@ -85,20 +86,20 @@ public class LibraryController {
     @ApiOperation(value = "馆藏查询", notes = "馆藏查询的接口，请求参数是图书名")
     @ApiImplicitParam(name = "name", value = "查询参数，书名", required = true, dataType = "String", paramType = "query")
     @GetMapping("query")
-    public JSONResult query(@RequestParam String name) {
+    public R query(@RequestParam String name) {
         if (name == null || "".equals(name.trim())) {
-            return JSONResult.build(null, "书名不能为空", 400);
+            return R.ok().put("书名不能为空", null);
         }
         String res = redisUtil.get(LIBRARY_QUERY + ":" + name);
         if (res != null) {
-            return JSONResult.build(JSON.parseArray(res, BookDto.class), "馆藏查询 - 缓存获取成功", 200);
+            return R.ok().put("馆藏查询 - 缓存获取成功", JSON.parseArray(res, BookDto.class));
         }
         List<BookDto> bookDtoList = librarySpiderService.query(name);
         if (!bookDtoList.isEmpty()) {
             redisUtil.set(LIBRARY_QUERY + ":" + name, JSON.toJSONString(bookDtoList), 60 * 60 * 24);
-            return JSONResult.build(bookDtoList, "查询成功", 200);
+            return R.ok().put("查询成功", bookDtoList);
         }
-        return JSONResult.build(null, "查询失败", 400);
+        return R.ok().put("查询失败", null);
     }
 
     /**
@@ -110,17 +111,17 @@ public class LibraryController {
     @ApiOperation(value = "图书详情", notes = "图书详情的接口，请求参数是图书 id")
     @ApiImplicitParam(name = "id", value = "查询参数，图书 id", required = true, dataType = "String", paramType = "query")
     @GetMapping("show")
-    public JSONResult show(@RequestParam String id) {
+    public R show(@RequestParam String id) {
         if (id == null || "".equals(id.trim())) {
-            return JSONResult.build(null, "id 不能为空", 400);
+            return R.ok().put("id 不能为空", null);
         }
         String res = redisUtil.get(BOOK_DETAIL + ":" + id);
         if (res != null) {
-            return JSONResult.build(JSON.parseObject(res, BookDto.class), "图书详情 - 缓存获取成功", 200);
+            return R.ok().put("图书详情 - 缓存获取成功", JSON.parseObject(res, BookDto.class));
         }
         BookDto bookDto = librarySpiderService.show(id);
         redisUtil.set(BOOK_DETAIL + ":" + id, JSON.toJSONString(bookDto), 60 * 60 * 24);
-        return JSONResult.build(bookDto, "查询成功", 200);
+        return R.ok().put("查询成功", bookDto);
     }
 
     /**
@@ -136,53 +137,53 @@ public class LibraryController {
             @ApiImplicitParam(name = "sq", value = "查询参数，6.专业热点的查询参数", dataType = "String", paramType = "query")
     })
     @GetMapping("hot")
-    public JSONResult score(@RequestParam String type, @RequestParam(required = false) String sq) {
+    public R score(@RequestParam String type, @RequestParam(required = false) String sq) {
         String res = redisUtil.get(HOT_BOOK + ":" + type);
         if (res != null) {
-            return JSONResult.build(JSON.parseArray(res, BookDto.class), "热点图书 - 缓存获取成功", 200);
+            return R.ok().put("热点图书 - 缓存获取成功", JSON.parseArray(res, BookDto.class));
         }
         if ("1".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderScoreHot.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
-                return JSONResult.build(bookDtoList, "读者热点-近2年入藏复本平均量，查询成功", 200);
+                return R.ok().put("读者热点-近2年入藏复本平均量，查询成功", bookDtoList);
             }
         } else if ("2".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderScoreHot2.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
-                return JSONResult.build(bookDtoList, "读者热点-近2年入藏复本总借量，查询成功", 200);
+                return R.ok().put("读者热点-近2年入藏复本总借量，查询成功", bookDtoList);
             }
         } else if ("3".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderRecommanded.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
-                return JSONResult.build(bookDtoList, "荐购热点-近5年入藏复本平均量，查询成功", 200);
+                return R.ok().put("荐购热点-近5年入藏复本平均量，查询成功", bookDtoList);
             }
         } else if ("4".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderRecommanded2.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
-                return JSONResult.build(bookDtoList, "荐购热点-近5年入藏复本总借量，查询成功", 200);
+                return R.ok().put("荐购热点-近5年入藏复本总借量，查询成功", bookDtoList);
             }
         } else if ("5".equals(type) && sq == null) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderNewBook.aspx");
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
-                return JSONResult.build(bookDtoList, "新书热度-近90天内入藏复本总借量，查询成功", 200);
+                return R.ok().put("新书热度-近90天内入藏复本总借量，查询成功", bookDtoList);
             }
         } else if ("6".equals(type) && sq != null) {
             String res6 = redisUtil.get(HOT_BOOK + ":" + type + ":" + sq);
             if (res6 != null) {
-                return JSONResult.build(JSON.parseArray(res6, BookDto.class), "热点图书 - 缓存获取成功", 200);
+                return R.ok().put("热点图书 - 缓存获取成功", JSON.parseArray(res6, BookDto.class));
             }
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot3.aspx" + "?sq=" + sq);
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type + ":" + sq, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
-                return JSONResult.build(bookDtoList, "专业热点-近2年内入藏复本总借量，查询成功", 200);
+                return R.ok().put("专业热点-近2年内入藏复本总借量，查询成功", bookDtoList);
             }
         }
-        return JSONResult.build(null, "查询失败", 400);
+        return R.ok().put("查询失败", null);
     }
 
 
@@ -203,28 +204,28 @@ public class LibraryController {
                     "21.环境科学、安全科学...X \n    22.综合性图书...Z", required = true, dataType = "String", paramType = "query"),
     })
     @GetMapping("category")
-    public JSONResult category(@RequestParam String type, @RequestParam String cate) {
+    public R category(@RequestParam String type, @RequestParam String cate) {
         if (type == null || cate == null) {
-            return JSONResult.build(null, "参数不能为空", 400);
+            return R.ok().put("参数不能为空", null);
         }
         String res = redisUtil.get(CATE_HOT_BOOK + ":" + type + ":" + cate);
         if (res != null) {
-            return JSONResult.build(JSON.parseArray(res, BookDto.class), "分类热点 - 缓存获取成功", 200);
+            return R.ok().put("分类热点 - 缓存获取成功", JSON.parseArray(res, BookDto.class));
         }
         if ("1".equals(type)) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot4.aspx" + "?sq=" + cate);
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
-                return JSONResult.build(bookDtoList, "分类热点-近2年入藏复本平均量，查询成功", 200);
+                return R.ok().put("分类热点-近2年入藏复本平均量，查询成功", bookDtoList);
             }
         } else if ("2".equals(type)) {
             List<BookDto> bookDtoList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot.aspx" + "?sq=" + cate);
             if (!bookDtoList.isEmpty()) {
                 redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookDtoList), 60 * 60 * 24 * 3);
-                return JSONResult.build(bookDtoList, "分类热点-近2年入藏复本总借量，查询成功", 200);
+                return R.ok().put("分类热点-近2年入藏复本总借量，查询成功", bookDtoList);
             }
         }
-        return JSONResult.build(null, "查询失败", 400);
+        return R.ok().put("查询失败", null);
     }
 
     /**
@@ -234,17 +235,17 @@ public class LibraryController {
      */
     @ApiOperation(value = "图书分类法总类", notes = "图书分类法总类的接口")
     @GetMapping("bookCate")
-    public JSONResult bookCate() {
+    public R bookCate() {
         String res = redisUtil.get(BOOK_CATE);
         if (res != null) {
-            return JSONResult.build(JSON.parseArray(res, BookCate.class), "图书分类法总类 - 缓存获取成功", 200);
+            return R.ok().put("图书分类法总类 - 缓存获取成功", JSON.parseArray(res, BookCateEntity.class));
         }
-        List<BookCate> bookCateList = libraryService.selectAll();
+        List<BookCateEntity> bookCateList = bookCateService.list();
         if (!bookCateList.isEmpty()) {
             redisUtil.set(BOOK_CATE, JSON.toJSONString(bookCateList), 60 * 60 * 24 * 3);
-            return JSONResult.build(bookCateList, "查询成功", 200);
+            return R.ok().put("查询成功", bookCateList);
         }
-        return JSONResult.build(null, "查询失败", 400);
+        return R.ok().put("查询失败", null);
     }
 
     /**
@@ -252,17 +253,17 @@ public class LibraryController {
      */
     @ApiOperation(value = "学院列表", notes = "学院列表的接口")
     @GetMapping("college")
-    public JSONResult college() {
+    public R college() {
         String res = redisUtil.get(COLLEGE_LIST);
         if (res != null) {
-            return JSONResult.build(JSON.parseObject(res, ProfessionHotDto.class), "学院列表 - 缓存获取成功", 200);
+            return R.ok().put("学院列表 - 缓存获取成功", JSON.parseObject(res, ProfessionHotDto.class));
         }
         ProfessionHotDto college = librarySpiderService.college();
         if (!college.getList().isEmpty()) {
             redisUtil.set(COLLEGE_LIST, JSON.toJSONString(college), 60 * 60 * 24 * 3);
-            return JSONResult.build(college, "查询成功", 200);
+            return R.ok().put("查询成功", college);
         }
-        return JSONResult.build(null, "查询失败", 400);
+        return R.ok().put("查询失败", null);
     }
 
     /**
@@ -278,19 +279,19 @@ public class LibraryController {
             @ApiImplicitParam(name = "major", value = "查询参数，专业，如 材料焊接", dataType = "String", paramType = "query")
     })
     @GetMapping("major")
-    public JSONResult major(@RequestParam String college, @RequestParam(required = false) String major) {
+    public R major(@RequestParam String college, @RequestParam(required = false) String major) {
         if (college == null) {
-            return JSONResult.build(null, "学院不能为空", 400);
+            return R.ok().put("学院不能为空", null);
         }
         if (major == null) {
             String res = redisUtil.get(MAJOR_HOT + ":" + college);
             if (res != null) {
-                return JSONResult.build(JSON.parseObject(res, ProfessionHotDto.class), "专业热点里的专业/课程列表 - 缓存获取成功", 200);
+                return R.ok().put("专业热点里的专业/课程列表 - 缓存获取成功", JSON.parseObject(res, ProfessionHotDto.class));
             }
         } else {
             String res = redisUtil.get(MAJOR_HOT + ":" + college + ":" + major);
             if (res != null) {
-                return JSONResult.build(JSON.parseObject(res, ProfessionHotDto.class), "专业热点里的专业/课程列表 - 缓存获取成功", 200);
+                return R.ok().put("专业热点里的专业/课程列表 - 缓存获取成功", JSON.parseObject(res, ProfessionHotDto.class));
             }
         }
 
@@ -301,58 +302,8 @@ public class LibraryController {
             } else {
                 redisUtil.set(MAJOR_HOT + ":" + college + ":" + major, JSON.toJSONString(professionHotDto), 60 * 60 * 24 * 3);
             }
-            return JSONResult.build(professionHotDto, "查询成功", 200);
+            return R.ok().put("查询成功", professionHotDto);
         }
-        return JSONResult.build(null, "查询失败", 400);
-    }
-
-    @ApiOperation(value = "收藏图书", notes = "收藏图书")
-    @PostMapping("likeBook")
-    public JSONResult likeBook(@RequestParam String sessionId, @RequestParam String bookId,
-                               @RequestParam String bookName, @RequestParam String author) {
-        // 找出 Redis 中映射的 openid
-        String sessionIdValue = redisUtil.get(sessionId);
-        if (sessionIdValue != null) {
-            String openidFromRedis = sessionIdValue.split(":")[0];
-            int i = libraryService.likeBook(openidFromRedis, bookId, bookName, author);
-            if (i > 0) {
-                return JSONResult.build(null, "收藏图书成功", 200);
-            } else if (i == -1) {
-                return JSONResult.build(null, "重复收藏", 400);
-            }
-        }
-        return JSONResult.build(null, "收藏图书失败", 400);
-    }
-
-    @ApiOperation(value = "取消收藏图书", notes = "取消收藏图书")
-    @PostMapping("unlikeBook")
-    public JSONResult unlikeBook(@RequestParam String sessionId, @RequestParam String bookId) {
-        // 找出 Redis 中映射的 openid
-        String sessionIdValue = redisUtil.get(sessionId);
-        if (sessionIdValue != null) {
-            String openidFromRedis = sessionIdValue.split(":")[0];
-            int i = libraryService.unlikeBook(openidFromRedis, bookId);
-            if (i > 0) {
-                return JSONResult.build(null, "取消收藏图书成功", 200);
-            } else if (i == -1) {
-                return JSONResult.build(null, "收藏不存在", 400);
-            }
-        }
-        return JSONResult.build(null, "取消收藏图书失败", 400);
-    }
-
-    @ApiOperation(value = "分页查询收藏图书列表", notes = "分页查询收藏图书列表")
-    @GetMapping("likeList")
-    public JSONResult likeList(@RequestParam String sessionId, Integer pageNum, Integer pageSize) {
-        // 找出 Redis 中映射的 openid
-        String sessionIdValue = redisUtil.get(sessionId);
-        if (sessionIdValue != null) {
-            String openidFromRedis = sessionIdValue.split(":")[0];
-            PageInfo<LikeBook> likeList = libraryService.likeList(openidFromRedis, pageNum, pageSize);
-            if (likeList.getPages() > 0) {
-                return JSONResult.build(likeList, "分页查询收藏图书列表成功", 200);
-            }
-        }
-        return JSONResult.build(null, "分页查询收藏图书列表失败", 400);
+        return R.ok().put("查询失败", null);
     }
 }

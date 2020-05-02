@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.duniqb.mobile.mapper.WxUserMapper">
-  <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.WxUser">
+  <resultMap id="BaseResultMap" type="cn.duniqb.mobile.entity.WxUser">
     <!--@mbg.generated generated on Fri Nov 22 13:10:59 CST 2019.-->
     <!--@Table wx_user-->
     <id column="id" jdbcType="INTEGER" property="id" />

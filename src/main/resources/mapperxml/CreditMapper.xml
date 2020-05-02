@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="cn.duniqb.mobile.mapper.CreditMapper">
-  <resultMap id="BaseResultMap" type="cn.duniqb.mobile.domain.Credit">
+  <resultMap id="BaseResultMap" type="cn.duniqb.mobile.entity.Credit">
     <!--@mbg.generated generated on Wed Nov 20 16:00:57 CST 2019.-->
     <!--@Table credit-->
     <id column="stu_no" jdbcType="CHAR" property="stuNo" />

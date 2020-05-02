@@ -1,9 +1,9 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.dto.json.JSONResult;
 import cn.duniqb.mobile.dto.job.*;
+import cn.duniqb.mobile.spider.JobSpiderService;
+import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.RedisUtil;
-import cn.duniqb.mobile.utils.spider.JobSpiderService;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiImplicitParam;
@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Api(value = "与就业相关的接口", tags = {"与就业相关的接口"})
 @RestController
-@RequestMapping("/api/v1/job/")
+@RequestMapping("/api/v2/job/")
 public class JobController {
 
     @Autowired
@@ -70,17 +70,17 @@ public class JobController {
     @GetMapping("recruitList")
     @ApiOperation(value = "获取招聘会列表", notes = "获取招聘会列表，请求参数是 page")
     @ApiImplicitParam(name = "page", value = "页数 page", dataType = "String", paramType = "query")
-    public JSONResult recruitList(@RequestParam String page) {
+    public R recruitList(@RequestParam String page) {
         String res = redisUtil.get(RECRUIT_LIST + ":" + page);
         if (res != null) {
-            return JSONResult.build(JSON.parseObject(res, RecruitList.class), "招聘会列表 - 缓存获取成功", 200);
+            return R.ok().put("招聘会列表 - 缓存获取成功", JSON.parseObject(res, RecruitList.class));
         }
         RecruitList recruitList = jobSpiderService.recruitList(page);
         if (recruitList != null) {
             redisUtil.set(RECRUIT_LIST + ":" + page, JSON.toJSONString(recruitList), 60 * 60 * 12);
-            return JSONResult.build(recruitList, "招聘会列表 - 获取成功", 200);
+            return R.ok().put("招聘会列表 - 获取成功", recruitList);
         }
-        return JSONResult.build(null, "招聘会列表 - 获取失败", 400);
+        return R.ok().put("招聘会列表 - 获取失败", null);
     }
 
     /**
@@ -92,17 +92,17 @@ public class JobController {
     @GetMapping("recruit")
     @ApiOperation(value = "获取招聘会详情", notes = "获取招聘会详情，请求参数是 id")
     @ApiImplicitParam(name = "id", value = "id", dataType = "String", paramType = "query")
-    public JSONResult recruit(@RequestParam String id) {
+    public R recruit(@RequestParam String id) {
         String res = redisUtil.get(RECRUIT + ":" + id);
         if (res != null) {
-            return JSONResult.build(JSON.parseObject(res, Recruit.class), "招聘会详情 - 缓存获取成功", 200);
+            return R.ok().put("招聘会详情 - 缓存获取成功", JSON.parseObject(res, Recruit.class));
         }
         Recruit recruit = jobSpiderService.recruit(id);
         if (recruit != null) {
             redisUtil.set(RECRUIT + ":" + id, JSON.toJSONString(recruit), 60 * 60 * 12);
-            return JSONResult.build(recruit, "招聘会详情 - 获取成功", 200);
+            return R.ok().put("招聘会详情 - 获取成功", recruit);
         }
-        return JSONResult.build(null, "招聘会详情 - 获取失败", 400);
+        return R.ok().put("招聘会详情 - 获取失败", null);
     }
 
     /**
@@ -114,17 +114,17 @@ public class JobController {
     @GetMapping("demandList")
     @ApiOperation(value = "获取单位需求列表", notes = "获取单位需求列表，请求参数是 page")
     @ApiImplicitParam(name = "page", value = "页数 page", dataType = "String", paramType = "query")
-    public JSONResult demandList(@RequestParam String page) {
+    public R demandList(@RequestParam String page) {
         String res = redisUtil.get(DEMAND_LIST + ":" + page);
         if (res != null) {
-            return JSONResult.build(JSON.parseObject(res, RecruitList.class), "单位需求列表 - 缓存获取成功", 200);
+            return R.ok().put("单位需求列表 - 缓存获取成功", JSON.parseObject(res, RecruitList.class));
         }
         DemandList demandList = jobSpiderService.demandList(page);
         if (demandList != null) {
             redisUtil.set(DEMAND_LIST + ":" + page, JSON.toJSONString(demandList), 60 * 60 * 12);
-            return JSONResult.build(demandList, "单位需求列表 - 获取成功", 200);
+            return R.ok().put("单位需求列表 - 获取成功", demandList);
         }
-        return JSONResult.build(null, "单位需求列表 - 获取失败", 400);
+        return R.ok().put("单位需求列表 - 获取失败", null);
     }
 
     /**
@@ -136,17 +136,17 @@ public class JobController {
     @GetMapping("demand")
     @ApiOperation(value = "获取单位需求详情", notes = "获取单位需求详情，请求参数是 id")
     @ApiImplicitParam(name = "id", value = "id", dataType = "String", paramType = "query")
-    public JSONResult demand(@RequestParam String id) {
+    public R demand(@RequestParam String id) {
         String res = redisUtil.get(DEMAND + ":" + id);
         if (res != null) {
-            return JSONResult.build(JSON.parseObject(res, Demand.class), "单位需求详情 - 缓存获取成功", 200);
+            return R.ok().put("单位需求详情 - 缓存获取成功", JSON.parseObject(res, Demand.class));
         }
         Demand demand = jobSpiderService.demand(id);
         if (demand != null) {
             redisUtil.set(DEMAND + ":" + id, JSON.toJSONString(demand), 60 * 60 * 12);
-            return JSONResult.build(demand, "单位需求详情 - 获取成功", 200);
+            return R.ok().put("单位需求详情 - 获取成功", demand);
         }
-        return JSONResult.build(null, "单位需求详情 - 获取失败", 400);
+        return R.ok().put("单位需求详情 - 获取失败", null);
     }
 
     /**
@@ -161,16 +161,16 @@ public class JobController {
             @ApiImplicitParam(name = "year", value = "年", dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "month", value = "月", dataType = "String", paramType = "query")
     })
-    public JSONResult calendar(@RequestParam String year, @RequestParam String month) {
+    public R calendar(@RequestParam String year, @RequestParam String month) {
         String res = redisUtil.get(CALENDAR + ":" + year + ":" + month);
         if (res != null) {
-            return JSONResult.build(JSON.parseArray(res, Calendar.class), "招聘日历 - 缓存获取成功", 200);
+            return R.ok().put("招聘日历 - 缓存获取成功", JSON.parseArray(res, Calendar.class));
         }
         List<Calendar> calendar = jobSpiderService.calendar(year, month);
         if (!calendar.isEmpty()) {
             redisUtil.set(CALENDAR + ":" + year + ":" + month, JSON.toJSONString(calendar), 60 * 60 * 12);
-            return JSONResult.build(calendar, "招聘日历 - 获取成功", 200);
+            return R.ok().put("招聘日历 - 获取成功", calendar);
         }
-        return JSONResult.build(null, "招聘日历 - 获取失败", 400);
+        return R.ok().put("招聘日历 - 获取失败", null);
     }
 }
