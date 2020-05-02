@@ -10,7 +10,7 @@ import java.util.List;
  * @author duniqb
  */
 @Data
-public class BookDto {
+public class Book {
     /**
      * 当页序号
      */

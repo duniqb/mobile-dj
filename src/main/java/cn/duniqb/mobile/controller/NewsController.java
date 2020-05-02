@@ -1,6 +1,6 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.dto.news.NewsDto;
+import cn.duniqb.mobile.dto.news.News;
 import cn.duniqb.mobile.dto.news.NewsList;
 import cn.duniqb.mobile.spider.NewsSpiderService;
 import cn.duniqb.mobile.utils.R;
@@ -23,7 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @Api(value = "与新闻相关的接口", tags = {"与新闻相关的接口"})
 @RestController
-@RequestMapping("/api/v2/news/")
+@RequestMapping("/news")
 public class NewsController {
     @Autowired
     private NewsSpiderService newsSpiderService;
@@ -48,7 +48,7 @@ public class NewsController {
      * @param page
      * @return
      */
-    @GetMapping("list")
+    @GetMapping("/list")
     @ApiOperation(value = "获取新闻列表", notes = "获取新闻列表的接口，请求参数是 type，page")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "type", value = "新闻类型 type，1：交大要闻 2：综合报道 ，3：通知公告", required = true, dataType = "String", paramType = "query"),
@@ -74,7 +74,7 @@ public class NewsController {
      * @param id
      * @return
      */
-    @GetMapping("detail")
+    @GetMapping("/detail")
     @ApiOperation(value = "获取新闻详情", notes = "获取新闻详情的接口，请求参数是 type，id")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "type", value = "新闻类型 type，1：交大要闻 2：综合报道 ，3：通知公告", required = true, dataType = "String", paramType = "query"),
@@ -83,9 +83,9 @@ public class NewsController {
     public R detail(@RequestParam String type, @RequestParam Integer id) {
         String res = redisUtil.get(NEWS_DETAIL + ":" + type + ":" + id);
         if (res != null) {
-            return R.ok().put("新闻详情 - 缓存获取成功", JSON.parseObject(res, NewsDto.class));
+            return R.ok().put("新闻详情 - 缓存获取成功", JSON.parseObject(res, News.class));
         }
-        NewsDto detail = newsSpiderService.detail(type, id);
+        News detail = newsSpiderService.detail(type, id);
         if (detail != null) {
             redisUtil.set(NEWS_DETAIL + ":" + type + ":" + id, JSON.toJSONString(detail), 60 * 60 * 24);
             return R.ok().put(detail.getType() + " - 获取成功", detail);

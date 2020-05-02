@@ -19,7 +19,7 @@ import java.util.Map;
  * @date 2020-04-30 19:36:16
  */
 @RestController
-@RequestMapping("mobile/article")
+@RequestMapping("/article")
 public class ArticleController {
     @Autowired
     private ArticleService articleService;

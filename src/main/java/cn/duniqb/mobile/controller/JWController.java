@@ -37,7 +37,7 @@ import java.util.Objects;
 @Api(value = "与登录教务相关的接口", tags = {"与登录教务相关的接口"})
 @Scope("session")
 @RestController
-@RequestMapping("/api/v2/jw")
+@RequestMapping("/jw")
 public class JWController {
     @Autowired
     private JWSpiderService jWSpiderService;
@@ -84,7 +84,7 @@ public class JWController {
      * 进入登录页面时或点击刷新，返回一个验证码
      */
     @ApiOperation(value = "获取验证码", notes = "无需参数，但获取验证码的客户端应当和登录的客户端一致，否则无效，即同一个 Session")
-    @GetMapping("verify")
+    @GetMapping("/verify")
     public R getVerifyCode() {
         // 获取验证码并保存到本地
         String fileName = saveVerifyCode();
@@ -105,7 +105,7 @@ public class JWController {
             @ApiImplicitParam(name = "password", value = "密码", required = true, dataType = "String", paramType = "query"),
             @ApiImplicitParam(name = "verifyCode", value = "验证码", required = true, dataType = "String", paramType = "query"),
     })
-    @GetMapping("login")
+    @GetMapping("/login")
     public R login(@RequestParam String stuNo, @RequestParam String password, @RequestParam String verifyCode, @RequestParam String sessionId) {
 
         String url = "http://" + host + "/academic/j_acegi_security_check";
@@ -198,7 +198,7 @@ public class JWController {
      * @throws Exception
      */
     @ApiOperation(value = "获取通知列表", notes = "获取通知列表")
-    @ApiImplicitParam(name = "page", value = "页数", required = true, dataType = "String", paramType = "query")
+    @ApiImplicitParam(name = "/page", value = "页数", required = true, dataType = "String", paramType = "query")
     @GetMapping("noticeList")
     public R noticeList(String page) {
         String res = redisUtil.get(NOTICE_LIST + ":" + page);
@@ -220,7 +220,7 @@ public class JWController {
      */
     @ApiOperation(value = "获取通知详情", notes = "获取通知详情")
     @ApiImplicitParam(name = "id", value = "id", required = true, dataType = "String", paramType = "query")
-    @GetMapping("notice")
+    @GetMapping("/notice")
     public R notice(String id) {
         if ("null".equals(id)) {
             return R.ok().put("获取通知详情失败", null);

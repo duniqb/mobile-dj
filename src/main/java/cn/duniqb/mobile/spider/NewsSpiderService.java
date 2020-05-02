@@ -1,6 +1,6 @@
 package cn.duniqb.mobile.spider;
 
-import cn.duniqb.mobile.dto.news.NewsDto;
+import cn.duniqb.mobile.dto.news.News;
 import cn.duniqb.mobile.dto.news.NewsList;
 import cn.duniqb.mobile.entity.ImgUrlEntity;
 import cn.duniqb.mobile.service.ImgUrlService;
@@ -73,21 +73,21 @@ public class NewsSpiderService {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Elements elements = doc.select("body section .m .list li");
                 NewsList newsList = new NewsList();
-                List<NewsDto> list = new ArrayList<>();
+                List<News> list = new ArrayList<>();
                 for (int i = 0; i < elements.size(); i++) {
-                    NewsDto newsDto = new NewsDto();
+                    News news = new News();
                     // 当前序号
-                    newsDto.setCurNo(i);
+                    news.setCurNo(i);
                     // 唯一 id
                     if (elements.get(i).select("a").attr("href").contains("html")) {
-                        newsDto.setId(elements.get(i).select("a").attr("href").split("/")[2].split("\\.")[0]);
+                        news.setId(elements.get(i).select("a").attr("href").split("/")[2].split("\\.")[0]);
                     }
                     // 标题
-                    newsDto.setTitle(elements.get(i).select("a").text());
+                    news.setTitle(elements.get(i).select("a").text());
                     // 日期：从列表中获取的
-                    newsDto.setDate(elements.get(i).select(".sdate").text());
-                    newsDto.setType(type);
-                    list.add(newsDto);
+                    news.setDate(elements.get(i).select(".sdate").text());
+                    news.setType(type);
+                    list.add(news);
                 }
                 // 新闻类型
                 newsList.setType(doc.select("section .totitle a").text().substring(0, 4));
@@ -110,7 +110,7 @@ public class NewsSpiderService {
      * @param type 1：交大要闻 http://www.djtu.edu.cn/News，2：综合报道 http://www.djtu.edu.cn/Report，3：通知公告：http://www.djtu.edu.cn/Notices
      * @param id
      */
-    public NewsDto detail(String type, Integer id) {
+    public News detail(String type, Integer id) {
         String url = null;
         if ("1".equals(type)) {
             url = "http://www.djtu.edu.cn/News" + "/" + id + ".html";
@@ -135,24 +135,24 @@ public class NewsSpiderService {
         try (Response response = client.newCall(request).execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
-                NewsDto newsDto = new NewsDto();
+                News news = new News();
                 // 唯一 id
-                newsDto.setId(String.valueOf(id));
+                news.setId(String.valueOf(id));
                 // 标题
-                newsDto.setTitle(doc.select("section .minfo h1").text());
+                news.setTitle(doc.select("section .minfo h1").text());
                 // 新闻类型
-                newsDto.setType(type);
+                news.setType(type);
 
                 String string = doc.select("section .minfo h5").text().toString();
                 // 发布时间：从详情中获取的
-                newsDto.setTime(string.split(" ")[0] + " " + string.split(" ")[1]);
+                news.setTime(string.split(" ")[0] + " " + string.split(" ")[1]);
                 // 浏览数
-                newsDto.setBrowse(string.split("浏览：")[1]);
+                news.setBrowse(string.split("浏览：")[1]);
                 if (string.contains("来源")) {
                     // 来源
-                    newsDto.setFrom(string.split("来源：")[1].split("浏览：")[0].trim());
+                    news.setFrom(string.split("来源：")[1].split("浏览：")[0].trim());
                 } else {
-                    newsDto.setFrom("");
+                    news.setFrom("");
                 }
 
                 // 内容
@@ -180,9 +180,9 @@ public class NewsSpiderService {
                     }
                 }
 
-                newsDto.setContent(contentList);
-                newsDto.setImage(imageList);
-                return newsDto;
+                news.setContent(contentList);
+                news.setImage(imageList);
+                return news;
             }
         } catch (IOException e) {
             e.printStackTrace();

@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Api(value = "与后勤相关的接口", tags = {"与后勤相关的接口"})
 @RestController
-@RequestMapping("/api/v2/repair/")
+@RequestMapping("/repair")
 public class RepairController {
     @Autowired
     private RepairSpiderService repairSpiderService;
@@ -50,7 +50,7 @@ public class RepairController {
     /**
      * 故障报修 查询各项数据清单
      */
-    @GetMapping("data")
+    @GetMapping("/data")
     @ApiOperation(value = "查询各项数据清单", notes = "查询各项数据清单的接口，请求参数是 id，value")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "id", value = "id", required = true, dataType = "String", paramType = "query"),
@@ -112,7 +112,7 @@ public class RepairController {
     /**
      * 根据报修手机号查询报修列表
      */
-    @GetMapping("list")
+    @GetMapping("/list")
     @ApiOperation(value = "根据报修手机号查询报修列表", notes = "根据报修手机号查询报修列表的接口，请求参数是 phone")
     @ApiImplicitParam(name = "phone", value = "手机号", required = true, dataType = "String", paramType = "query")
     public R list(@RequestParam String phone) {
@@ -126,7 +126,7 @@ public class RepairController {
     /**
      * 报修单详情
      */
-    @GetMapping("detail")
+    @GetMapping("/detail")
     @ApiOperation(value = "报修单详情", notes = "报修单详情的接口，请求参数是 listNumber")
     @ApiImplicitParam(name = "listNumber", value = "序列号", required = true, dataType = "String", paramType = "query")
     public R detail(@RequestParam String listNumber) {
@@ -140,7 +140,7 @@ public class RepairController {
     /**
      * 最新通知
      */
-    @GetMapping("notice")
+    @GetMapping("/notice")
     @ApiOperation(value = "最新通知", notes = "最新通知的接口")
     public R notice() {
         String res = redisUtil.get(LOGISTICS_NOTICE);
@@ -158,7 +158,7 @@ public class RepairController {
     /**
      * 最近维修数量
      */
-    @GetMapping("recent")
+    @GetMapping("/recent")
     @ApiOperation(value = "最近维修数量", notes = "最近维修数量的接口")
     public R recent() {
         String res = redisUtil.get(LOGISTICS_RECENT);
@@ -176,7 +176,7 @@ public class RepairController {
     /**
      * 发起报修
      */
-    @GetMapping("report")
+    @GetMapping("/report")
     @ApiOperation(value = "发起报修", notes = "发起报修的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "phone", value = "报修电话", required = true, dataType = "String", paramType = "query"),
@@ -199,7 +199,7 @@ public class RepairController {
     /**
      * 维修评价
      */
-    @GetMapping("evaluate")
+    @GetMapping("/evaluate")
     @ApiOperation(value = "维修评价", notes = "维修评价的接口")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "listNumber", value = "序列号", required = true, dataType = "String", paramType = "query"),

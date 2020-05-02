@@ -1,8 +1,8 @@
 package cn.duniqb.mobile.spider;
 
-import cn.duniqb.mobile.dto.BookDto;
+import cn.duniqb.mobile.dto.Book;
 import cn.duniqb.mobile.dto.profession.Item;
-import cn.duniqb.mobile.dto.profession.ProfessionHotDto;
+import cn.duniqb.mobile.dto.profession.ProfessionHot;
 import cn.duniqb.mobile.utils.HttpUtils;
 import okhttp3.*;
 import org.jsoup.Jsoup;
@@ -27,7 +27,7 @@ public class LibrarySpiderService {
      * @param name
      * @return
      */
-    public List<BookDto> query(String name) {
+    public List<Book> query(String name) {
         // 先获取会变化的某项值
         String url = "http://wxlib.djtu.edu.cn/wx/search.aspx";
         String viewState = "";
@@ -66,24 +66,24 @@ public class LibrarySpiderService {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Element div = doc.select("#form1 div").get(2);
                 String[] split = div.toString().split("<hr>");
-                List<BookDto> list = new ArrayList<>();
+                List<Book> list = new ArrayList<>();
 
                 for (int i = 1; i < split.length - 1; i++) {
-                    BookDto bookDto = new BookDto();
-                    bookDto.setCurNo(split[i].substring(0, 3).trim().replace(".", ""));
+                    Book book = new Book();
+                    book.setCurNo(split[i].substring(0, 3).trim().replace(".", ""));
 
                     Document parse = Jsoup.parse(split[i]);
                     String bookUrl = parse.select("a").attr("href");
                     if (bookUrl.contains("id")) {
-                        bookDto.setId(bookUrl.split("=")[1].trim());
+                        book.setId(bookUrl.split("=")[1].trim());
                     }
-                    bookDto.setBookName(parse.select("a").text());
+                    book.setBookName(parse.select("a").text());
                     if (split[i].contains("<br>")) {
                         String[] split1 = split[i].split("<br>");
-                        bookDto.setAuthor(split1[1].trim());
-                        bookDto.setIndex(split1[2].trim());
+                        book.setAuthor(split1[1].trim());
+                        book.setIndex(split1[2].trim());
                     }
-                    list.add(bookDto);
+                    list.add(book);
                 }
                 return list;
             }
@@ -99,7 +99,7 @@ public class LibrarySpiderService {
      * @param id
      * @return
      */
-    public BookDto show(String id) {
+    public Book show(String id) {
         String url = "http://wxlib.djtu.edu.cn/wx/ShowBook.aspx";
 
         Map<String, String> map = new HashMap<>();
@@ -110,35 +110,35 @@ public class LibrarySpiderService {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Element element = doc.select("#form1 div").get(0);
                 String[] split = element.toString().split("<br>");
-                BookDto bookDto = new BookDto();
+                Book book = new Book();
                 // 复本情况
                 List<String> list = new ArrayList<>();
                 for (int i = 0; i < split.length; i++) {
                     if (split[i].contains("MARC状态")) {
-                        bookDto.setType(split[i].split(">")[1].trim());
+                        book.setType(split[i].split(">")[1].trim());
                     } else if (split[i].contains("题名")) {
-                        bookDto.setBookName(split[i].split("：")[1].trim());
+                        book.setBookName(split[i].split("：")[1].trim());
                     } else if (split[i].contains("责任者")) {
-                        bookDto.setAuthor(split[i].split("：")[1].trim());
+                        book.setAuthor(split[i].split("：")[1].trim());
                     } else if (split[i].contains("出版发行项")) {
-                        bookDto.setPublisher(split[i].split("：")[1].trim());
+                        book.setPublisher(split[i].split("：")[1].trim());
                     } else if (split[i].contains("索书号")) {
-                        bookDto.setIndex(split[i].split("：")[1].trim());
+                        book.setIndex(split[i].split("：")[1].trim());
                     } else if (split[i].contains("提要文摘")) {
-                        bookDto.setSummary(split[i].split("：")[1].trim());
+                        book.setSummary(split[i].split("：")[1].trim());
                     } else if (split[i].contains("CALIS")) {
-                        bookDto.setCALIS(split[i].split("：")[1].trim());
+                        book.setCALIS(split[i].split("：")[1].trim());
                     } else if (split[i].contains("ISBN")) {
-                        bookDto.setISBN(split[i].split("：")[1].trim());
+                        book.setISBN(split[i].split("：")[1].trim());
                     } else if (split[i].contains("可借") || split[i].contains("不详") || split[i].contains("留本")) {
                         if (split[i].contains("、")) {
                             list.add(split[i].split("、")[1].trim());
                         }
                     }
                 }
-                bookDto.setId(id);
-                bookDto.setStatus(list);
-                return bookDto;
+                book.setId(id);
+                book.setStatus(list);
+                return book;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -153,26 +153,26 @@ public class LibrarySpiderService {
      *
      * @return
      */
-    public List<BookDto> hot(String url) {
+    public List<Book> hot(String url) {
         try (Response response = HttpUtils.get(url, null)) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Elements elements = doc.select("#form1 article dd a");
-                List<BookDto> bookDtoList = new ArrayList<>();
+                List<Book> bookList = new ArrayList<>();
                 for (Element element : elements) {
-                    BookDto bookDto = new BookDto();
+                    Book book = new Book();
                     // 当前序号
-                    bookDto.setCurNo(element.text().split("\\.")[0]);
+                    book.setCurNo(element.text().split("\\.")[0]);
 
                     // 热度
                     String[] split = element.text().split("\\(");
                     String last = split[split.length - 1];
-                    bookDto.setHot(last.replace(")", ""));
+                    book.setHot(last.replace(")", ""));
 
                     // id
                     String string = element.select("a").attr("href");
                     if (string.contains("id")) {
-                        bookDto.setId(string.split("=")[1]);
+                        book.setId(string.split("=")[1]);
                     }
 
                     // 书名
@@ -180,11 +180,11 @@ public class LibrarySpiderService {
                     for (int i = 1; i < element.text().split("\\.").length; i++) {
                         stringBuffer.append(element.text().split("\\.")[i]);
                     }
-                    bookDto.setBookName(stringBuffer.toString().split("\\(")[0].replace(")", ""));
+                    book.setBookName(stringBuffer.toString().split("\\(")[0].replace(")", ""));
 
-                    bookDtoList.add(bookDto);
+                    bookList.add(book);
                 }
-                return bookDtoList;
+                return bookList;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -196,14 +196,14 @@ public class LibrarySpiderService {
     /**
      * 学院列表
      */
-    public ProfessionHotDto college() {
+    public ProfessionHot college() {
         String url = "http://wxlib.djtu.edu.cn/br/ReaderInstitute.aspx";
 
         try (Response response = HttpUtils.get(url, null)) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Elements elements = doc.select("#form1 .cgal_nr ul li");
-                ProfessionHotDto professionHotDto = new ProfessionHotDto();
+                ProfessionHot professionHot = new ProfessionHot();
                 List<Item> list = new ArrayList<>();
                 for (int i = 0; i < elements.size(); i++) {
                     Item item = new Item();
@@ -211,9 +211,9 @@ public class LibrarySpiderService {
                     item.setName(elements.get(i).text());
                     list.add(item);
                 }
-                professionHotDto.setTitle("院系列表");
-                professionHotDto.setList(list);
-                return professionHotDto;
+                professionHot.setTitle("院系列表");
+                professionHot.setList(list);
+                return professionHot;
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -227,7 +227,7 @@ public class LibrarySpiderService {
      * major 为空则 http://wxlib.djtu.edu.cn/br/ReaderProfession.aspx?sq=材料科学
      * 否则 http://wxlib.djtu.edu.cn/br/ReaderFenLeiHao.aspx?zy=材料焊接&xy=材料科学
      */
-    public ProfessionHotDto major(String college, String major) {
+    public ProfessionHot major(String college, String major) {
         String url = null;
         // 查询专业列表
         if (major == null && college != null) {
@@ -239,7 +239,7 @@ public class LibrarySpiderService {
         try (Response response = HttpUtils.get(url, null)) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
-                ProfessionHotDto professionHotDto = new ProfessionHotDto();
+                ProfessionHot professionHot = new ProfessionHot();
                 List<Item> list = new ArrayList<>();
                 Elements elements = doc.select("#form1 article dd a");
                 for (int i = 0; i < elements.size(); i++) {
@@ -250,9 +250,9 @@ public class LibrarySpiderService {
                     item.setSq("".equals(trim) ? null : trim);
                     list.add(item);
                 }
-                professionHotDto.setTitle(doc.select("#form1 article dt a").text());
-                professionHotDto.setList(list);
-                return professionHotDto;
+                professionHot.setTitle(doc.select("#form1 article dt a").text());
+                professionHot.setList(list);
+                return professionHot;
             }
         } catch (IOException e) {
             e.printStackTrace();

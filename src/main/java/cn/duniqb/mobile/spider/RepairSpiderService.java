@@ -23,8 +23,8 @@ public class RepairSpiderService {
     /**
      * 报修网站的主机
      */
-    @Value("${logistics.host}")
-    private String logisticsHost;
+    @Value("${repair.host}")
+    private String repairHost;
 
     /**
      * 故障报修 查询各项数据清单
@@ -33,19 +33,19 @@ public class RepairSpiderService {
         String url = null;
         // 查询校区 id，返回建筑 id
         if ("distinctId".equals(id)) {
-            url = logisticsHost + "/web/app/user/buildings.action";
+            url = repairHost + "/web/app/user/buildings.action";
         }
         // 查询建筑 id，返回房间 id
         else if ("buildingId".equals(id)) {
-            url = logisticsHost + "/web/app/user/placeRoom.action";
+            url = repairHost + "/web/app/user/placeRoom.action";
         }
         // 查询房间 id，返回设备 id
         else if ("roomId".equals(id)) {
-            url = logisticsHost + "/web/app/user/equipment.action";
+            url = repairHost + "/web/app/user/equipment.action";
         }
         // 查询设备 id，返回设备详情
         else if ("equipmentId".equals(id)) {
-            url = logisticsHost + "/web/app/user/equipment/detail.action";
+            url = repairHost + "/web/app/user/equipment/detail.action";
         }
 
         OkHttpClient client = new OkHttpClient();
@@ -88,7 +88,7 @@ public class RepairSpiderService {
      * @param userTel
      */
     public List<RepairDetail> list(String userTel) {
-        String url = logisticsHost + "/web/app/user/select/all/maintenance.action";
+        String url = repairHost + "/web/app/user/select/all/maintenance.action";
         OkHttpClient client = new OkHttpClient();
 
         RequestBody requestBody = new FormBody.Builder()
@@ -152,7 +152,7 @@ public class RepairSpiderService {
      * 报修单详情
      */
     public RepairDetail detail(String listNumber) {
-        String url = logisticsHost + "/web/app/user/select/oneMaintenance/" + listNumber + ".action";
+        String url = repairHost + "/web/app/user/select/oneMaintenance/" + listNumber + ".action";
 
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder()
@@ -205,7 +205,7 @@ public class RepairSpiderService {
      * 最新通知
      */
     public Notice notice() {
-        String url = logisticsHost + "/web/app/user/index.action";
+        String url = repairHost + "/web/app/user/index.action";
 
         OkHttpClient client = new OkHttpClient();
 
@@ -241,7 +241,7 @@ public class RepairSpiderService {
      * 最近维修数量
      */
     public List<Recent> recent() {
-        String url = logisticsHost + "/web/app/user/my/maintenance/router.action";
+        String url = repairHost + "/web/app/user/my/maintenance/router.action";
 
         OkHttpClient client = new OkHttpClient();
 
@@ -291,7 +291,7 @@ public class RepairSpiderService {
      * @return
      */
     public Report report(String phone, String distinctId, String buildingId, String roomId, String equipmentId, String listDescription) {
-        String url = logisticsHost + "/web/app/user/add/do.action";
+        String url = repairHost + "/web/app/user/add/do.action";
 
         OkHttpClient client = new OkHttpClient();
 
@@ -349,7 +349,7 @@ public class RepairSpiderService {
      * 评价
      */
     public Integer evaluate(String listNumber, String phone, String listScore, String listWord) {
-        String url = logisticsHost + "/web/app/user/judgement/do.action";
+        String url = repairHost + "/web/app/user/judgement/do.action";
 
         OkHttpClient client = new OkHttpClient();
 

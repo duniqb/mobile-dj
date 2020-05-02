@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Api(value = "与就业相关的接口", tags = {"与就业相关的接口"})
 @RestController
-@RequestMapping("/api/v2/job/")
+@RequestMapping("/job")
 public class JobController {
 
     @Autowired
@@ -67,7 +67,7 @@ public class JobController {
      * @param page
      * @return
      */
-    @GetMapping("recruitList")
+    @GetMapping("/recruitList")
     @ApiOperation(value = "获取招聘会列表", notes = "获取招聘会列表，请求参数是 page")
     @ApiImplicitParam(name = "page", value = "页数 page", dataType = "String", paramType = "query")
     public R recruitList(@RequestParam String page) {
@@ -89,7 +89,7 @@ public class JobController {
      * @param id
      * @return
      */
-    @GetMapping("recruit")
+    @GetMapping("/recruit")
     @ApiOperation(value = "获取招聘会详情", notes = "获取招聘会详情，请求参数是 id")
     @ApiImplicitParam(name = "id", value = "id", dataType = "String", paramType = "query")
     public R recruit(@RequestParam String id) {
@@ -111,7 +111,7 @@ public class JobController {
      * @param page
      * @return
      */
-    @GetMapping("demandList")
+    @GetMapping("/demandList")
     @ApiOperation(value = "获取单位需求列表", notes = "获取单位需求列表，请求参数是 page")
     @ApiImplicitParam(name = "page", value = "页数 page", dataType = "String", paramType = "query")
     public R demandList(@RequestParam String page) {
@@ -133,7 +133,7 @@ public class JobController {
      * @param id
      * @return
      */
-    @GetMapping("demand")
+    @GetMapping("/demand")
     @ApiOperation(value = "获取单位需求详情", notes = "获取单位需求详情，请求参数是 id")
     @ApiImplicitParam(name = "id", value = "id", dataType = "String", paramType = "query")
     public R demand(@RequestParam String id) {
@@ -155,7 +155,7 @@ public class JobController {
      * @param year
      * @return
      */
-    @GetMapping("calendar")
+    @GetMapping("/calendar")
     @ApiOperation(value = "获取招聘日历", notes = "获取招聘日历")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "year", value = "年", dataType = "String", paramType = "query"),

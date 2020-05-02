@@ -33,5 +33,4 @@ build/
 ### Custom ###
 /src/main/resources/application-pro.yml
 /src/main/resources/dj.xiaoshi98.top.jks
-/src/main/resources/application-dev.yml
 **/application-pro.yml

@@ -32,7 +32,7 @@ import java.util.*;
  */
 @Api(value = "与小程序相关的接口", tags = {"与小程序相关的接口"})
 @RestController
-@RequestMapping("/api/v2/mini/")
+@RequestMapping("/mini")
 public class MiniController {
     @Autowired
     private WxUserService wxUserService;
@@ -75,7 +75,7 @@ public class MiniController {
      * @param code
      * @return
      */
-    @GetMapping("login")
+    @GetMapping("/login")
     @ApiOperation(value = "登录小程序", notes = "获取登录态的接口，请求参数是 code")
     @ApiImplicitParam(name = "code", value = "认证 code", required = true, dataType = "String", paramType = "query")
     public R login(@RequestParam String code) {
@@ -128,7 +128,7 @@ public class MiniController {
      * @param sessionId
      * @return
      */
-    @GetMapping("session")
+    @GetMapping("/session")
     @ApiOperation(value = "检查登录是否有效", notes = "检查登录是否有效的接口，请求参数是 sessionId")
     @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
     public R session(@RequestParam String sessionId) {
@@ -148,7 +148,7 @@ public class MiniController {
      * @param city
      * @return
      */
-    @GetMapping("tip")
+    @GetMapping("/tip")
     @ApiOperation(value = "提示信息", notes = "提示信息的接口，请求参数是 sessionId")
     @ApiImplicitParams({
             @ApiImplicitParam(name = "sessionId", value = "sessionId", required = false, dataType = "String", paramType = "query"),
@@ -227,7 +227,7 @@ public class MiniController {
      * @param
      * @return
      */
-    @PostMapping("add")
+    @PostMapping("/add")
     @ApiOperation(value = "添加用户", notes = "添加用户的接口，请求参数是 wxUser")
     @ApiImplicitParam(name = "wxUser", value = "微信账号信息", required = true, dataType = "WxUserDto", paramType = "body")
     public R add(@RequestParam String sessionId, @RequestParam String avatarUrl,
@@ -283,7 +283,7 @@ public class MiniController {
      * @param sessionId
      * @return
      */
-    @GetMapping("query")
+    @GetMapping("/query")
     @ApiOperation(value = "获取用户信息", notes = "获取用户信息的接口，请求参数是 sessionId")
     @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
     public R query(@RequestParam String sessionId) {
@@ -304,7 +304,7 @@ public class MiniController {
      * @param sessionId
      * @return
      */
-    @GetMapping("register")
+    @GetMapping("/register")
     @ApiOperation(value = "检查是否真正的在数据库注册", notes = "检查是否真正的在数据库注册的接口，请求参数是 sessionId")
     @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
     public R register(@RequestParam String sessionId) {

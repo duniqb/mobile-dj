@@ -19,7 +19,7 @@ import java.util.Map;
  * @date 2020-04-30 19:36:16
  */
 @RestController
-@RequestMapping("mobile/likecomment")
+@RequestMapping("/likecomment")
 public class LikeCommentController {
     @Autowired
     private LikeCommentService likeCommentService;

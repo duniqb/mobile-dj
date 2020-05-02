@@ -32,5 +32,5 @@ public class NewsList {
     /**
      * 新闻列表
      */
-    private List<NewsDto> list;
+    private List<News> list;
 }

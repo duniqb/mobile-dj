@@ -10,7 +10,7 @@ import java.util.List;
  * @author duniqb
  */
 @Data
-public class ProfessionHotDto {
+public class ProfessionHot {
     /**
      * 专业名/课程名
      */

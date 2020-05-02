@@ -16,7 +16,7 @@ import java.util.*;
  */
 @Api(value = "与校历相关的接口", tags = {"与校历相关的接口"})
 @RestController
-@RequestMapping("/api/v2/calendar/")
+@RequestMapping("/calendar")
 public class CalendarController {
     /**
      * 日历
@@ -24,7 +24,7 @@ public class CalendarController {
      * @return
      */
     @ApiOperation(value = "日历", notes = "日历的接口")
-    @GetMapping("calendar")
+    @GetMapping("/calendar")
     public R calendar() {
         Map<String, Integer> map = new HashMap<>();
 
@@ -79,7 +79,7 @@ public class CalendarController {
      * @return
      */
     @ApiOperation(value = "节假日提示", notes = "节假日提示的接口")
-    @GetMapping("festival")
+    @GetMapping("/festival")
     public R festival() {
         List<String> list = new ArrayList<>();
 

@@ -8,7 +8,7 @@ import java.util.List;
  * 新闻详情
  */
 @Data
-public class NewsDto {
+public class News {
     /**
      * 当前序号
      */
