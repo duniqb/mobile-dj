@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://ubuntu:3306/mobile_dj?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://ubuntu:3306/mobile_dj2?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai
     username: root
     password: zlb/zlb/zlb
   redis:
@@ -21,11 +21,20 @@ spring:
     port: 5672
     username: admin
     password: admin
+    connection-timeout: 3000
   mail:
     host: smtp.qq.com
     port:
     username: duniqb@qq.com
     password: syexthrjrulghdib
+  # OSS
+  cloud:
+    alicloud:
+      access-key: LTAI4G7tsooSDhu5GLcsLYDD
+      secret-key: xsAyLv8pmVEg8e2s3RHl28HXVFvNbD
+      oss:
+        endpoint: oss-cn-beijing.aliyuncs.com
+        bucket: mobile-dj
 
 mybatis-plus:
   mapper-locations: classpath:/mapper/**/*.xml

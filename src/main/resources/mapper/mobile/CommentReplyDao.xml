@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.duniqb.mobile.dao.CommentReplyDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.duniqb.mobile.entity.CommentReplyEntity" id="commentReplyMap">
+        <result property="replyId" column="reply_id"/>
+        <result property="commentId" column="comment_id"/>
+        <result property="openIdFrom" column="open_id_from"/>
+        <result property="openIdTo" column="open_id_to"/>
+        <result property="content" column="content"/>
+        <result property="likeCount" column="like_count"/>
+        <result property="time" column="time"/>
+        <result property="status" column="status"/>
+    </resultMap>
+
+
+</mapper>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.duniqb.mobile.dao.StudentDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.duniqb.mobile.entity.StudentEntity" id="studentMap">
+        <result property="stuNo" column="stu_no"/>
+        <result property="name" column="name"/>
+        <result property="img" column="img"/>
+        <result property="college" column="college"/>
+        <result property="major" column="major"/>
+        <result property="direction" column="direction"/>
+        <result property="studentType" column="student_type"/>
+        <result property="grade" column="grade"/>
+        <result property="clazz" column="clazz"/>
+        <result property="certificateType" column="certificate_type"/>
+        <result property="certificate" column="certificate"/>
+        <result property="email" column="email"/>
+        <result property="phone" column="phone"/>
+        <result property="address" column="address"/>
+    </resultMap>
+
+
+</mapper>

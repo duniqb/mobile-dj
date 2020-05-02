@@ -16,6 +16,7 @@
 
     <properties>
         <java.version>1.8</java.version>
+        <spring-cloud.version>Hoxton.SR3</spring-cloud.version>
     </properties>
 
     <dependencies>
@@ -115,7 +116,30 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-amqp</artifactId>
         </dependency>
+
+        <!-- 阿里云 oss -->
+<!--        <dependency>-->
+<!--            <groupId>com.aliyun.oss</groupId>-->
+<!--            <artifactId>aliyun-sdk-oss</artifactId>-->
+<!--            <version>3.8.0</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alicloud-oss</artifactId>
+        </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>2.2.0.RELEASE</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
