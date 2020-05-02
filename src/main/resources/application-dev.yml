@@ -16,6 +16,11 @@ spring:
         max-idle: 10
         min-idle: 0
     timeout: 3000
+  rabbitmq:
+    addresses: ubuntu
+    port: 5672
+    username: admin
+    password: admin
   mail:
     host: smtp.qq.com
     port:
