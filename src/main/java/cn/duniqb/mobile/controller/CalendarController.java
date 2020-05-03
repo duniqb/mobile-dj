@@ -14,7 +14,7 @@ import java.util.*;
  *
  * @author duniqb
  */
-@Api(value = "与校历相关的接口", tags = {"与校历相关的接口"})
+@Api(tags = {"与校历相关的接口"})
 @RestController
 @RequestMapping("/calendar")
 public class CalendarController {
@@ -28,7 +28,7 @@ public class CalendarController {
     public R calendar() {
         Map<String, Integer> map = new HashMap<>();
 
-        return R.ok().put("日历获取成功", map);
+        return R.ok("日历获取成功").put("data", map);
     }
 
     /**
@@ -42,6 +42,6 @@ public class CalendarController {
         List<String> list = new ArrayList<>();
 
         // 空
-        return R.ok().put("节假日提示成功", list);
+        return R.ok("节假日提示成功").put("data", list);
     }
 }

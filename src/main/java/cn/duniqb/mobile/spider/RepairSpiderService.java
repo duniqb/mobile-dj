@@ -224,9 +224,9 @@ public class RepairSpiderService {
                 Element element = doc.select("div.bottom_inside a").first();
 
                 Notice notice = new Notice();
-                notice.setTitle(element.select(".bottom_inside_title").text());
-                notice.setContent(element.select(".bottom_inside_art").text());
-                notice.setDate(element.select(".inscription").text());
+//                notice.setTitle(element.select(".bottom_inside_title").text());
+//                notice.setContent(element.select(".bottom_inside_art").text());
+//                notice.setDate(element.select(".inscription").text());
 
                 return notice;
             }

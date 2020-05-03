@@ -2,12 +2,11 @@ package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.dto.job.*;
 import cn.duniqb.mobile.spider.JobSpiderService;
+import cn.duniqb.mobile.utils.BizCodeEnum;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +21,7 @@ import java.util.List;
  *
  * @author duniqb
  */
-@Api(value = "与就业相关的接口", tags = {"与就业相关的接口"})
+@Api(tags = {"与就业相关的接口"})
 @RestController
 @RequestMapping("/job")
 public class JobController {
@@ -69,7 +68,6 @@ public class JobController {
      */
     @GetMapping("/recruitList")
     @ApiOperation(value = "获取招聘会列表", notes = "获取招聘会列表，请求参数是 page")
-    @ApiImplicitParam(name = "page", value = "页数 page", dataType = "String", paramType = "query")
     public R recruitList(@RequestParam String page) {
         String res = redisUtil.get(RECRUIT_LIST + ":" + page);
         if (res != null) {
@@ -80,7 +78,7 @@ public class JobController {
             redisUtil.set(RECRUIT_LIST + ":" + page, JSON.toJSONString(recruitList), 60 * 60 * 12);
             return R.ok().put("招聘会列表 - 获取成功", recruitList);
         }
-        return R.ok().put("招聘会列表 - 获取失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "招聘会列表 - 获取失败");
     }
 
     /**
@@ -91,7 +89,6 @@ public class JobController {
      */
     @GetMapping("/recruit")
     @ApiOperation(value = "获取招聘会详情", notes = "获取招聘会详情，请求参数是 id")
-    @ApiImplicitParam(name = "id", value = "id", dataType = "String", paramType = "query")
     public R recruit(@RequestParam String id) {
         String res = redisUtil.get(RECRUIT + ":" + id);
         if (res != null) {
@@ -102,7 +99,7 @@ public class JobController {
             redisUtil.set(RECRUIT + ":" + id, JSON.toJSONString(recruit), 60 * 60 * 12);
             return R.ok().put("招聘会详情 - 获取成功", recruit);
         }
-        return R.ok().put("招聘会详情 - 获取失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "招聘会详情 - 获取失败");
     }
 
     /**
@@ -113,7 +110,6 @@ public class JobController {
      */
     @GetMapping("/demandList")
     @ApiOperation(value = "获取单位需求列表", notes = "获取单位需求列表，请求参数是 page")
-    @ApiImplicitParam(name = "page", value = "页数 page", dataType = "String", paramType = "query")
     public R demandList(@RequestParam String page) {
         String res = redisUtil.get(DEMAND_LIST + ":" + page);
         if (res != null) {
@@ -124,7 +120,7 @@ public class JobController {
             redisUtil.set(DEMAND_LIST + ":" + page, JSON.toJSONString(demandList), 60 * 60 * 12);
             return R.ok().put("单位需求列表 - 获取成功", demandList);
         }
-        return R.ok().put("单位需求列表 - 获取失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "单位需求列表 - 获取失败");
     }
 
     /**
@@ -135,7 +131,6 @@ public class JobController {
      */
     @GetMapping("/demand")
     @ApiOperation(value = "获取单位需求详情", notes = "获取单位需求详情，请求参数是 id")
-    @ApiImplicitParam(name = "id", value = "id", dataType = "String", paramType = "query")
     public R demand(@RequestParam String id) {
         String res = redisUtil.get(DEMAND + ":" + id);
         if (res != null) {
@@ -146,7 +141,7 @@ public class JobController {
             redisUtil.set(DEMAND + ":" + id, JSON.toJSONString(demand), 60 * 60 * 12);
             return R.ok().put("单位需求详情 - 获取成功", demand);
         }
-        return R.ok().put("单位需求详情 - 获取失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "单位需求详情 - 获取失败");
     }
 
     /**
@@ -157,10 +152,6 @@ public class JobController {
      */
     @GetMapping("/calendar")
     @ApiOperation(value = "获取招聘日历", notes = "获取招聘日历")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "year", value = "年", dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "month", value = "月", dataType = "String", paramType = "query")
-    })
     public R calendar(@RequestParam String year, @RequestParam String month) {
         String res = redisUtil.get(CALENDAR + ":" + year + ":" + month);
         if (res != null) {
@@ -171,6 +162,6 @@ public class JobController {
             redisUtil.set(CALENDAR + ":" + year + ":" + month, JSON.toJSONString(calendar), 60 * 60 * 12);
             return R.ok().put("招聘日历 - 获取成功", calendar);
         }
-        return R.ok().put("招聘日历 - 获取失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "招聘日历 - 获取失败");
     }
 }

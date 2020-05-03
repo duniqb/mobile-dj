@@ -4,20 +4,22 @@ import cn.duniqb.mobile.dto.news.News;
 import cn.duniqb.mobile.dto.news.NewsList;
 import cn.duniqb.mobile.entity.ImgUrlEntity;
 import cn.duniqb.mobile.service.ImgUrlService;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import cn.duniqb.mobile.utils.HttpUtils;
+import com.aliyun.oss.OSS;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import okhttp3.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.*;
 
 /**
  * 爬取新闻
@@ -30,17 +32,15 @@ public class NewsSpiderService {
     @Autowired
     private ImgUrlService imgUrlService;
 
-    /**
-     * 文章图片存放的本机文件夹
-     */
-    @Value("${local.image}")
-    private String imagePath;
+    @Autowired
+    private OSS ossClient;
 
-    /**
-     * 本机 url，以供回传图片地址
-     */
-    @Value("${local.host}")
-    private String localhost;
+    @Value("${spring.cloud.alicloud.oss.endpoint}")
+    private String endpoint;
+
+    @Value("${spring.cloud.alicloud.oss.bucket}")
+    private String bucket;
+
 
     /**
      * 新闻列表
@@ -51,25 +51,18 @@ public class NewsSpiderService {
     public NewsList list(String type, String page) {
         String url = "";
         if ("1".equals(type)) {
-            url = "http://www.djtu.edu.cn/News" + "?page=" + page;
+            url = "http://www.djtu.edu.cn/News";
         } else if ("2".equals(type)) {
-            url = "http://www.djtu.edu.cn/Report.html" + "?page=" + page;
+            url = "http://www.djtu.edu.cn/Report.html";
         } else if ("3".equals(type)) {
-            url = "http://www.djtu.edu.cn/Notices.html" + "?page=" + page;
+            url = "http://www.djtu.edu.cn/Notices.html";
         }
 
-        OkHttpClient client = new OkHttpClient();
-        Request request = new Request.Builder()
-                .url(url)
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
-                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .addHeader("Accept-Encoding", "gzip, deflate")
-                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
-                .addHeader("Connection", "keep-alive")
-                .build();
+        Map<String, String> map = new HashMap<>();
+        map.put("page", page);
 
-        try (Response response = client.newCall(request).execute()) {
-            if (response.code() == 200) {
+        try (Response response = HttpUtils.get(url, map)) {
+            if (response.code() == HttpStatus.OK.value()) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Elements elements = doc.select("body section .m .list li");
                 NewsList newsList = new NewsList();
@@ -107,11 +100,13 @@ public class NewsSpiderService {
     /**
      * 新闻详情
      *
-     * @param type 1：交大要闻 http://www.djtu.edu.cn/News，2：综合报道 http://www.djtu.edu.cn/Report，3：通知公告：http://www.djtu.edu.cn/Notices
+     * @param type 1：交大要闻 http://www.djtu.edu.cn/News，
+     *             2：综合报道 http://www.djtu.edu.cn/Report，
+     *             3：通知公告：http://www.djtu.edu.cn/Notices
      * @param id
      */
     public News detail(String type, Integer id) {
-        String url = null;
+        String url = "";
         if ("1".equals(type)) {
             url = "http://www.djtu.edu.cn/News" + "/" + id + ".html";
         } else if ("2".equals(type)) {
@@ -120,19 +115,7 @@ public class NewsSpiderService {
             url = "http://www.djtu.edu.cn/Notices" + "/" + id + ".html";
         }
 
-        OkHttpClient client = new OkHttpClient();
-        assert url != null;
-        Request request = new Request.Builder()
-                .url(url)
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
-                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .addHeader("Accept-Encoding", "gzip, deflate")
-                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
-                .addHeader("Connection", "keep-alive")
-                .build();
-
-
-        try (Response response = client.newCall(request).execute()) {
+        try (Response response = HttpUtils.get(url, null)) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 News news = new News();
@@ -158,24 +141,33 @@ public class NewsSpiderService {
                 // 内容
                 Elements elements = doc.select("section .minfo .content div[style]");
                 List<String> contentList = new ArrayList<>();
-                for (int i = 0; i < elements.size(); i++) {
-                    contentList.add(elements.get(i).text().trim());
+                for (org.jsoup.nodes.Element element : elements) {
+                    contentList.add(element.text().trim());
                 }
-                // 图片地址
+                // 准备传输的图片地址
                 List<String> imageList = new ArrayList<>();
+
                 // 首先查看本地记录是否有该 id 对应的 url 图片保存
-                List<ImgUrlEntity> imgUrlList = imgUrlService.listById(String.valueOf(id));
+                QueryWrapper<ImgUrlEntity> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("article_id", id);
+                List<ImgUrlEntity> imgUrlList = imgUrlService.list(queryWrapper);
+
+                // 本地没有记录，上传图片到 oss
                 if (imgUrlList.isEmpty()) {
                     Elements imgElements = doc.select("section .minfo .content div img");
-                    for (int i = 0; i < imgElements.size(); i++) {
-                        String imgUrl = "img/" + saveImage(imgElements.get(i).attr("src"));
-                        imageList.add(localhost + imgUrl);
+                    for (org.jsoup.nodes.Element imgElement : imgElements) {
+                        // https://mobile-dj.oss-cn-beijing.aliyuncs.com/slide/1.jpg
+                        // 实际可访问图片地址
+                        String ossHost = "https://" + bucket + "." + endpoint + "/";
+                        String imgName = saveImage(imgElement.attr("src"));
+                        imageList.add(ossHost + imgName);
+
+                        // 新图片信息保存到数据库
                         ImgUrlEntity imgUrlEntity = new ImgUrlEntity();
                         imgUrlEntity.setArticleId(id);
-                        imgUrlEntity.setId(id);
+                        // 图片类型，0：新闻图片，1：文章图片，2：失物招领
                         imgUrlEntity.setImgType(0);
-                        imgUrlEntity.setUrl(localhost + imgUrl);
-
+                        imgUrlEntity.setUrl(ossHost + imgName);
                         imgUrlService.save(imgUrlEntity);
                     }
                 }
@@ -191,31 +183,19 @@ public class NewsSpiderService {
     }
 
     /**
-     * 保存新闻详情的图片 到 oss
+     * 保存新闻详情的图片到 oss
      *
      * @return
      */
-    private String saveImage(String imgUrl) {
-//        HttpGet getVerifyCode = new HttpGet("http://www.djtu.edu.cn" + imgUrl);
-//        FileOutputStream fileOutputStream = null;
-//        String filename = imgUrl.split("/")[4];
-//        try {
-//            HttpClient client = HttpClients.createDefault();
-//            HttpResponse response = client.execute(getVerifyCode);
-//            fileOutputStream = new FileOutputStream(new File(imagePath + filename));
-//            response.getEntity().writeTo(fileOutputStream);
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        } finally {
-//            try {
-//                if (fileOutputStream != null) {
-//                    fileOutputStream.close();
-//                }
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        return filename;
-        return null;
+    private String saveImage(String imgUrl) throws IOException {
+        String date = imgUrl.split("/")[3];
+        String uuid = imgUrl.split("/")[4];
+        String fileName = "news/" + date + "/" + uuid;
+
+        // 上传网络流
+        InputStream inputStream = new URL("http://www.djtu.edu.cn" + imgUrl).openStream();
+        ossClient.putObject("mobile-dj", fileName, inputStream);
+
+        return fileName;
     }
 }

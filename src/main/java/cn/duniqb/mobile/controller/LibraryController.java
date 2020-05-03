@@ -5,12 +5,11 @@ import cn.duniqb.mobile.dto.profession.ProfessionHot;
 import cn.duniqb.mobile.entity.BookCateEntity;
 import cn.duniqb.mobile.service.BookCateService;
 import cn.duniqb.mobile.spider.LibrarySpiderService;
+import cn.duniqb.mobile.utils.BizCodeEnum;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -26,7 +25,7 @@ import java.util.List;
  *
  * @author duniqb
  */
-@Api(value = "与图书馆相关的接口", tags = {"与图书馆相关的接口"})
+@Api(tags = {"与图书馆相关的接口"})
 @Scope("session")
 @RestController
 @RequestMapping("/library")
@@ -84,7 +83,6 @@ public class LibraryController {
      * @return
      */
     @ApiOperation(value = "馆藏查询", notes = "馆藏查询的接口，请求参数是图书名")
-    @ApiImplicitParam(name = "name", value = "查询参数，书名", required = true, dataType = "String", paramType = "query")
     @GetMapping("/query")
     public R query(@RequestParam String name) {
         if (name == null || "".equals(name.trim())) {
@@ -99,7 +97,7 @@ public class LibraryController {
             redisUtil.set(LIBRARY_QUERY + ":" + name, JSON.toJSONString(bookList), 60 * 60 * 24);
             return R.ok().put("查询成功", bookList);
         }
-        return R.ok().put("查询失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
     }
 
     /**
@@ -109,7 +107,6 @@ public class LibraryController {
      * @return
      */
     @ApiOperation(value = "图书详情", notes = "图书详情的接口，请求参数是图书 id")
-    @ApiImplicitParam(name = "id", value = "查询参数，图书 id", required = true, dataType = "String", paramType = "query")
     @GetMapping("/show")
     public R show(@RequestParam String id) {
         if (id == null || "".equals(id.trim())) {
@@ -121,21 +118,20 @@ public class LibraryController {
         }
         Book book = librarySpiderService.show(id);
         redisUtil.set(BOOK_DETAIL + ":" + id, JSON.toJSONString(book), 60 * 60 * 24);
-        return R.ok().put("查询成功", book);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询成功");
     }
 
     /**
      * 热点图书
      *
+     * @param type 查询参数，热度类型，
+     *             1：读者热点-近2年入藏复本平均量，2：读者热点-近2年入藏复本总借量，" +
+     *             3：荐购热点-近5年入藏复本平均量，4：荐购热点-近5年入藏复本总借量，
+     *             5：新书热度-近90天内入藏复本总借量)，6：专业热点
+     * @param sq   查询参数，6.专业热点的查询参数
      * @return
      */
     @ApiOperation(value = "热点图书 - 读者热点，荐购热点，新书热度，专业热点", notes = "热点图书的接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "type", value = "查询参数，热度类型，1：读者热点-近2年入藏复本平均量，2：读者热点-近2年入藏复本总借量，" +
-                    "3：荐购热点-近5年入藏复本平均量，4：荐购热点-近5年入藏复本总借量，5：新书热度-近90天内入藏复本总借量)，6：专业热点",
-                    required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "sq", value = "查询参数，6.专业热点的查询参数", dataType = "String", paramType = "query")
-    })
     @GetMapping("/hot")
     public R score(@RequestParam String type, @RequestParam(required = false) String sq) {
         String res = redisUtil.get(HOT_BOOK + ":" + type);
@@ -183,26 +179,22 @@ public class LibraryController {
                 return R.ok().put("专业热点-近2年内入藏复本总借量，查询成功", bookList);
             }
         }
-        return R.ok().put("查询失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
     }
 
 
     /**
      * 分类热点
      *
-     * @param type
-     * @param cate
+     * @param type 查询参数，type=1 近2年入藏复本平均量，type=2 近2年入藏复本总借量
+     * @param cate 1.马克思主义、列宁主义、毛泽东思...A  \n  2.哲学、宗教...B  \n 3.社会科学总论...C  \n   " +
+     *             "4.政治、法律...D  \n 5.军事...E  \n   6.经济...F  \n   7.文化、科学、教育、体育...G \n   8.语言、文字...H \n 9.文学...I  \n   " +
+     *             "10.艺术...J  \n  11.历史、地理...K \n    12.自然科学总论...N  \n  13.数理科学和化学...O \n  14.天文学、地球科学...P  \n   " +
+     *             "15.生物科学...Q  \n   16.医药、卫生...R  \n   17.农业科学...S \n  18.工业技术...T  \n 19.交通运输...U \n  20.航空、航天...V  \n   " +
+     *             "21.环境科学、安全科学...X \n    22.综合性图书...Z
      * @return
      */
     @ApiOperation(value = "热点图书 - 分类热点", notes = "热点图书的接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "type", value = "查询参数，type=1 近2年入藏复本平均量，type=2 近2年入藏复本总借量", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "cate", value = "1.马克思主义、列宁主义、毛泽东思...A  \n  2.哲学、宗教...B  \n 3.社会科学总论...C  \n   " +
-                    "4.政治、法律...D  \n 5.军事...E  \n   6.经济...F  \n   7.文化、科学、教育、体育...G \n   8.语言、文字...H \n 9.文学...I  \n   " +
-                    "10.艺术...J  \n  11.历史、地理...K \n    12.自然科学总论...N  \n  13.数理科学和化学...O \n  14.天文学、地球科学...P  \n   " +
-                    "15.生物科学...Q  \n   16.医药、卫生...R  \n   17.农业科学...S \n  18.工业技术...T  \n 19.交通运输...U \n  20.航空、航天...V  \n   " +
-                    "21.环境科学、安全科学...X \n    22.综合性图书...Z", required = true, dataType = "String", paramType = "query"),
-    })
     @GetMapping("/category")
     public R category(@RequestParam String type, @RequestParam String cate) {
         if (type == null || cate == null) {
@@ -225,7 +217,7 @@ public class LibraryController {
                 return R.ok().put("分类热点-近2年入藏复本总借量，查询成功", bookList);
             }
         }
-        return R.ok().put("查询失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
     }
 
     /**
@@ -245,7 +237,7 @@ public class LibraryController {
             redisUtil.set(BOOK_CATE, JSON.toJSONString(bookCateList), 60 * 60 * 24 * 3);
             return R.ok().put("查询成功", bookCateList);
         }
-        return R.ok().put("查询失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
     }
 
     /**
@@ -263,7 +255,7 @@ public class LibraryController {
             redisUtil.set(COLLEGE_LIST, JSON.toJSONString(college), 60 * 60 * 24 * 3);
             return R.ok().put("查询成功", college);
         }
-        return R.ok().put("查询失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
     }
 
     /**
@@ -271,13 +263,11 @@ public class LibraryController {
      * major 为空则 http://wxlib.djtu.edu.cn/br/ReaderProfession.aspx?sq=材料科学
      * 否则 http://wxlib.djtu.edu.cn/br/ReaderFenLeiHao.aspx?zy=材料焊接&xy=材料科学
      *
+     * @param college 查询参数，学院，如 材料科学
+     * @param major   查询参数，专业，如 材料焊接
      * @return
      */
     @ApiOperation(value = "专业热点里的专业/课程列表", notes = "专业/课程列表的接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "college", value = "查询参数，学院，如 材料科学", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "major", value = "查询参数，专业，如 材料焊接", dataType = "String", paramType = "query")
-    })
     @GetMapping("/major")
     public R major(@RequestParam String college, @RequestParam(required = false) String major) {
         if (college == null) {
@@ -304,6 +294,6 @@ public class LibraryController {
             }
             return R.ok().put("查询成功", professionHot);
         }
-        return R.ok().put("查询失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
     }
 }

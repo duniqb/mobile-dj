@@ -2,12 +2,11 @@ package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.dto.repair.*;
 import cn.duniqb.mobile.spider.RepairSpiderService;
+import cn.duniqb.mobile.utils.BizCodeEnum;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,11 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 /**
- * 与后勤相关的接口
+ * 与后勤维修相关的接口
  *
  * @author duniqb
  */
-@Api(value = "与后勤相关的接口", tags = {"与后勤相关的接口"})
+@Api(tags = {"与后勤维修相关的接口"})
 @RestController
 @RequestMapping("/repair")
 public class RepairController {
@@ -49,13 +48,13 @@ public class RepairController {
 
     /**
      * 故障报修 查询各项数据清单
+     *
+     * @param id
+     * @param value
+     * @return
      */
     @GetMapping("/data")
     @ApiOperation(value = "查询各项数据清单", notes = "查询各项数据清单的接口，请求参数是 id，value")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "id", value = "id", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "value", value = "id 的值", required = true, dataType = "String", paramType = "query")
-    })
     public R data(@RequestParam String id, @RequestParam String value) {
         String res = redisUtil.get(LOGISTICS_DATA + ":" + id + ":" + value);
         if (res != null) {
@@ -106,7 +105,7 @@ public class RepairController {
                 return R.ok().put("查询设备详情数据成功", detail);
             }
         }
-        return R.ok().put("查询数据失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询数据失败");
     }
 
     /**
@@ -114,27 +113,28 @@ public class RepairController {
      */
     @GetMapping("/list")
     @ApiOperation(value = "根据报修手机号查询报修列表", notes = "根据报修手机号查询报修列表的接口，请求参数是 phone")
-    @ApiImplicitParam(name = "phone", value = "手机号", required = true, dataType = "String", paramType = "query")
     public R list(@RequestParam String phone) {
         List<RepairDetail> list = repairSpiderService.list(phone);
         if (!list.isEmpty()) {
             return R.ok().put("查询报修列表成功", list);
         }
-        return R.ok().put("查询报修列表失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询报修列表失败");
     }
 
     /**
      * 报修单详情
+     *
+     * @param listNumber 序列号
+     * @return
      */
     @GetMapping("/detail")
     @ApiOperation(value = "报修单详情", notes = "报修单详情的接口，请求参数是 listNumber")
-    @ApiImplicitParam(name = "listNumber", value = "序列号", required = true, dataType = "String", paramType = "query")
     public R detail(@RequestParam String listNumber) {
         RepairDetail repairDetail = repairSpiderService.detail(listNumber);
         if (repairDetail != null) {
             return R.ok().put("查询报修单详情成功", repairDetail);
         }
-        return R.ok().put("查询报修单详情失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询报修单详情失败");
     }
 
     /**
@@ -152,7 +152,7 @@ public class RepairController {
             redisUtil.set(LOGISTICS_NOTICE, JSON.toJSONString(notice), 60 * 30);
             return R.ok().put("查询最新通知成功", notice);
         }
-        return R.ok().put("查询最新通知失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询最新通知失败");
     }
 
     /**
@@ -170,43 +170,43 @@ public class RepairController {
             redisUtil.set(LOGISTICS_RECENT, JSON.toJSONString(recentList), 60 * 60 * 24);
             return R.ok().put("查询最近维修数量成功", recentList);
         }
-        return R.ok().put("查询最近维修数量失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询最近维修数量失败");
     }
 
     /**
      * 发起报修
+     *
+     * @param phone       报修电话
+     * @param distinctId  校区
+     * @param buildingId  建筑物
+     * @param roomId      房间号
+     * @param equipmentId 设备
+     * @param place       房间/位置
+     * @param description 描述信息
+     * @return
      */
     @GetMapping("/report")
     @ApiOperation(value = "发起报修", notes = "发起报修的接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "phone", value = "报修电话", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "distinctId", value = "校区", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "buildingId", value = "建筑物", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "roomId", value = "房间号", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "equipmentId", value = "设备", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "place", value = "房间/位置", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "description", value = "描述信息", required = true, dataType = "String", paramType = "query"),
-    })
     public R report(String phone, String distinctId, String buildingId, String roomId, String equipmentId, String place, String description) {
         String listDescription = "房间号 " + place + " " + description;
         Report report = repairSpiderService.report(phone, distinctId, buildingId, roomId, equipmentId, listDescription);
         if (report != null) {
             return R.ok().put("发起报修成功", report);
         }
-        return R.ok().put("发起报修失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "发起报修失败");
     }
 
     /**
      * 维修评价
+     *
+     * @param listNumber 序列号
+     * @param phone      报修电话
+     * @param listScore  打分 1-5
+     * @param listWord   评语
+     * @return
      */
     @GetMapping("/evaluate")
     @ApiOperation(value = "维修评价", notes = "维修评价的接口")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "listNumber", value = "序列号", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "phone", value = "报修电话", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "listScore", value = "打分 1-5", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "listWord", value = "评语", required = true, dataType = "String", paramType = "query")
-    })
     public R evaluate(String listNumber, String phone, String listScore, String listWord) {
         repairSpiderService.evaluate(listNumber, phone, listScore, listWord);
         return R.ok().put("维修评价成功", null);

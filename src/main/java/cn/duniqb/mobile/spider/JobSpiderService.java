@@ -156,7 +156,9 @@ public class JobSpiderService {
         map.put("page", page);
 
         try (Response response = HttpUtils.get(url, map)) {
-            if (response.code() == 200) {
+            if ((response == null)) {
+                return null;
+            } else if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Elements elements = doc.select("body section .demands>ul li");
 

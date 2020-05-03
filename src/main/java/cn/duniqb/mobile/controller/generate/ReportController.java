@@ -1,9 +1,10 @@
-package cn.duniqb.mobile.controller;
+package cn.duniqb.mobile.controller.generate;
 
 import cn.duniqb.mobile.entity.ReportEntity;
 import cn.duniqb.mobile.service.ReportService;
 import cn.duniqb.mobile.utils.PageUtils;
 import cn.duniqb.mobile.utils.R;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +19,7 @@ import java.util.Map;
  * @email duniqb@qq.com
  * @date 2020-04-30 19:36:16
  */
+@Api(tags = {"与举报相关的接口"})
 @RestController
 @RequestMapping("/report")
 public class ReportController {

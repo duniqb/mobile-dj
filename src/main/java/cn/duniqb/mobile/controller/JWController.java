@@ -6,21 +6,21 @@ import cn.duniqb.mobile.entity.WxUserEntity;
 import cn.duniqb.mobile.service.StudentService;
 import cn.duniqb.mobile.service.WxUserService;
 import cn.duniqb.mobile.spider.JWSpiderService;
+import cn.duniqb.mobile.utils.BizCodeEnum;
+import cn.duniqb.mobile.utils.HttpUtils;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
-import okhttp3.*;
+import okhttp3.FormBody;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Scope;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -34,7 +34,7 @@ import java.util.Objects;
  *
  * @author duniqb
  */
-@Api(value = "与登录教务相关的接口", tags = {"与登录教务相关的接口"})
+@Api(tags = {"与登录教务相关的接口"})
 @Scope("session")
 @RestController
 @RequestMapping("/jw")
@@ -98,19 +98,10 @@ public class JWController {
      *
      * @return
      */
-    @Transactional(propagation = Propagation.REQUIRED)
     @ApiOperation(value = "登录教务", notes = "登录教务的接口，包含学号，密码和验证码")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "stuNo", value = "学号", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "password", value = "密码", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "verifyCode", value = "验证码", required = true, dataType = "String", paramType = "query"),
-    })
     @GetMapping("/login")
     public R login(@RequestParam String stuNo, @RequestParam String password, @RequestParam String verifyCode, @RequestParam String sessionId) {
-
         String url = "http://" + host + "/academic/j_acegi_security_check";
-
-        OkHttpClient client = new OkHttpClient();
 
         RequestBody requestBody = new FormBody.Builder()
                 .add("groupId", null)
@@ -118,17 +109,8 @@ public class JWController {
                 .add("j_password", password)
                 .add("j_captcha", verifyCode)
                 .build();
-        Request request = new Request.Builder()
-                .url(url)
-                .post(requestBody)
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
-                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .addHeader("Accept-Encoding", "gzip, deflate")
-                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
-                .addHeader("Connection", "keep-alive")
-                .build();
 
-        try (Response response = client.newCall(request).execute()) {
+        try (Response response = HttpUtils.post(url, requestBody)) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 // 此处应该存储cookie
@@ -198,7 +180,6 @@ public class JWController {
      * @throws Exception
      */
     @ApiOperation(value = "获取通知列表", notes = "获取通知列表")
-    @ApiImplicitParam(name = "/page", value = "页数", required = true, dataType = "String", paramType = "query")
     @GetMapping("noticeList")
     public R noticeList(String page) {
         String res = redisUtil.get(NOTICE_LIST + ":" + page);
@@ -210,7 +191,7 @@ public class JWController {
             redisUtil.set(NOTICE_LIST + ":" + page, JSON.toJSONString(noticeList), 60 * 60 * 12);
             return R.ok().put("获取通知列表成功", noticeList);
         }
-        return R.ok().put("获取通知列表失败", null);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "获取通知列表失败");
     }
 
     /**
@@ -219,7 +200,6 @@ public class JWController {
      * @throws Exception
      */
     @ApiOperation(value = "获取通知详情", notes = "获取通知详情")
-    @ApiImplicitParam(name = "id", value = "id", required = true, dataType = "String", paramType = "query")
     @GetMapping("/notice")
     public R notice(String id) {
         if ("null".equals(id)) {
@@ -234,7 +214,7 @@ public class JWController {
             redisUtil.set(NOTICE_DETAIL + ":" + id, JSON.toJSONString(notice), 60 * 60 * 24);
             return R.ok().put("获取通知详情成功", notice);
         }
-        return R.ok().put("获取通知详情失败", 400);
+        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "获取通知详情失败");
     }
 }
 

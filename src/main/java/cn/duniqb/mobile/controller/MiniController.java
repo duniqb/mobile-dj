@@ -10,16 +10,17 @@ import cn.duniqb.mobile.utils.HttpUtils;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.RedisUtil;
 import com.alibaba.fastjson.JSON;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
+import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -30,7 +31,8 @@ import java.util.*;
  *
  * @author duniqb
  */
-@Api(value = "与小程序相关的接口", tags = {"与小程序相关的接口"})
+@Slf4j
+@Api(tags = {"与小程序相关的接口"})
 @RestController
 @RequestMapping("/mini")
 public class MiniController {
@@ -72,12 +74,11 @@ public class MiniController {
      * 调用 auth.code2Session 接口，换取 用户唯一标识 OpenID 和 会话密钥 session_key
      * 以后每次调用业务接口，都根据 sessionId 的值 sessionKey 是否存在，不存在提示重新登录
      *
-     * @param code
+     * @param code 认证 code
      * @return
      */
     @GetMapping("/login")
     @ApiOperation(value = "登录小程序", notes = "获取登录态的接口，请求参数是 code")
-    @ApiImplicitParam(name = "code", value = "认证 code", required = true, dataType = "String", paramType = "query")
     public R login(@RequestParam String code) {
         String url = "https://api.weixin.qq.com/sns/jscode2session";
 
@@ -88,13 +89,18 @@ public class MiniController {
         map.put("grant_type", "authorization_code");
 
         try (Response response = HttpUtils.get(url, map)) {
-            if (response.code() == 200) {
+            System.out.println("登录小程序返回的：");
+            System.out.println(Objects.requireNonNull(response.body()).toString());
+            if (response.code() == HttpStatus.OK.value()) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 String json = doc.select("html body").first().text();
                 Code2Session code2Session = JSON.parseObject(json, Code2Session.class);
 
-                // 查询是否第一次登录，是则插入用户，并添加 Session_key
-                WxUserEntity wxUser = wxUserService.getById(code2Session.getOpenid());
+                // 查询是否第一次登录，是则插入用户，并添加 Session_key new WxUserEntity().setOpenid(code2Session.getOpenid())
+                QueryWrapper<WxUserEntity> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("openid", code2Session.getOpenid());
+                WxUserEntity wxUser = wxUserService.getOne(queryWrapper);
+
                 String sessionId = SESSION_ID + ":" + UUID.randomUUID().toString().replace("-", "");
                 if (wxUser == null) {
                     WxUserEntity wxUserNew = new WxUserEntity();
@@ -105,21 +111,22 @@ public class MiniController {
                         // 以 随机串 为 key，openid:session_key 为 value 组成键值对并存到缓存当中，24 小时过期
                         String value = code2Session.getOpenid() + ":" + code2Session.getSession_key();
                         redisUtil.set(sessionId, value, 60 * 60 * 24);
-                        return R.ok().put("首次登录成功", sessionId);
+                        return R.ok("首次登录成功").put("data", sessionId);
                     }
                 }
-                // 否则更新 Session_key
+                // 已有用户，则更新 Session_key
                 else {
+                    log.debug("查看是否已有用户");
                     String value = code2Session.getOpenid() + ":" + code2Session.getSession_key();
                     redisUtil.set(sessionId, value, 60 * 60 * 24);
-                    return R.ok().put("登录成功，已更新 Session_key", sessionId);
+                    return R.ok("登陆成功").put("data", sessionId);
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        return R.ok().put("登录失败", null);
+        return R.error(400, "登陆失败");
     }
 
     /**
@@ -130,13 +137,12 @@ public class MiniController {
      */
     @GetMapping("/session")
     @ApiOperation(value = "检查登录是否有效", notes = "检查登录是否有效的接口，请求参数是 sessionId")
-    @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
     public R session(@RequestParam String sessionId) {
         String value = redisUtil.get(sessionId);
         if (value == null) {
-            return R.ok().put("未登录", 400);
+            return R.error(400, "未登录");
         }
-        return R.ok().put("已登录", null);
+        return R.ok("已登录");
     }
 
     /**
@@ -150,14 +156,9 @@ public class MiniController {
      */
     @GetMapping("/tip")
     @ApiOperation(value = "提示信息", notes = "提示信息的接口，请求参数是 sessionId")
-    @ApiImplicitParams({
-            @ApiImplicitParam(name = "sessionId", value = "sessionId", required = false, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "province", value = "省", required = true, dataType = "String", paramType = "query"),
-            @ApiImplicitParam(name = "city", value = "市", required = true, dataType = "String", paramType = "query"),
-    })
     public R tip(@RequestParam(required = false) String sessionId, @RequestParam String province, @RequestParam String city) {
         if ("undefined".equals(sessionId) || "undefined".equals(province) || "undefined".equals(city)) {
-            return R.ok().put("获取提示失败", null);
+            return R.error(400, "获取提示失败");
         }
         String res = redisUtil.get(TIP + ":" + province + ":" + city);
         if (res != null) {
@@ -165,7 +166,10 @@ public class MiniController {
             String sessionIdValue = redisUtil.get(sessionId);
             if (sessionIdValue != null) {
                 String openid = sessionIdValue.split(":")[0];
-                WxUserEntity wxUser = wxUserService.getById(openid);
+                QueryWrapper<WxUserEntity> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("openid", openid);
+                WxUserEntity wxUser = wxUserService.getOne(queryWrapper);
+
                 Tip tip = JSON.parseObject(res, Tip.class);
 
                 TipDto tipDto = new TipDto();
@@ -177,14 +181,14 @@ public class MiniController {
                 list.add(tip.getTip1());
                 list.add(tip.getTip2());
                 if (wxUser != null) {
-                    Integer gender = wxUser.getGender();
-                    // false 男，true 女，女性增加化妆信息
+                    int gender = wxUser.getGender() == null ? 0 : wxUser.getGender();
+                    // 0 男，1 女，女性增加化妆信息
                     if (gender == 1) {
                         list.add(tip.getMakeup());
                     }
                 }
                 tipDto.setTips(list);
-                return R.ok().put("提示信息 - 缓存获取成功", tipDto);
+                return R.ok("提示信息 - 缓存获取成功").put("data", tipDto);
             }
 
         }
@@ -202,22 +206,22 @@ public class MiniController {
         String sessionIdValue = redisUtil.get(sessionId);
         if (sessionIdValue != null) {
             String openid = sessionIdValue.split(":")[0];
-            WxUserEntity wxUser = wxUserService.getById(openid);
-
+            QueryWrapper<WxUserEntity> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("openid", openid);
+            WxUserEntity wxUser = wxUserService.getOne(queryWrapper);
             if (wxUser != null) {
-                Integer gender = wxUser.getGender();
-                // false 男，true 女，女性增加化妆信息
+                int gender = wxUser.getGender() == null ? 0 : wxUser.getGender();
+                // 0 男，1 女，女性增加化妆信息
                 if (gender == 1) {
                     list.add(tip.getMakeup());
                 }
             }
             tipDto.setTips(list);
             redisUtil.set(TIP + ":" + province + ":" + city, JSON.toJSONString(tip), 60 * 60);
-            return R.ok().put("获取提示成功", tipDto);
         } else {
             tipDto.setTips(list);
-            return R.ok().put("获取提示成功", tipDto);
         }
+        return R.ok("获取提示成功").put("data", tipDto);
     }
 
     /**
@@ -229,7 +233,6 @@ public class MiniController {
      */
     @PostMapping("/add")
     @ApiOperation(value = "添加用户", notes = "添加用户的接口，请求参数是 wxUser")
-    @ApiImplicitParam(name = "wxUser", value = "微信账号信息", required = true, dataType = "WxUserDto", paramType = "body")
     public R add(@RequestParam String sessionId, @RequestParam String avatarUrl,
                  @RequestParam String city, @RequestParam String country,
                  @RequestParam Integer gender, @RequestParam String language,
@@ -285,7 +288,6 @@ public class MiniController {
      */
     @GetMapping("/query")
     @ApiOperation(value = "获取用户信息", notes = "获取用户信息的接口，请求参数是 sessionId")
-    @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
     public R query(@RequestParam String sessionId) {
         String sessionIdValue = redisUtil.get(sessionId);
         if (sessionIdValue != null) {
@@ -306,7 +308,6 @@ public class MiniController {
      */
     @GetMapping("/register")
     @ApiOperation(value = "检查是否真正的在数据库注册", notes = "检查是否真正的在数据库注册的接口，请求参数是 sessionId")
-    @ApiImplicitParam(name = "sessionId", value = "sessionId", required = true, dataType = "String", paramType = "query")
     public R register(@RequestParam String sessionId) {
         String sessionIdValue = redisUtil.get(sessionId);
         if (sessionIdValue != null) {

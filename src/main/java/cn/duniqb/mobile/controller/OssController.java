@@ -5,6 +5,7 @@ import com.aliyun.oss.OSS;
 import com.aliyun.oss.common.utils.BinaryUtil;
 import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.PolicyConditions;
+import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,9 @@ import java.util.Map;
  * @date 2020/4/19 22:24
  * @since 1.0
  */
+@Api(tags = {"与阿里云 oss 相关的接口"})
 @RestController
+@RequestMapping("/oss")
 public class OssController {
 
     @Autowired
@@ -43,7 +46,7 @@ public class OssController {
      *
      * @return
      */
-    @RequestMapping("/oss/policy")
+    @RequestMapping("/policy")
     public R policy() {
 
         String host = "https://" + bucket + "." + endpoint;
