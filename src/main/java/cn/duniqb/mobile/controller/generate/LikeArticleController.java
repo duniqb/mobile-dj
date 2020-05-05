@@ -91,13 +91,13 @@ public class LikeArticleController {
             if (likeStatus) {
                 Long likeCount = likeService.disLike(openid, EntityType.ENTITY_ARTICLE, articleId);
                 // 做定时任务序列化
-                return R.ok("取消点赞成功").put("likeCount", likeCount);
+                return R.ok(1, "取消点赞成功").put("likeCount", likeCount);
             }
             // 没有对该实体点过赞
             else {
                 Long likeCount = likeService.like(openid, EntityType.ENTITY_ARTICLE, articleId);
                 // 做定时任务序列化
-                return R.ok("点赞成功").put("likeCount", likeCount);
+                return R.ok(0, "点赞成功").put("likeCount", likeCount);
 
             }
         }

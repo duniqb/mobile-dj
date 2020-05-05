@@ -90,6 +90,15 @@ public class ArticleController {
             for (ImgUrlEntity imgUrlEntity : imgUrlEntityList) {
                 imgList.add(imgUrlEntity.getUrl());
             }
+            if (imgList.isEmpty()) {
+                article.setBlankImage(0);
+            } else if (imgList.size() < 3) {
+                article.setBlankImage(3 - imgList.size());
+            } else if (imgList.size() < 6) {
+                article.setBlankImage(6 - imgList.size());
+            } else if (imgList.size() < 9) {
+                article.setBlankImage(9 - imgList.size());
+            }
             article.setImgUrlList(imgList);
 
             // 查找文章的作者名
@@ -147,9 +156,9 @@ public class ArticleController {
     /**
      * 信息
      */
-    @RequestMapping("/info/{id}")
+    @RequestMapping("/info")
     // @RequiresPermissions("mobile:article:info")
-    public R info(@PathVariable("id") Integer id) {
+    public R info(@RequestParam String sessionId,@RequestParam Integer id) {
         ArticleEntity articleEntity = articleService.getById(id);
 
         Article article = new Article();
@@ -171,10 +180,44 @@ public class ArticleController {
 
         // 查找文章的作者名
         QueryWrapper<WxUserEntity> queryWrapperName = new QueryWrapper<>();
-        queryWrapperImg.eq("openid", articleEntity.getOpenId());
+        queryWrapperName.eq("openid", articleEntity.getOpenId());
         WxUserEntity wxUser = wxUserService.getOne(queryWrapperName);
         article.setAuthor(wxUser.getNickname());
         article.setAvatar(wxUser.getAvatarUrl());
+        // 查找点赞数量，先查看Redis 里是否有该文章的点赞情况存储，如果有则返回，没有则从数据库查询后写入redis并返回
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openid = sessionIdValue.split(":")[0];
+
+            String likeKey = RedisKeyUtil.getLikeKey(EntityType.ENTITY_ARTICLE, article.getId());
+            // Redis 没有该文章的点赞记录
+            if (redisUtil.scard(likeKey) == 0) {
+                QueryWrapper<LikeArticleEntity> queryWrapperLike = new QueryWrapper<>();
+                queryWrapperLike.eq("article_id", article.getId());
+                List<LikeArticleEntity> likeArticleEntityList = likeArticleService.list(queryWrapperLike);
+                // 把数据库存在的该文章的点赞记录放置到 Redis
+                if (!likeArticleEntityList.isEmpty()) {
+                    for (LikeArticleEntity likeArticleEntity : likeArticleEntityList) {
+                        System.out.println("写入了点赞记录");
+                        likeService.like(likeArticleEntity.getOpenId(), EntityType.ENTITY_ARTICLE, article.getId());
+                    }
+                }
+            }
+
+            // 该用户是否对该文章点赞
+            Boolean likeStatus = likeService.getLikeStatus(openid, EntityType.ENTITY_ARTICLE, article.getId());
+            if (likeStatus) {
+                article.setIsLike(true);
+            }
+
+            article.setLikeCount((likeService.getLikeCount(EntityType.ENTITY_ARTICLE, article.getId())));
+        }
+
+        // 查找评论数量
+        QueryWrapper<CommentEntity> queryWrapperComment = new QueryWrapper<>();
+        queryWrapperComment.eq("article_id", articleEntity.getId());
+        List<CommentEntity> commentEntityList = commentService.list(queryWrapperComment);
+        article.setCommentCount(commentEntityList.size());
 
         return R.ok().put("article", article);
     }

@@ -64,4 +64,9 @@ public class Article {
      * 当前登录用户是否点赞
      */
     private Boolean isLike = false;
+
+    /**
+     * 空白区域的数量，用以点击进入详情页
+     */
+    private Integer blankImage;
 }
