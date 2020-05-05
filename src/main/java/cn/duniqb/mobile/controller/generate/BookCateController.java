@@ -4,7 +4,7 @@ import cn.duniqb.mobile.entity.BookCateEntity;
 import cn.duniqb.mobile.service.BookCateService;
 import cn.duniqb.mobile.utils.PageUtils;
 import cn.duniqb.mobile.utils.R;
-import cn.duniqb.mobile.utils.RedisUtil;
+import cn.duniqb.mobile.utils.redis.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;

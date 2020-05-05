@@ -1,4 +1,4 @@
-package cn.duniqb.mobile.dto;
+package cn.duniqb.mobile.dto.mini;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;

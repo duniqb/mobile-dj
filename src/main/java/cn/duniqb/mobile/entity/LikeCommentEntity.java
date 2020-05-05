@@ -32,10 +32,7 @@ public class LikeCommentEntity implements Serializable {
 	 * 点赞对象id
 	 */
 	private Integer commentOrReplyId;
-	/**
-	 * 点赞时间
-	 */
-	private Date time;
+
 	/**
 	 * 点赞人
 	 */

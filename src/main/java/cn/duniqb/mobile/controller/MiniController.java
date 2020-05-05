@@ -1,6 +1,6 @@
 package cn.duniqb.mobile.controller;
 
-import cn.duniqb.mobile.dto.Code2Session;
+import cn.duniqb.mobile.dto.mini.Code2Session;
 import cn.duniqb.mobile.dto.tip.Tip;
 import cn.duniqb.mobile.dto.tip.TipDto;
 import cn.duniqb.mobile.entity.WxUserEntity;
@@ -8,7 +8,7 @@ import cn.duniqb.mobile.service.WxUserService;
 import cn.duniqb.mobile.spider.MiniSpiderService;
 import cn.duniqb.mobile.utils.HttpUtils;
 import cn.duniqb.mobile.utils.R;
-import cn.duniqb.mobile.utils.RedisUtil;
+import cn.duniqb.mobile.utils.redis.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
@@ -242,7 +242,11 @@ public class MiniController {
         if (sessionIdValue != null) {
             String openid = sessionIdValue.split(":")[0];
             // 检测是否存在，存在则更新
-            WxUserEntity wxUser = wxUserService.getById(openid);
+
+            QueryWrapper<WxUserEntity> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("openid", openid);
+            WxUserEntity wxUser = wxUserService.getOne(queryWrapper);
+
             if (wxUser != null) {
                 wxUser.setAvatarUrl(avatarUrl);
                 wxUser.setCity(city);
@@ -255,7 +259,7 @@ public class MiniController {
 
                 boolean update = wxUserService.updateById(wxUser);
                 if (update) {
-                    return R.ok().put("更新用户成功", wxUser);
+                    return R.ok("更新用户成功").put("data", wxUser);
                 }
             }
             // 不存在则插入
@@ -273,11 +277,11 @@ public class MiniController {
 
                 boolean update = wxUserService.save(newWxUser);
                 if (update) {
-                    return R.ok().put("新增用户成功", newWxUser);
+                    return R.ok("新增用户成功").put("data", newWxUser);
                 }
             }
         }
-        return R.ok().put("添加/更新用户失败", 400);
+        return R.ok("添加/更新用户失败").put("data", 400);
     }
 
     /**
@@ -292,12 +296,16 @@ public class MiniController {
         String sessionIdValue = redisUtil.get(sessionId);
         if (sessionIdValue != null) {
             String openid = sessionIdValue.split(":")[0];
-            WxUserEntity wxUser = wxUserService.getById(openid);
+
+            QueryWrapper<WxUserEntity> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("openid", openid);
+            WxUserEntity wxUser = wxUserService.getOne(queryWrapper);
+
             if (wxUser != null) {
-                return R.ok().put("获取用户信息成功", wxUser);
+                return R.ok("获取用户信息成功").put("data", wxUser);
             }
         }
-        return R.ok().put("获取用户信息失败", 400);
+        return R.ok("获取用户信息失败").put("data", 400);
     }
 
     /**
@@ -312,14 +320,18 @@ public class MiniController {
         String sessionIdValue = redisUtil.get(sessionId);
         if (sessionIdValue != null) {
             String openid = sessionIdValue.split(":")[0];
-            WxUserEntity wxUser = wxUserService.getById(openid);
+
+            QueryWrapper<WxUserEntity> queryWrapper = new QueryWrapper<>();
+            queryWrapper.eq("openid", openid);
+            WxUserEntity wxUser = wxUserService.getOne(queryWrapper);
+
             if (wxUser != null) {
                 // 已注册
                 if (wxUser.getTime() != null) {
-                    return R.ok().put("用户已注册", wxUser);
+                    return R.ok("用户已注册").put("data", wxUser);
                 }
             }
         }
-        return R.ok().put("用户未注册", 400);
+        return R.error(400, "用户未注册");
     }
 }

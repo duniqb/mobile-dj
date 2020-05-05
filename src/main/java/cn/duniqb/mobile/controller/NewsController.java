@@ -4,7 +4,7 @@ import cn.duniqb.mobile.dto.news.News;
 import cn.duniqb.mobile.dto.news.NewsList;
 import cn.duniqb.mobile.spider.NewsSpiderService;
 import cn.duniqb.mobile.utils.R;
-import cn.duniqb.mobile.utils.RedisUtil;
+import cn.duniqb.mobile.utils.redis.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;

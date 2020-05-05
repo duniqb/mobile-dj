@@ -1,4 +1,4 @@
-package cn.duniqb.mobile.utils;
+package cn.duniqb.mobile.utils.redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -22,7 +22,7 @@ public class RedisUtil {
      * @param key
      * @return
      */
-    public long ttl(String key) {
+    public Long ttl(String key) {
         return redisTemplate.getExpire(key);
     }
 
@@ -42,7 +42,7 @@ public class RedisUtil {
      * @param key
      * @return
      */
-    public long incr(String key, long delta) {
+    public Long incr(String key, long delta) {
         return redisTemplate.opsForValue().increment(key, delta);
     }
 
@@ -148,7 +148,7 @@ public class RedisUtil {
      * @param value
      * @return 执行 LPUSH命令后，列表的长度。
      */
-    public long lpush(String key, String value) {
+    public Long lpush(String key, String value) {
         return redisTemplate.opsForList().leftPush(key, value);
     }
 
@@ -169,7 +169,61 @@ public class RedisUtil {
      * @param value
      * @return 执行 LPUSH命令后，列表的长度。
      */
-    public long rpush(String key, String value) {
+    public Long rpush(String key, String value) {
         return redisTemplate.opsForList().rightPush(key, value);
+    }
+
+    /**
+     * 对 sadd() 的包装，往集合添加元素
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public Long sadd(String key, String value) {
+        return redisTemplate.opsForSet().add(key, value);
+    }
+
+    /**
+     * 移除集合 key 中的一个或多个 member 元素，不存在的 member 元素会被忽略。
+     *
+     * @param key
+     * @param value
+     * @return
+     */
+    public Long srem(String key, String value) {
+        return redisTemplate.opsForSet().remove(key, value);
+    }
+
+    /**
+     * Redis Scard 命令返回集合中元素的数量。
+     *
+     * @param key
+     * @return
+     */
+    public Long scard(String key) {
+        return redisTemplate.opsForSet().size(key);
+    }
+
+
+    /**
+     * Redis Sismember 命令判断成员元素是否是集合的成员。
+     *
+     * @param key
+     * @return
+     */
+    public Boolean sismember(String key, String value) {
+        return redisTemplate.opsForSet().isMember(key, value);
+    }
+
+
+    /**
+     * Redis Smembers 命令返回集合中的所有的成员。 不存在的集合 key 被视为空集合。
+     *
+     * @param key
+     * @return
+     */
+    public Set<String> ssmembers(String key) {
+        return redisTemplate.opsForSet().members(key);
     }
 }

@@ -29,10 +29,6 @@ public class LikeArticleEntity implements Serializable {
 	 */
 	private Integer articleId;
 	/**
-	 * 点赞时间
-	 */
-	private Date time;
-	/**
 	 * 点赞人
 	 */
 	private String openId;

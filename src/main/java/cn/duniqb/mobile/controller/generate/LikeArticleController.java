@@ -1,15 +1,23 @@
 package cn.duniqb.mobile.controller.generate;
 
 import cn.duniqb.mobile.entity.LikeArticleEntity;
+import cn.duniqb.mobile.entity.WxUserEntity;
 import cn.duniqb.mobile.service.LikeArticleService;
+import cn.duniqb.mobile.service.WxUserService;
 import cn.duniqb.mobile.utils.PageUtils;
 import cn.duniqb.mobile.utils.R;
+import cn.duniqb.mobile.utils.redis.EntityType;
+import cn.duniqb.mobile.utils.redis.LikeService;
+import cn.duniqb.mobile.utils.redis.RedisUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 
 
 /**
@@ -19,12 +27,19 @@ import java.util.Map;
  * @email duniqb@qq.com
  * @date 2020-04-30 19:36:16
  */
+@Slf4j
 @Api(tags = {"与文章点赞相关的接口"})
 @RestController
 @RequestMapping("/likearticle")
 public class LikeArticleController {
     @Autowired
     private LikeArticleService likeArticleService;
+
+    @Autowired
+    private RedisUtil redisUtil;
+
+    @Autowired
+    private LikeService likeService;
 
     /**
      * 列表
@@ -65,10 +80,29 @@ public class LikeArticleController {
      */
     @RequestMapping("/update")
     // @RequiresPermissions("mobile:likearticle:update")
-    public R update(@RequestBody LikeArticleEntity likeArticle) {
-        likeArticleService.updateById(likeArticle);
+    public R update(@RequestParam Integer articleId, @RequestParam(required = false) String sessionId) {
+        // 使用 sessionId 查找用户
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openid = sessionIdValue.split(":")[0];
 
-        return R.ok();
+            Boolean likeStatus = likeService.getLikeStatus(openid, EntityType.ENTITY_ARTICLE, articleId);
+            // 用户对该实体点过赞
+            if (likeStatus) {
+                Long likeCount = likeService.disLike(openid, EntityType.ENTITY_ARTICLE, articleId);
+                // 做定时任务序列化
+                return R.ok("取消点赞成功").put("likeCount", likeCount);
+            }
+            // 没有对该实体点过赞
+            else {
+                Long likeCount = likeService.like(openid, EntityType.ENTITY_ARTICLE, articleId);
+                // 做定时任务序列化
+                return R.ok("点赞成功").put("likeCount", likeCount);
+
+            }
+        }
+//        likeArticleService.updateById(likeArticle); 不再直接修改数据库
+        return R.error(400, "请求失败");
     }
 
     /**
