@@ -6,11 +6,11 @@ import com.aliyun.oss.common.utils.BinaryUtil;
 import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.PolicyConditions;
 import io.swagger.annotations.Api;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -29,7 +29,7 @@ import java.util.Map;
 @RequestMapping("/oss")
 public class OssController {
 
-    @Autowired
+    @Resource
     private OSS ossClient;
 
     @Value("${spring.cloud.alicloud.oss.endpoint}")
@@ -48,13 +48,12 @@ public class OssController {
      */
     @RequestMapping("/policy")
     public R policy() {
-
         String host = "https://" + bucket + "." + endpoint;
         // callbackUrl为 上传回调服务器的URL，请将下面的IP和Port配置为您自己的真实信息。
-//        String callbackUrl = "http://88.88.88.88:8888";
+//        String callbackUrl = "http://24k71280g7.wicp.vip:80";
         // 用户上传文件时指定的前缀
-        String format = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        String dir = format + "/";
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String dir = "article/" + date + "/";
         Map<String, String> respMap = null;
         try {
             long expireTime = 30;
@@ -69,20 +68,36 @@ public class OssController {
             String encodedPolicy = BinaryUtil.toBase64String(binaryData);
             String postSignature = ossClient.calculatePostSignature(postPolicy);
 
-            respMap = new LinkedHashMap<String, String>();
+            respMap = new LinkedHashMap<>();
             respMap.put("accessid", accessId);
             respMap.put("policy", encodedPolicy);
             respMap.put("signature", postSignature);
             respMap.put("dir", dir);
             respMap.put("host", host);
             respMap.put("expire", String.valueOf(expireEndTime / 1000));
-            // respMap.put("expire", formatISO8601Date(expiration));
+//
+//            JSONObject jasonCallback = new JSONObject();
+//            jasonCallback.put("callbackUrl", callbackUrl);
+//            jasonCallback.put("callbackBody",
+//                    "filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}");
+//            jasonCallback.put("callbackBodyType", "application/x-www-form-urlencoded");
+//            String base64CallbackBody = BinaryUtil.toBase64String(jasonCallback.toString().getBytes());
+//            respMap.put("callback", base64CallbackBody);
+//
+//            JSONObject ja1 = JSONObject.fromObject(respMap);
+            // System.out.println(ja1.toString());
+//            response.setHeader("Access-Control-Allow-Origin", "*");
+//            response.setHeader("Access-Control-Allow-Methods", "GET, POST");
+//            response(request, response, ja1.toString());
+//            return R.ok("签名成功").put("data", ja1);
+
         } catch (Exception e) {
             System.out.println(e.getMessage());
         } finally {
             ossClient.shutdown();
         }
-        return R.ok().put("data", respMap);
+        return R.ok("签名成功").put("data", respMap);
+//        return R.error(400, "签名失败");
     }
 
 }

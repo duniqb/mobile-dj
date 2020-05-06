@@ -43,4 +43,8 @@ public class ArticleEntity implements Serializable {
      */
     private Integer status;
 
+    /**
+     * 发布地点
+     */
+    private String address;
 }

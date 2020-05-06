@@ -69,4 +69,9 @@ public class Article {
      * 空白区域的数量，用以点击进入详情页
      */
     private Integer blankImage;
+
+    /**
+     * 发布地点
+     */
+    private String address;
 }
