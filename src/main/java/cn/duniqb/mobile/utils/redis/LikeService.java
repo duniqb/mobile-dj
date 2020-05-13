@@ -1,6 +1,8 @@
 package cn.duniqb.mobile.utils.redis;
 
-import jdk.nashorn.internal.ir.ReturnNode;
+import cn.duniqb.mobile.entity.LikeArticleEntity;
+import cn.duniqb.mobile.service.LikeArticleService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,17 +20,8 @@ public class LikeService {
     @Autowired
     private RedisUtil redisUtil;
 
-    /**
-     * 获取某实体的点赞数量
-     *
-     * @param entityType
-     * @param entityId
-     * @return
-     */
-    public long getLikeCount(int entityType, int entityId) {
-        String likeKey = RedisKeyUtil.getLikeKey(entityType, entityId);
-        return redisUtil.scard(likeKey);
-    }
+    @Autowired
+    private LikeArticleService likeArticleService;
 
     /**
      * 某用户对某元素是否 like 的状态
@@ -36,13 +29,30 @@ public class LikeService {
      * @param openid     用户
      * @param entityType 实体类型
      * @param entityId   实体 id
-     * @return 是否喜欢：喜欢是 0，不喜欢是 1
+     * @return like 返回 1，不 like 返回 -1，否则返回 0
      */
-    public Boolean getLikeStatus(String openid, int entityType, int entityId) {
+    public Integer getLikeStatus(String openid, int entityType, int entityId) {
         // 生成喜欢某个实体 id 的键
         String likeKey = RedisKeyUtil.getLikeKey(entityType, entityId);
         // 该用户对该实体 id 点过赞吗？（以该实体 id 为键的集合，是否包含该用户）
-        return redisUtil.sismember(likeKey, openid);
+        if (redisUtil.sismember(likeKey, openid)) {
+            return 1;
+        }
+
+        // 生成不喜欢某个实体 id 的键
+        String dislikeKey = RedisKeyUtil.getDislikeKey(entityType, entityId);
+        if (redisUtil.sismember(dislikeKey, openid)) {
+            return -1;
+        }
+
+        QueryWrapper<LikeArticleEntity> queryWrapperIsLike = new QueryWrapper<>();
+        queryWrapperIsLike.eq("article_id", entityId);
+        queryWrapperIsLike.eq("open_id", openid);
+        LikeArticleEntity likeArticleEntity = likeArticleService.getOne(queryWrapperIsLike);
+        if (likeArticleEntity != null) {
+            return 1;
+        }
+        return -1;
     }
 
     /**
@@ -54,10 +64,14 @@ public class LikeService {
      * @return
      */
     public Long like(String openid, int entityType, int entityId) {
-        // likekey 某具体实体的键
+        // likeKey 某具体实体的键
         String likeKey = RedisKeyUtil.getLikeKey(entityType, entityId);
         // 在该实体 id 为键的集合里，加入用户
         redisUtil.sadd(likeKey, openid);
+
+        // 同时将用户从点踩集合里删除
+        String disLikeKey = RedisKeyUtil.getDislikeKey(entityType, entityId);
+        redisUtil.srem(disLikeKey, openid);
 
         // 返回该实体集合中，点赞用户的数量
         return redisUtil.scard(likeKey);
@@ -67,14 +81,18 @@ public class LikeService {
      * 用户对某实体进行了取消点赞操作
      *
      * @param openid
-     * @param entityType
-     * @param entityId
+     * @param entityType 实体类型，文章，评论等
+     * @param entityId   实体 id
      * @return
      */
-    public Long disLike(String openid, int entityType, int entityId) {
-        // 将用户从点赞集合里删除
+    public Long dislike(String openid, int entityType, int entityId) {
+        // likeKey 某具体实体的键
+        String dislikeKey = RedisKeyUtil.getDislikeKey(entityType, entityId);
+        // 在该实体 id 为键的集合里，加入用户
+        redisUtil.sadd(dislikeKey, openid);
+
+        // 同时将用户从点赞集合里删除
         String likeKey = RedisKeyUtil.getLikeKey(entityType, entityId);
-        // 在该实体 id 为键的集合里，移除用户
         redisUtil.srem(likeKey, openid);
 
         // 返回该实体集合中，点赞用户的数量

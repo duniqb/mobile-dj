@@ -2,11 +2,11 @@ package cn.duniqb.mobile.entity;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
 
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
-
-import lombok.Data;
 
 /**
  * 文章表

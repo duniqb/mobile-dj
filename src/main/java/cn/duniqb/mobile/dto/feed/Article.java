@@ -53,12 +53,12 @@ public class Article {
     /**
      * 点赞数量
      */
-    private Long likeCount;
+    private Integer likeCount = 0;
 
     /**
      * 评论数量
      */
-    private Integer commentCount;
+    private Integer commentCount = 0;
 
     /**
      * 当前登录用户是否点赞
@@ -74,4 +74,9 @@ public class Article {
      * 发布地点
      */
     private String address;
+
+    /**
+     * 发表时间戳
+     */
+    private Long timestamp;
 }

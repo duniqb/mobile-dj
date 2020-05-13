@@ -15,6 +15,10 @@ import java.util.Map;
  */
 public interface LikeArticleService extends IService<LikeArticleEntity> {
 
-    PageUtils queryPage(Map<String, Object> params);
+    PageUtils queryPage(Map<String, Object> params, Integer id);
+
+    void saveLikeToDatabase();
+
+    void saveDislikeToDatabase();
 }
 

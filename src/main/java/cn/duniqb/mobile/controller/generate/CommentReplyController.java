@@ -4,6 +4,7 @@ import cn.duniqb.mobile.entity.CommentReplyEntity;
 import cn.duniqb.mobile.service.CommentReplyService;
 import cn.duniqb.mobile.utils.PageUtils;
 import cn.duniqb.mobile.utils.R;
+import cn.duniqb.mobile.utils.redis.RedisUtil;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,9 @@ import java.util.Map;
 public class CommentReplyController {
     @Autowired
     private CommentReplyService commentReplyService;
+
+    @Autowired
+    private RedisUtil redisUtil;
 
     /**
      * 列表
@@ -52,12 +56,21 @@ public class CommentReplyController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @RequestMapping("/save/{sessionId}")
     // @RequiresPermissions("mobile:commentreply:save")
-    public R save(@RequestBody CommentReplyEntity commentReply) {
-        commentReplyService.save(commentReply);
+    public R save(@RequestBody CommentReplyEntity commentReply, @PathVariable String sessionId) {
+        String sessionIdValue = redisUtil.get(sessionId);
+        if (sessionIdValue != null) {
+            String openid = sessionIdValue.split(":")[0];
+            commentReply.setOpenIdFrom(openid);
 
-        return R.ok();
+            boolean save = commentReplyService.save(commentReply);
+            if (save) {
+                return R.ok("回复成功");
+            }
+        }
+        return R.error(400, "回复失败");
+
     }
 
     /**

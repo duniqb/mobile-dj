@@ -28,6 +28,12 @@ public class LikeArticleEntity implements Serializable {
 	 * 被点赞文章
 	 */
 	private Integer articleId;
+
+	/**
+	 * 点赞时间
+	 */
+	private Date time;
+
 	/**
 	 * 点赞人
 	 */

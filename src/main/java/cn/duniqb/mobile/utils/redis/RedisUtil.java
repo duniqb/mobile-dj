@@ -205,7 +205,6 @@ public class RedisUtil {
         return redisTemplate.opsForSet().size(key);
     }
 
-
     /**
      * Redis Sismember 命令判断成员元素是否是集合的成员。
      *
@@ -215,7 +214,6 @@ public class RedisUtil {
     public Boolean sismember(String key, String value) {
         return redisTemplate.opsForSet().isMember(key, value);
     }
-
 
     /**
      * Redis Smembers 命令返回集合中的所有的成员。 不存在的集合 key 被视为空集合。

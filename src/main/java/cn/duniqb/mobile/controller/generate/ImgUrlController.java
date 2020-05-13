@@ -8,7 +8,11 @@ import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.ws.rs.Path;
+import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 
@@ -52,12 +56,20 @@ public class ImgUrlController {
     /**
      * 保存
      */
-    @RequestMapping("/save")
+    @RequestMapping("/save/{articleId}")
     // @RequiresPermissions("mobile:imgurl:save")
-    public R save(@RequestBody ImgUrlEntity imgUrl) {
-        imgUrlService.save(imgUrl);
+    public R save(@RequestBody List<String> imgList, @PathVariable("articleId") Integer articleId) {
+        System.out.println("保存图片...");
+        System.out.println("图片:" + Arrays.toString(imgList.toArray()));
+        for (int i = 0; i < imgList.size(); i++) {
+            ImgUrlEntity imgUrlEntity = new ImgUrlEntity();
+            imgUrlEntity.setArticleId(articleId);
+            imgUrlEntity.setUrl(imgList.get(i));
+            imgUrlEntity.setImgType(1);
+            imgUrlService.save(imgUrlEntity);
+        }
 
-        return R.ok();
+        return R.ok("保存图片列表成功");
     }
 
     /**

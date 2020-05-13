@@ -13,5 +13,5 @@ import org.apache.ibatis.annotations.Mapper;
  */
 @Mapper
 public interface ArticleDao extends BaseMapper<ArticleEntity> {
-
+    int saveArticle(ArticleEntity articleEntity);
 }
