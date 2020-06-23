@@ -64,7 +64,7 @@ public class LikeArticleServiceImpl extends ServiceImpl<LikeArticleDao, LikeArti
      *
      * @return
      */
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0/60 * * * * ?")
     @Override
     public void saveLikeToDatabase() {
         System.out.println("正在执行定时任务：保存文章点赞");
@@ -103,7 +103,7 @@ public class LikeArticleServiceImpl extends ServiceImpl<LikeArticleDao, LikeArti
      *
      * @return
      */
-    @Scheduled(cron = "0/5 * * * * ?")
+    @Scheduled(cron = "0/60 * * * * ?")
     @Override
     public void saveDislikeToDatabase() {
         System.out.println("正在执行定时任务：保存取消文章点赞");

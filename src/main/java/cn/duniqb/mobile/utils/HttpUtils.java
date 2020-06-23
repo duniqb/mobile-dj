@@ -38,8 +38,8 @@ public class HttpUtils {
 
         OkHttpClient okHttpClient = new OkHttpClient.Builder()
                 // 超时时间
-                .connectTimeout(3, TimeUnit.SECONDS)
-                .readTimeout(3, TimeUnit.SECONDS).build();
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS).build();
 
         log.info("请求的 URL:" + url + formParam);
 
@@ -52,6 +52,7 @@ public class HttpUtils {
                 .addHeader("Accept-Encoding", "gzip, deflate")
                 .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
                 .addHeader("Connection", "keep-alive")
+
                 .build();
 
         return okHttpClient.newCall(request).execute();

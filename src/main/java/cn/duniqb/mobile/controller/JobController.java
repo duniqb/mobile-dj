@@ -2,7 +2,6 @@ package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.dto.job.*;
 import cn.duniqb.mobile.spider.JobSpiderService;
-import cn.duniqb.mobile.utils.BizCodeEnum;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.redis.RedisUtil;
 import com.alibaba.fastjson.JSON;
@@ -71,14 +70,14 @@ public class JobController {
     public R recruitList(@RequestParam String page) {
         String res = redisUtil.get(RECRUIT_LIST + ":" + page);
         if (res != null) {
-            return R.ok().put("招聘会列表 - 缓存获取成功", JSON.parseObject(res, RecruitList.class));
+            return R.ok("招聘会列表 - 缓存获取成功").put("data", JSON.parseObject(res, RecruitList.class));
         }
         RecruitList recruitList = jobSpiderService.recruitList(page);
         if (recruitList != null) {
             redisUtil.set(RECRUIT_LIST + ":" + page, JSON.toJSONString(recruitList), 60 * 60 * 12);
-            return R.ok().put("招聘会列表 - 获取成功", recruitList);
+            return R.ok("招聘会列表 - 获取成功").put("data", recruitList);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "招聘会列表 - 获取失败");
+        return R.error(400, "招聘会列表 - 获取失败");
     }
 
     /**
@@ -92,14 +91,14 @@ public class JobController {
     public R recruit(@RequestParam String id) {
         String res = redisUtil.get(RECRUIT + ":" + id);
         if (res != null) {
-            return R.ok().put("招聘会详情 - 缓存获取成功", JSON.parseObject(res, Recruit.class));
+            return R.ok("招聘会详情 - 缓存获取成功").put("data", JSON.parseObject(res, Recruit.class));
         }
         Recruit recruit = jobSpiderService.recruit(id);
         if (recruit != null) {
             redisUtil.set(RECRUIT + ":" + id, JSON.toJSONString(recruit), 60 * 60 * 12);
-            return R.ok().put("招聘会详情 - 获取成功", recruit);
+            return R.ok("招聘会详情 - 获取成功").put("data", recruit);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "招聘会详情 - 获取失败");
+        return R.error(400, "招聘会详情 - 获取失败");
     }
 
     /**
@@ -113,14 +112,14 @@ public class JobController {
     public R demandList(@RequestParam String page) {
         String res = redisUtil.get(DEMAND_LIST + ":" + page);
         if (res != null) {
-            return R.ok().put("单位需求列表 - 缓存获取成功", JSON.parseObject(res, RecruitList.class));
+            return R.ok("单位需求列表 - 缓存获取成功").put("data", JSON.parseObject(res, RecruitList.class));
         }
         DemandList demandList = jobSpiderService.demandList(page);
         if (demandList != null) {
             redisUtil.set(DEMAND_LIST + ":" + page, JSON.toJSONString(demandList), 60 * 60 * 12);
-            return R.ok().put("单位需求列表 - 获取成功", demandList);
+            return R.ok("单位需求列表 - 获取成功").put("data", demandList);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "单位需求列表 - 获取失败");
+        return R.error(400, "单位需求列表 - 获取失败");
     }
 
     /**
@@ -134,14 +133,14 @@ public class JobController {
     public R demand(@RequestParam String id) {
         String res = redisUtil.get(DEMAND + ":" + id);
         if (res != null) {
-            return R.ok().put("单位需求详情 - 缓存获取成功", JSON.parseObject(res, Demand.class));
+            return R.ok("单位需求详情 - 缓存获取成功").put("data", JSON.parseObject(res, Demand.class));
         }
         Demand demand = jobSpiderService.demand(id);
         if (demand != null) {
             redisUtil.set(DEMAND + ":" + id, JSON.toJSONString(demand), 60 * 60 * 12);
-            return R.ok().put("单位需求详情 - 获取成功", demand);
+            return R.ok("单位需求详情 - 获取成功").put("data", demand);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "单位需求详情 - 获取失败");
+        return R.error(400, "单位需求详情 - 获取失败");
     }
 
     /**
@@ -155,13 +154,13 @@ public class JobController {
     public R calendar(@RequestParam String year, @RequestParam String month) {
         String res = redisUtil.get(CALENDAR + ":" + year + ":" + month);
         if (res != null) {
-            return R.ok().put("招聘日历 - 缓存获取成功", JSON.parseArray(res, Calendar.class));
+            return R.ok("招聘日历 - 缓存获取成功").put("data", JSON.parseArray(res, Calendar.class));
         }
         List<Calendar> calendar = jobSpiderService.calendar(year, month);
         if (!calendar.isEmpty()) {
             redisUtil.set(CALENDAR + ":" + year + ":" + month, JSON.toJSONString(calendar), 60 * 60 * 12);
-            return R.ok().put("招聘日历 - 获取成功", calendar);
+            return R.ok("招聘日历 - 获取成功").put("data", calendar);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "招聘日历 - 获取失败");
+        return R.error(400, "招聘日历 - 获取失败");
     }
 }

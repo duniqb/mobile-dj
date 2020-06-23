@@ -25,6 +25,5 @@ public class WebMvcConfig implements WebMvcConfigurer {
         registry.addResourceHandler("/static/**").addResourceLocations("classpath:/");
         // 其中OTA表示访问的前缀。"file:D:/OTA/"是文件真实的存储路径
         registry.addResourceHandler("/verify/**").addResourceLocations("file:" + verifyPath);
-        registry.addResourceHandler("/img/**").addResourceLocations("file:" + imagePath);
     }
 }

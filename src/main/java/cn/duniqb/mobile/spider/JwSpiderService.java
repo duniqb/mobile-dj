@@ -23,7 +23,7 @@ import java.util.*;
  * @author duniqb
  */
 @Service
-public class JWSpiderService {
+public class JwSpiderService {
     private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
 
     /**
@@ -253,13 +253,21 @@ public class JWSpiderService {
      * @return
      */
     public NoticeList noticeList(String page) {
-        String url = "http://" + host + "/homepage/infoArticleList.do?sortColumn=publicationDate&pagingNumberPer=10&columnId=10182&sortDirection=-1&pagingPage=" + page;
+//        String url = "http://" + host + "/homepage/infoArticleList.do?sortColumn=publicationDate&pagingNumberPer=10&columnId=10182&sortDirection=-1&pagingPage=" + page;
+        String url = "http://" + host + "/homepage/infoArticleList.do";
+        Map<String, String> map = new HashMap<>();
+        map.put("sortColumn", "publicationDate");
+        map.put("pagingNumberPer", "10");
+        map.put("columnId", "10182");
+        map.put("sortDirection", "-1");
+        map.put("pagingPage", page);
 
-        try (Response response = HttpUtils.get(url, null)) {
+        try (Response response = HttpUtils.get(url, map)) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Elements elements = null;
                 if (doc != null) {
+                    System.out.println(doc);
                     elements = doc.select("body .thirdBody #thirdmiddle #thirdcontent ul.articleList li");
                 }
                 NoticeList noticeList = new NoticeList();
@@ -280,6 +288,7 @@ public class JWSpiderService {
                     }
                     noticeList.setList(list);
                 }
+                System.out.println(noticeList.toString());
                 return noticeList;
             }
         } catch (IOException e) {

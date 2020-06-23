@@ -1,0 +1,12 @@
+六月 23, 2020 9:31:17 上午 io.github.yedaxia.apidocs.LogUtils info
+信息: info: find java src paths:  [D:\code\IdeaProjects\mobile-dj\.mvn\wrapper/]
+六月 23, 2020 9:31:17 上午 io.github.yedaxia.apidocs.LogUtils info
+信息: info: project type not set, try to figure out...
+六月 23, 2020 9:31:17 上午 io.github.yedaxia.apidocs.LogUtils info
+信息: info: found it a GENERIC project, tell us if we are wrong.
+六月 23, 2020 9:31:17 上午 io.github.yedaxia.apidocs.LogUtils info
+信息: info: start find controllers in path : D:\code\IdeaProjects\mobile-dj\.mvn\wrapper/
+六月 23, 2020 9:31:17 上午 io.github.yedaxia.apidocs.LogUtils info
+信息: info: generate api docs start...
+六月 23, 2020 9:31:17 上午 io.github.yedaxia.apidocs.LogUtils info
+信息: info: generate api docs done !!!
