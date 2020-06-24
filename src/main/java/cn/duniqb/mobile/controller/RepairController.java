@@ -2,7 +2,6 @@ package cn.duniqb.mobile.controller;
 
 import cn.duniqb.mobile.dto.repair.*;
 import cn.duniqb.mobile.spider.RepairSpiderService;
-import cn.duniqb.mobile.utils.BizCodeEnum;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.redis.RedisUtil;
 import com.alibaba.fastjson.JSON;
@@ -61,22 +60,22 @@ public class RepairController {
             if ("distinctId".equals(id)) {
                 Buildings buildings = JSON.parseObject(res, Buildings.class);
                 if (!buildings.getBuildings().isEmpty()) {
-                    return R.ok().put("建筑物数据清单 - 缓存获取成功", buildings);
+                    return R.ok("建筑物数据清单 - 缓存获取成功").put("data", buildings);
                 }
             } else if ("buildingId".equals(id)) {
                 Rooms rooms = JSON.parseObject(res, Rooms.class);
                 if (!rooms.getRooms().isEmpty()) {
-                    return R.ok().put("房间号数据清单 - 缓存获取成功", rooms);
+                    return R.ok("房间号数据清单 - 缓存获取成功").put("data", rooms);
                 }
             } else if ("roomId".equals(id)) {
                 Equipments equipments = JSON.parseObject(res, Equipments.class);
                 if (!equipments.getEquipments().isEmpty()) {
-                    return R.ok().put("设备号数据清单 - 缓存获取成功", equipments);
+                    return R.ok("设备号数据清单 - 缓存获取成功").put("data", equipments);
                 }
             } else if ("equipmentId".equals(id)) {
                 Detail detail = JSON.parseObject(res, Detail.class);
                 if (detail != null) {
-                    return R.ok().put("设备详情数据清单 - 缓存获取成功", detail);
+                    return R.ok("设备详情数据清单 - 缓存获取成功").put("data", detail);
                 }
             }
         }
@@ -87,38 +86,37 @@ public class RepairController {
         if ("distinctId".equals(id)) {
             Buildings buildings = JSON.parseObject(replace.substring(1, replace.length() - 1), Buildings.class);
             if (!buildings.getBuildings().isEmpty()) {
-                return R.ok().put("查询建筑物数据成功", buildings);
+                return R.ok("查询建筑物数据成功").put("data", buildings);
             }
         } else if ("buildingId".equals(id)) {
             Rooms rooms = JSON.parseObject(replace.substring(1, replace.length() - 1), Rooms.class);
             if (!rooms.getRooms().isEmpty()) {
-                return R.ok().put("查询房间号数据成功", rooms);
+                return R.ok("查询房间号数据成功").put("data", rooms);
             }
         } else if ("roomId".equals(id)) {
             Equipments equipments = JSON.parseObject(replace.substring(1, replace.length() - 1), Equipments.class);
             if (!equipments.getEquipments().isEmpty()) {
-                return R.ok().put("查询设备号数据成功", equipments);
+                return R.ok("查询设备号数据成功").put("data", equipments);
             }
         } else if ("equipmentId".equals(id)) {
             Detail detail = JSON.parseObject(replace.substring(1, replace.length() - 1), Detail.class);
             if (detail != null) {
-                return R.ok().put("查询设备详情数据成功", detail);
+                return R.ok("查询设备详情数据成功").put("data", detail);
             }
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询数据失败");
+        return R.error(400, "查询数据失败");
     }
 
     /**
      * 根据报修手机号查询报修列表
      */
     @GetMapping("/list")
-    @ApiOperation(value = "根据报修手机号查询报修列表", notes = "根据报修手机号查询报修列表的接口，请求参数是 phone")
     public R list(@RequestParam String phone) {
         List<RepairDetail> list = repairSpiderService.list(phone);
         if (!list.isEmpty()) {
-            return R.ok().put("查询报修列表成功", list);
+            return R.ok("查询报修列表成功").put("data", list);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询报修列表失败");
+        return R.error(400, "查询报修列表失败");
     }
 
     /**
@@ -132,9 +130,9 @@ public class RepairController {
     public R detail(@RequestParam String listNumber) {
         RepairDetail repairDetail = repairSpiderService.detail(listNumber);
         if (repairDetail != null) {
-            return R.ok().put("查询报修单详情成功", repairDetail);
+            return R.ok("查询报修单详情成功").put("data", repairDetail);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询报修单详情失败");
+        return R.error(400, "查询报修单详情失败");
     }
 
     /**
@@ -145,14 +143,14 @@ public class RepairController {
     public R notice() {
         String res = redisUtil.get(LOGISTICS_NOTICE);
         if (res != null) {
-            return R.ok().put("最新通知 - 缓存获取成功", JSON.parseObject(res, Notice.class));
+            return R.ok("最新通知 - 缓存获取成功").put("data", JSON.parseObject(res, Notice.class));
         }
         Notice notice = repairSpiderService.notice();
         if (notice != null) {
-            redisUtil.set(LOGISTICS_NOTICE, JSON.toJSONString(notice), 60 * 30);
-            return R.ok().put("查询最新通知成功", notice);
+            redisUtil.set(LOGISTICS_NOTICE, JSON.toJSONString(notice), 60 * 10);
+            return R.ok("查询最新通知成功").put("data", notice);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询最新通知失败");
+        return R.error(400,"查询通知失败");
     }
 
     /**
@@ -163,14 +161,14 @@ public class RepairController {
     public R recent() {
         String res = redisUtil.get(LOGISTICS_RECENT);
         if (res != null) {
-            return R.ok().put("最近维修数量 - 缓存获取成功", JSON.parseArray(res, Recent.class));
+            return R.ok("最近维修数量 - 缓存获取成功").put("data", JSON.parseArray(res, Recent.class));
         }
         List<Recent> recentList = repairSpiderService.recent();
         if (!recentList.isEmpty()) {
             redisUtil.set(LOGISTICS_RECENT, JSON.toJSONString(recentList), 60 * 60 * 24);
-            return R.ok().put("查询最近维修数量成功", recentList);
+            return R.ok("查询最近维修数量成功").put("data", recentList);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询最近维修数量失败");
+        return R.error(400, "查询最近维修数量失败");
     }
 
     /**
@@ -191,9 +189,9 @@ public class RepairController {
         String listDescription = "房间号 " + place + " " + description;
         Report report = repairSpiderService.report(phone, distinctId, buildingId, roomId, equipmentId, listDescription);
         if (report != null) {
-            return R.ok().put("发起报修成功", report);
+            return R.ok("发起报修成功").put("data", report);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "发起报修失败");
+        return R.error(400, "发起报修失败");
     }
 
     /**
@@ -209,6 +207,6 @@ public class RepairController {
     @ApiOperation(value = "维修评价", notes = "维修评价的接口")
     public R evaluate(String listNumber, String phone, String listScore, String listWord) {
         repairSpiderService.evaluate(listNumber, phone, listScore, listWord);
-        return R.ok().put("维修评价成功", null);
+        return R.ok("维修评价成功");
     }
 }

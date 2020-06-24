@@ -10,6 +10,7 @@ import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.Console;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -59,7 +60,7 @@ public class RepairSpiderService {
                 .url(url)
                 .post(requestBody)
                 .addHeader("Accept", "application/json")
-                .addHeader("Accept-Encoding", "gzip, deflate, br")
+//                .addHeader("Accept-Encoding", "gzip, deflate, br")
                 .addHeader("Accept-Language", "zh-CN,zh;q=0.9")
                 .addHeader("Connection", "keep-alive")
                 .addHeader("Content-Type", "application/x-www-form-urlencoded; charset=utf-8")
@@ -99,7 +100,7 @@ public class RepairSpiderService {
                 .post(requestBody)
                 // 重要的 Header
                 .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
-                .addHeader("Accept-Encoding", "gzip, deflate, br")
+//                .addHeader("Accept-Encoding", "gzip, deflate, br")
                 .addHeader("Accept-Language", "zh-CN,zh;q=0.9")
                 .addHeader("Connection", "keep-alive")
                 .addHeader("Content-Type", "application/x-www-form-urlencoded")
@@ -158,7 +159,7 @@ public class RepairSpiderService {
         Request request = new Request.Builder()
                 .url(url)
                 .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .addHeader("Accept-Encoding", "gzip, deflate")
+//                .addHeader("Accept-Encoding", "gzip, deflate")
                 .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
                 .addHeader("Connection", "keep-alive")
                 .addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1")
@@ -211,11 +212,13 @@ public class RepairSpiderService {
 
         Request request = new Request.Builder()
                 .url(url)
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
-                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .addHeader("Accept-Encoding", "gzip, deflate")
-                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
+                .method("GET", null)
+                .header("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1")
+                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9")
+                .addHeader("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6")
+                .addHeader("Cache-Control", "max-age=0")
                 .addHeader("Connection", "keep-alive")
+                .addHeader("Host", "nanqu.56team.com")
                 .build();
 
         try (Response response = client.newCall(request).execute()) {
@@ -224,9 +227,9 @@ public class RepairSpiderService {
                 Element element = doc.select("div.bottom_inside a").first();
 
                 Notice notice = new Notice();
-//                notice.setTitle(element.select(".bottom_inside_title").text());
-//                notice.setContent(element.select(".bottom_inside_art").text());
-//                notice.setDate(element.select(".inscription").text());
+                notice.setTitle(element.select(".bottom_inside_title").text());
+                notice.setContent(element.select(".bottom_inside_art").text());
+                notice.setDate(element.select(".inscription").text());
 
                 return notice;
             }
@@ -249,7 +252,7 @@ public class RepairSpiderService {
                 .url(url)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
                 .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .addHeader("Accept-Encoding", "gzip, deflate")
+//                .addHeader("Accept-Encoding", "gzip, deflate")
                 .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
                 .addHeader("Connection", "keep-alive")
                 .build();
@@ -311,7 +314,7 @@ public class RepairSpiderService {
                 .post(body)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
                 .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .addHeader("Accept-Encoding", "gzip, deflate")
+//                .addHeader("Accept-Encoding", "gzip, deflate")
                 .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
                 .addHeader("Connection", "keep-alive")
                 .build();
@@ -363,7 +366,7 @@ public class RepairSpiderService {
                 .url(url)
                 .post(requestBody)
                 .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3")
-                .addHeader("Accept-Encoding", "gzip, deflate, br")
+//                .addHeader("Accept-Encoding", "gzip, deflate, br")
                 .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
                 .addHeader("Connection", "keep-alive")
                 .addHeader("Content-Type", "application/x-www-form-urlencoded")
