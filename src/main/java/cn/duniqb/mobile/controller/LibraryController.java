@@ -5,7 +5,6 @@ import cn.duniqb.mobile.dto.profession.ProfessionHot;
 import cn.duniqb.mobile.entity.BookCateEntity;
 import cn.duniqb.mobile.service.BookCateService;
 import cn.duniqb.mobile.spider.LibrarySpiderService;
-import cn.duniqb.mobile.utils.BizCodeEnum;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.redis.RedisUtil;
 import com.alibaba.fastjson.JSON;
@@ -86,18 +85,18 @@ public class LibraryController {
     @GetMapping("/query")
     public R query(@RequestParam String name) {
         if (name == null || "".equals(name.trim())) {
-            return R.ok().put("书名不能为空", null);
+            return R.error(400, "书名不能为空");
         }
         String res = redisUtil.get(LIBRARY_QUERY + ":" + name);
         if (res != null) {
-            return R.ok().put("馆藏查询 - 缓存获取成功", JSON.parseArray(res, Book.class));
+            return R.ok("馆藏查询 - 缓存获取成功").put("data", JSON.parseArray(res, Book.class));
         }
         List<Book> bookList = librarySpiderService.query(name);
         if (!bookList.isEmpty()) {
             redisUtil.set(LIBRARY_QUERY + ":" + name, JSON.toJSONString(bookList), 60 * 60 * 24);
-            return R.ok().put("查询成功", bookList);
+            return R.ok("查询成功").put("data", bookList);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
+        return R.error(400, "查询失败");
     }
 
     /**
@@ -110,15 +109,15 @@ public class LibraryController {
     @GetMapping("/show")
     public R show(@RequestParam String id) {
         if (id == null || "".equals(id.trim())) {
-            return R.ok().put("id 不能为空", null);
+            return R.error(400, "id 不能为空");
         }
         String res = redisUtil.get(BOOK_DETAIL + ":" + id);
         if (res != null) {
-            return R.ok().put("图书详情 - 缓存获取成功", JSON.parseObject(res, Book.class));
+            return R.ok("图书详情 - 缓存获取成功").put("data", JSON.parseObject(res, Book.class));
         }
         Book book = librarySpiderService.show(id);
         redisUtil.set(BOOK_DETAIL + ":" + id, JSON.toJSONString(book), 60 * 60 * 24);
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询成功");
+        return R.ok("图书详情 - 缓存获取成功").put("data", book);
     }
 
     /**
@@ -136,50 +135,50 @@ public class LibraryController {
     public R score(@RequestParam String type, @RequestParam(required = false) String sq) {
         String res = redisUtil.get(HOT_BOOK + ":" + type);
         if (res != null) {
-            return R.ok().put("热点图书 - 缓存获取成功", JSON.parseArray(res, Book.class));
+            return R.ok("热点图书 - 缓存获取成功").put("data", JSON.parseArray(res, Book.class));
         }
         if ("1".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderScoreHot.aspx");
             if (!bookList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookList), 60 * 60 * 24 * 3);
-                return R.ok().put("读者热点-近2年入藏复本平均量，查询成功", bookList);
+                return R.ok("读者热点-近2年入藏复本平均量，查询成功").put("data", bookList);
             }
         } else if ("2".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderScoreHot2.aspx");
             if (!bookList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookList), 60 * 60 * 24 * 3);
-                return R.ok().put("读者热点-近2年入藏复本总借量，查询成功", bookList);
+                return R.ok("读者热点-近2年入藏复本总借量，查询成功").put("data", bookList);
             }
         } else if ("3".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderRecommanded.aspx");
             if (!bookList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookList), 60 * 60 * 24 * 3);
-                return R.ok().put("荐购热点-近5年入藏复本平均量，查询成功", bookList);
+                return R.ok("荐购热点-近5年入藏复本平均量，查询成功").put("data", bookList);
             }
         } else if ("4".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderRecommanded2.aspx");
             if (!bookList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookList), 60 * 60 * 24 * 3);
-                return R.ok().put("荐购热点-近5年入藏复本总借量，查询成功", bookList);
+                return R.ok("荐购热点-近5年入藏复本总借量，查询成功").put("data", bookList);
             }
         } else if ("5".equals(type) && sq == null) {
             List<Book> bookList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderNewBook.aspx");
             if (!bookList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type, JSON.toJSONString(bookList), 60 * 60 * 24 * 3);
-                return R.ok().put("新书热度-近90天内入藏复本总借量，查询成功", bookList);
+                return R.ok("新书热度-近90天内入藏复本总借量，查询成功").put("data", bookList);
             }
         } else if ("6".equals(type) && sq != null) {
             String res6 = redisUtil.get(HOT_BOOK + ":" + type + ":" + sq);
             if (res6 != null) {
-                return R.ok().put("热点图书 - 缓存获取成功", JSON.parseArray(res6, Book.class));
+                return R.ok("热点图书 - 缓存获取成功").put("data", JSON.parseArray(res6, Book.class));
             }
             List<Book> bookList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot3.aspx" + "?sq=" + sq);
             if (!bookList.isEmpty()) {
                 redisUtil.set(HOT_BOOK + ":" + type + ":" + sq, JSON.toJSONString(bookList), 60 * 60 * 24 * 3);
-                return R.ok().put("专业热点-近2年内入藏复本总借量，查询成功", bookList);
+                return R.ok("专业热点-近2年内入藏复本总借量，查询成功").put("data", bookList);
             }
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
+        return R.error(400, "查询失败");
     }
 
 
@@ -198,26 +197,26 @@ public class LibraryController {
     @GetMapping("/category")
     public R category(@RequestParam String type, @RequestParam String cate) {
         if (type == null || cate == null) {
-            return R.ok().put("参数不能为空", null);
+            return R.error(400, "参数不能为空");
         }
         String res = redisUtil.get(CATE_HOT_BOOK + ":" + type + ":" + cate);
         if (res != null) {
-            return R.ok().put("分类热点 - 缓存获取成功", JSON.parseArray(res, Book.class));
+            return R.ok("分类热点 - 缓存获取成功").put("data", JSON.parseArray(res, Book.class));
         }
         if ("1".equals(type)) {
             List<Book> bookList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot4.aspx" + "?sq=" + cate);
             if (!bookList.isEmpty()) {
                 redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookList), 60 * 60 * 24 * 3);
-                return R.ok().put("分类热点-近2年入藏复本平均量，查询成功", bookList);
+                return R.ok("分类热点-近2年入藏复本平均量，查询成功").put("data", bookList);
             }
         } else if ("2".equals(type)) {
             List<Book> bookList = librarySpiderService.hot("http://wxlib.djtu.edu.cn/br/ReaderHot.aspx" + "?sq=" + cate);
             if (!bookList.isEmpty()) {
                 redisUtil.set(CATE_HOT_BOOK + ":" + type + ":" + cate, JSON.toJSONString(bookList), 60 * 60 * 24 * 3);
-                return R.ok().put("分类热点-近2年入藏复本总借量，查询成功", bookList);
+                return R.ok("分类热点-近2年入藏复本总借量，查询成功").put("data", bookList);
             }
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
+        return R.error(400, "查询失败");
     }
 
     /**
@@ -230,14 +229,14 @@ public class LibraryController {
     public R bookCate() {
         String res = redisUtil.get(BOOK_CATE);
         if (res != null) {
-            return R.ok().put("图书分类法总类 - 缓存获取成功", JSON.parseArray(res, BookCateEntity.class));
+            return R.ok("图书分类法总类 - 缓存获取成功").put("data", JSON.parseArray(res, BookCateEntity.class));
         }
         List<BookCateEntity> bookCateList = bookCateService.list();
         if (!bookCateList.isEmpty()) {
             redisUtil.set(BOOK_CATE, JSON.toJSONString(bookCateList), 60 * 60 * 24 * 3);
-            return R.ok().put("查询成功", bookCateList);
+            return R.ok("查询成功").put("data", bookCateList);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
+        return R.error(400, "查询失败");
     }
 
     /**
@@ -248,14 +247,14 @@ public class LibraryController {
     public R college() {
         String res = redisUtil.get(COLLEGE_LIST);
         if (res != null) {
-            return R.ok().put("学院列表 - 缓存获取成功", JSON.parseObject(res, ProfessionHot.class));
+            return R.ok("学院列表 - 缓存获取成功").put("data", JSON.parseObject(res, ProfessionHot.class));
         }
         ProfessionHot college = librarySpiderService.college();
         if (!college.getList().isEmpty()) {
             redisUtil.set(COLLEGE_LIST, JSON.toJSONString(college), 60 * 60 * 24 * 3);
-            return R.ok().put("查询成功", college);
+            return R.ok("查询成功").put("data", college);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
+        return R.error(400, "查询失败");
     }
 
     /**
@@ -271,17 +270,17 @@ public class LibraryController {
     @GetMapping("/major")
     public R major(@RequestParam String college, @RequestParam(required = false) String major) {
         if (college == null) {
-            return R.ok().put("学院不能为空", null);
+            return R.error(400, "学院不能为空");
         }
         if (major == null) {
             String res = redisUtil.get(MAJOR_HOT + ":" + college);
             if (res != null) {
-                return R.ok().put("专业热点里的专业/课程列表 - 缓存获取成功", JSON.parseObject(res, ProfessionHot.class));
+                return R.ok("专业热点里的专业/课程列表 - 缓存获取成功").put("data", JSON.parseObject(res, ProfessionHot.class));
             }
         } else {
             String res = redisUtil.get(MAJOR_HOT + ":" + college + ":" + major);
             if (res != null) {
-                return R.ok().put("专业热点里的专业/课程列表 - 缓存获取成功", JSON.parseObject(res, ProfessionHot.class));
+                return R.ok("专业热点里的专业/课程列表 - 缓存获取成功").put("data", JSON.parseObject(res, ProfessionHot.class));
             }
         }
 
@@ -292,8 +291,8 @@ public class LibraryController {
             } else {
                 redisUtil.set(MAJOR_HOT + ":" + college + ":" + major, JSON.toJSONString(professionHot), 60 * 60 * 24 * 3);
             }
-            return R.ok().put("查询成功", professionHot);
+            return R.ok("查询成功").put("data", professionHot);
         }
-        return R.error(BizCodeEnum.TIMEOUT_EXCEPTION.getCode(), "查询失败");
+        return R.error(400, "查询失败");
     }
 }

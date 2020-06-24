@@ -3,7 +3,6 @@ package cn.duniqb.mobile.spider;
 import cn.duniqb.mobile.dto.Book;
 import cn.duniqb.mobile.dto.profession.Item;
 import cn.duniqb.mobile.dto.profession.ProfessionHot;
-import cn.duniqb.mobile.utils.HttpUtils;
 import okhttp3.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -12,7 +11,10 @@ import org.jsoup.select.Elements;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 爬取图书馆
@@ -31,14 +33,29 @@ public class LibrarySpiderService {
         // 先获取会变化的某项值
         String url = "http://wxlib.djtu.edu.cn/wx/search.aspx";
         String viewState = "";
-        try (Response response = HttpUtils.get(url, null)) {
+
+        OkHttpClient client = new OkHttpClient();
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
+                .addHeader("Connection", "keep-alive")
+//                .addHeader("Accept-Encoding", "gzip, deflate")
+                .addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
-                viewState = doc.select("body form input").get(0).attr("value");
+                System.out.println(doc);
+                viewState = doc.select("body form input").get(2).attr("value");
+                System.out.println(viewState);
+
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+
 
         // 构造 POST 参数
         RequestBody requestBody = new FormBody.Builder()
@@ -50,18 +67,16 @@ public class LibrarySpiderService {
                 .add("__EVENTTARGET", "")
                 .build();
 
-        Request request = new Request.Builder()
+        Request request2 = new Request.Builder()
                 .url(url)
                 .post(requestBody)
-                .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
                 .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
-                .addHeader("Accept-Encoding", "gzip, deflate")
                 .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
                 .addHeader("Connection", "keep-alive")
+                .addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1")
                 .build();
 
-        OkHttpClient client = new OkHttpClient();
-        try (Response response = client.newCall(request).execute()) {
+        try (Response response = client.newCall(request2).execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Element div = doc.select("#form1 div").get(2);
@@ -100,15 +115,23 @@ public class LibrarySpiderService {
      * @return
      */
     public Book show(String id) {
-        String url = "http://wxlib.djtu.edu.cn/wx/ShowBook.aspx";
+        String url = "http://wxlib.djtu.edu.cn/wx/ShowBook.aspx?id=" + id;
+        OkHttpClient client = new OkHttpClient.Builder()
+                // 超时时间
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS).build();
 
-        Map<String, String> map = new HashMap<>();
-        map.put("id", id);
-
-        try (Response response = HttpUtils.get(url, map)) {
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1")
+                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
+                .addHeader("Connection", "keep-alive")
+                .build();
+        try (Response response = client.newCall(request).execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
-                Element element = doc.select("#form1 div").get(0);
+                Element element = doc.select("#form1 div").get(2);
                 String[] split = element.toString().split("<br>");
                 Book book = new Book();
                 // 复本情况
@@ -154,7 +177,17 @@ public class LibrarySpiderService {
      * @return
      */
     public List<Book> hot(String url) {
-        try (Response response = HttpUtils.get(url, null)) {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1")
+                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
+                .addHeader("Connection", "keep-alive")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Elements elements = doc.select("#form1 article dd a");
@@ -199,7 +232,17 @@ public class LibrarySpiderService {
     public ProfessionHot college() {
         String url = "http://wxlib.djtu.edu.cn/br/ReaderInstitute.aspx";
 
-        try (Response response = HttpUtils.get(url, null)) {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1")
+                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
+                .addHeader("Connection", "keep-alive")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Elements elements = doc.select("#form1 .cgal_nr ul li");
@@ -236,7 +279,17 @@ public class LibrarySpiderService {
             url = "http://wxlib.djtu.edu.cn/br/ReaderFenLeiHao.aspx" + "?zy=" + major + "&xy=" + college;
         }
 
-        try (Response response = HttpUtils.get(url, null)) {
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("User-Agent", "Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1")
+                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
+                .addHeader("Connection", "keep-alive")
+                .build();
+
+        try (Response response = client.newCall(request).execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 ProfessionHot professionHot = new ProfessionHot();

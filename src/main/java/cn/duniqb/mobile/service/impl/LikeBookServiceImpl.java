@@ -1,6 +1,7 @@
 package cn.duniqb.mobile.service.impl;
 
 import cn.duniqb.mobile.dao.LikeBookDao;
+import cn.duniqb.mobile.entity.ArticleEntity;
 import cn.duniqb.mobile.entity.LikeBookEntity;
 import cn.duniqb.mobile.service.LikeBookService;
 import cn.duniqb.mobile.utils.PageUtils;
@@ -18,9 +19,12 @@ public class LikeBookServiceImpl extends ServiceImpl<LikeBookDao, LikeBookEntity
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
+        QueryWrapper<LikeBookEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.orderByDesc("time");
+
         IPage<LikeBookEntity> page = this.page(
                 new Query<LikeBookEntity>().getPage(params),
-                new QueryWrapper<LikeBookEntity>()
+                queryWrapper
         );
 
         return new PageUtils(page);
