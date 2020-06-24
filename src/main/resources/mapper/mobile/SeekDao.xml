@@ -3,7 +3,7 @@
 
 <mapper namespace="cn.duniqb.mobile.dao.SeekDao">
 
-	<!-- 可根据自己的需求，是否要使用 -->
+    <!-- 可根据自己的需求，是否要使用 -->
     <resultMap type="cn.duniqb.mobile.entity.SeekEntity" id="seekMap">
         <result property="id" column="id"/>
         <result property="openid" column="openid"/>
@@ -17,5 +17,9 @@
         <result property="date" column="date"/>
     </resultMap>
 
-
+    <insert id="saveSeek" useGeneratedKeys="true" keyProperty="id"
+            parameterType="cn.duniqb.mobile.entity.SeekEntity">
+        insert into dj_seek(openid, title, content, status, place, contact, type, date, time)
+        values (#{openid}, #{title}, #{content}, #{status}, #{place}, #{contact}, #{type}, #{date}, #{time})
+    </insert>
 </mapper>

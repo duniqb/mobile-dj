@@ -8,16 +8,15 @@ import cn.duniqb.mobile.utils.Query;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
+import javax.annotation.Resource;
 import java.util.Map;
 
 
 @Service("articleService")
 public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> implements ArticleService {
-    @Autowired
+    @Resource
     private ArticleDao articleDao;
 
     @Override

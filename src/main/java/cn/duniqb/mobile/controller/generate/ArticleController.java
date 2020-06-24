@@ -13,6 +13,7 @@ import cn.duniqb.mobile.utils.redis.EntityType;
 import cn.duniqb.mobile.utils.redis.LikeService;
 import cn.duniqb.mobile.utils.redis.RedisUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import io.swagger.annotations.Api;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,6 +33,7 @@ import java.util.Map;
  * @email duniqb@qq.com
  * @date 2020-05-04 09:28:06
  */
+@Api(tags = {"与信息流文章相关的接口"})
 @Slf4j
 @RestController
 @RequestMapping("/article")

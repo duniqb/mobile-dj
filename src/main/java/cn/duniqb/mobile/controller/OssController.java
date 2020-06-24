@@ -7,6 +7,7 @@ import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.PolicyConditions;
 import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,16 +45,15 @@ public class OssController {
     /**
      * 服务端签名后直传
      *
+     * @param type 图片类型
      * @return
      */
-    @RequestMapping("/policy")
-    public R policy() {
+    @RequestMapping("/policy/{type}")
+    public R policy(@PathVariable String type) {
         String host = "https://" + bucket + "." + endpoint;
-        // callbackUrl为 上传回调服务器的URL，请将下面的IP和Port配置为您自己的真实信息。
-//        String callbackUrl = "http://24k71280g7.wicp.vip:80";
         // 用户上传文件时指定的前缀
         String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
-        String dir = "article/" + date + "/";
+        String dir = type + "/" + date + "/";
         Map<String, String> respMap = null;
         try {
             long expireTime = 30;
@@ -75,29 +75,11 @@ public class OssController {
             respMap.put("dir", dir);
             respMap.put("host", host);
             respMap.put("expire", String.valueOf(expireEndTime / 1000));
-//
-//            JSONObject jasonCallback = new JSONObject();
-//            jasonCallback.put("callbackUrl", callbackUrl);
-//            jasonCallback.put("callbackBody",
-//                    "filename=${object}&size=${size}&mimeType=${mimeType}&height=${imageInfo.height}&width=${imageInfo.width}");
-//            jasonCallback.put("callbackBodyType", "application/x-www-form-urlencoded");
-//            String base64CallbackBody = BinaryUtil.toBase64String(jasonCallback.toString().getBytes());
-//            respMap.put("callback", base64CallbackBody);
-//
-//            JSONObject ja1 = JSONObject.fromObject(respMap);
-            // System.out.println(ja1.toString());
-//            response.setHeader("Access-Control-Allow-Origin", "*");
-//            response.setHeader("Access-Control-Allow-Methods", "GET, POST");
-//            response(request, response, ja1.toString());
-//            return R.ok("签名成功").put("data", ja1);
-
         } catch (Exception e) {
             System.out.println(e.getMessage());
         } finally {
             ossClient.shutdown();
         }
         return R.ok("签名成功").put("data", respMap);
-//        return R.error(400, "签名失败");
     }
-
 }

@@ -1,5 +1,6 @@
 package cn.duniqb.mobile.service;
 
+import cn.duniqb.mobile.entity.ArticleEntity;
 import cn.duniqb.mobile.entity.SeekEntity;
 import cn.duniqb.mobile.utils.PageUtils;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -16,5 +17,7 @@ import java.util.Map;
 public interface SeekService extends IService<SeekEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    int saveSeek(SeekEntity seekEntity);
 }
 
