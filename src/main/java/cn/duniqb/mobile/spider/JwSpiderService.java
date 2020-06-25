@@ -3,19 +3,19 @@ package cn.duniqb.mobile.spider;
 import cn.duniqb.mobile.dto.jw.*;
 import cn.duniqb.mobile.entity.StudentEntity;
 import cn.duniqb.mobile.utils.HttpUtils;
+import cn.duniqb.mobile.utils.redis.RedisUtil;
 import okhttp3.*;
-import org.jetbrains.annotations.NotNull;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 爬取教务
@@ -24,13 +24,19 @@ import java.util.*;
  */
 @Service
 public class JwSpiderService {
-    private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
-
     /**
      * 教务主机 ip
      */
     @Value("${jw.host}")
     private String host;
+
+    @Autowired
+    private RedisUtil redisUtil;
+
+    /**
+     * Cookie 在 Redis 里的前缀
+     */
+    private static final String COOKIE = "COOKIE";
 
     /**
      * 获取个人信息与学分信息
@@ -38,47 +44,60 @@ public class JwSpiderService {
      * @return
      * @throws Exception
      */
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Map<Integer, String> getInfo() {
+    public Map<Integer, Object> getInfo(String sessionId) {
         String url = "http://" + host + "/academic/showPersonalInfo.do";
-
-        OkHttpClient.Builder builder = new OkHttpClient.Builder();
-        builder.cookieJar(new CookieJar() {
-            private final HashMap<String, List<Cookie>> cookieStore = new HashMap<>();
+        // 初始化Cookie管理器
+        CookieJar cookieJar = new CookieJar() {
+            // Cookie缓存区
+            private final Map<String, List<Cookie>> cookiesMap = new HashMap<>();
 
             @Override
-            public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
-                cookieStore.put(url.host(), cookies);
+            public void saveFromResponse(HttpUrl arg0, List<Cookie> arg1) {
+                String host = arg0.host();
+                List<Cookie> cookiesList = cookiesMap.get(host);
+                if (cookiesList != null) {
+                    cookiesMap.remove(host);
+                }
+                //再重新天添加
+                cookiesMap.put(host, arg1);
             }
 
-            @NotNull
             @Override
-            public List<Cookie> loadForRequest(HttpUrl url) {
-                List<Cookie> cookies = cookieStore.get(url.host());
-                return cookies != null ? cookies : new ArrayList<>();
+            public List<Cookie> loadForRequest(HttpUrl arg0) {
+                // TODO Auto-generated method stub
+                List<Cookie> cookiesList = cookiesMap.get(arg0.host());
+                //原因：当Request 连接到网络的时候，OkHttp会调用loadForRequest()
+                return cookiesList != null ? cookiesList : new ArrayList<>();
             }
-        });
+        };
 
-        OkHttpClient okHttpClient = builder.build();
-
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .cookieJar(cookieJar)
+                // 超时时间
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS).build();
+        String cookieFromRedis = redisUtil.get(COOKIE + ":" + sessionId);
+        if (cookieFromRedis == null) {
+            return null;
+        }
 
         Request request = new Request.Builder()
                 .url(url)
+                .header("Cookie", cookieFromRedis)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
                 .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
                 .addHeader("Accept-Encoding", "gzip, deflate")
                 .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
                 .addHeader("Connection", "keep-alive")
                 .build();
-
-        try (Response response = okHttpClient.newCall(request).execute()) {
+        Call loginCall = okHttpClient.newCall(request);
+        try (Response response = loginCall.execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
-
                 String imgUrl = doc.select("table.form td img").attr("src");
 
                 Elements elements = doc.select("table.form tr");
-                Map<Integer, String> map = new HashMap<>();
+                Map<Integer, Object> map = new HashMap<>();
                 StudentEntity student = new StudentEntity();
                 for (Element element : elements) {
                     Elements tit = element.select("th");
@@ -113,8 +132,9 @@ public class JwSpiderService {
                         }
                     }
                 }
+                map.put(1, student);
 
-                // 插入学分
+                // 学分
                 Elements credits = doc.select("table.datalist tr");
                 Elements th = credits.select("th");
                 Elements td = credits.select("td");
@@ -133,6 +153,7 @@ public class JwSpiderService {
                         credit.setOptionalCredits(Double.valueOf(td.get(i).text()));
                     }
                 }
+                map.put(2, credit);
                 return map;
             }
         } catch (IOException e) {
@@ -144,21 +165,49 @@ public class JwSpiderService {
 
     /**
      * 查询成绩
-     * 在此处总是查询所有的成绩
      *
      * @param stuNo
      * @return
      * @throws Exception
      */
-    @Transactional(propagation = Propagation.REQUIRED)
-    public Score getScoreParam(String stuNo) {
+    public List<Score> getScoreParam(String stuNo, String sessionId, String year, String term) {
         String url = "http://" + host + "/academic/manager/score/studentOwnScore.do";
+        CookieJar cookieJar = new CookieJar() {
+            // Cookie缓存区
+            private final Map<String, List<Cookie>> cookiesMap = new HashMap<>();
 
-        OkHttpClient client = new OkHttpClient();
+            @Override
+            public void saveFromResponse(HttpUrl arg0, List<Cookie> arg1) {
+                String host = arg0.host();
+                List<Cookie> cookiesList = cookiesMap.get(host);
+                if (cookiesList != null) {
+                    cookiesMap.remove(host);
+                }
+                //再重新添加
+                cookiesMap.put(host, arg1);
+            }
+
+            @Override
+            public List<Cookie> loadForRequest(HttpUrl arg0) {
+                // TODO Auto-generated method stub
+                List<Cookie> cookiesList = cookiesMap.get(arg0.host());
+                //原因：当Request 连接到网络的时候，OkHttp会调用loadForRequest()
+                return cookiesList != null ? cookiesList : new ArrayList<>();
+            }
+        };
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .cookieJar(cookieJar)
+                // 超时时间
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS).build();
+        String cookieFromRedis = redisUtil.get(COOKIE + ":" + sessionId);
+        if (cookieFromRedis == null) {
+            return null;
+        }
 
         RequestBody requestBody = new FormBody.Builder()
-                .add("year", null)
-                .add("term", null)
+                .add("year", year)
+                .add("term", term)
                 .add("para", "0")
                 .add("sortColumn", "")
                 .add("Submit", "查询")
@@ -166,6 +215,7 @@ public class JwSpiderService {
         Request request = new Request.Builder()
                 .url(url)
                 .post(requestBody)
+                .header("Cookie", cookieFromRedis)
                 .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
                 .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
                 .addHeader("Accept-Encoding", "gzip, deflate")
@@ -173,34 +223,41 @@ public class JwSpiderService {
                 .addHeader("Connection", "keep-alive")
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
+        Call loginCall = okHttpClient.newCall(request);
+        List<Score> scoreList = new ArrayList<>();
+        try (Response response = loginCall.execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Element element = doc.select("table.datalist").first();
-                Elements tr = element.select("tr");
+                if (element != null) {
+                    Elements tr = element.select("tr");
+                    for (int i = 1; i < tr.size(); i++) {
+                        Elements trd = tr.get(i).select("td");
+                        Score score = new Score();
 
-                Score score = new Score();
+                        score.setStuNo(stuNo);
+                        score.setYear(Integer.valueOf(trd.get(0).text()));
+                        score.setTerm(trd.get(1).text());
+                        score.setCourseId(trd.get(2).text());
+                        score.setCourseName(trd.get(4).text());
+                        score.setCredit(trd.get(7).text());
+                        score.setTeacherName(trd.get(14).text());
+                        score.setUsualScore("".equals(trd.get(8).text()) ? null : trd.get(8).text());
+                        score.setEndScore("".equals(trd.get(9).text()) ? null : trd.get(9).text());
+                        score.setTotalScore("".equals(trd.get(10).text()) ? null : trd.get(10).text());
+                        score.setSlowExam("是".equals(trd.get(11).text()));
+                        score.setExamType(trd.get(12).text());
+                        score.setComment(trd.get(13).text());
 
-                for (int i = 1; i < tr.size(); i++) {
-                    Elements trd = tr.get(i).select("td");
-
-                    score.setStuNo(stuNo);
-                    score.setYear(Integer.valueOf(trd.get(0).text()));
-                    score.setTerm(trd.get(1).text());
-                    score.setCourseId(trd.get(2).text());
-                    score.setUsualScore("".equals(trd.get(8).text()) ? null : trd.get(8).text());
-                    score.setEndScore("".equals(trd.get(9).text()) ? null : trd.get(9).text());
-                    score.setTotalScore("".equals(trd.get(10).text()) ? null : trd.get(10).text());
-                    score.setSlowExam("是".equals(trd.get(11).text()));
-                    score.setExamType(trd.get(12).text());
-                    score.setComment(trd.get(13).text());
+                        scoreList.add(score);
+                    }
+                    return scoreList;
                 }
-                return score;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return scoreList;
     }
 
     /**
@@ -210,11 +267,53 @@ public class JwSpiderService {
      * @return
      * @throws Exception
      */
-    @Transactional(propagation = Propagation.REQUIRED)
-    public GradeExam getGradeExam(String stuNo) {
+    public List<GradeExam> getGradeExam(String stuNo, String sessionId) {
         String url = "http://" + host + "/academic/student/skilltest/skilltest.jsdo";
+        CookieJar cookieJar = new CookieJar() {
+            // Cookie缓存区
+            private final Map<String, List<Cookie>> cookiesMap = new HashMap<>();
 
-        try (Response response = HttpUtils.get(url, null)) {
+            @Override
+            public void saveFromResponse(HttpUrl arg0, List<Cookie> arg1) {
+                String host = arg0.host();
+                List<Cookie> cookiesList = cookiesMap.get(host);
+                if (cookiesList != null) {
+                    cookiesMap.remove(host);
+                }
+                //再重新添加
+                cookiesMap.put(host, arg1);
+            }
+
+            @Override
+            public List<Cookie> loadForRequest(HttpUrl arg0) {
+                // TODO Auto-generated method stub
+                List<Cookie> cookiesList = cookiesMap.get(arg0.host());
+                //原因：当Request 连接到网络的时候，OkHttp会调用loadForRequest()
+                return cookiesList != null ? cookiesList : new ArrayList<>();
+            }
+        };
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .cookieJar(cookieJar)
+                // 超时时间
+                .connectTimeout(10, TimeUnit.SECONDS)
+                .readTimeout(10, TimeUnit.SECONDS).build();
+        String cookieFromRedis = redisUtil.get(COOKIE + ":" + sessionId);
+        if (cookieFromRedis == null) {
+            return null;
+        }
+        Request request = new Request.Builder()
+                .url(url)
+                .header("Cookie", cookieFromRedis)
+                .header("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:26.0) Gecko/20100101 Firefox/26.0")
+                .addHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+                .addHeader("Accept-Encoding", "gzip, deflate")
+                .addHeader("Accept-Language", "zh-cn,zh;q=0.8,en-us;q=0.5,en;q=0.3")
+                .addHeader("Connection", "keep-alive")
+                .build();
+        Call loginCall = okHttpClient.newCall(request);
+        List<GradeExam> gradeExamList = new ArrayList<>();
+
+        try (Response response = loginCall.execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Element element = doc.select("table.infolist_tab").last();
@@ -236,14 +335,14 @@ public class JwSpiderService {
                     gradeExam.setExamTime(trd.get(1).text().split(" ")[1]);
                     gradeExam.setScore(trd.get(4).text());
                     gradeExam.setApproved(trd.get(5).text());
-
-                    return gradeExam;
+                    gradeExamList.add(gradeExam);
                 }
+                return gradeExamList;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
+        return gradeExamList;
     }
 
     /**
@@ -267,7 +366,6 @@ public class JwSpiderService {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                 Elements elements = null;
                 if (doc != null) {
-                    System.out.println(doc);
                     elements = doc.select("body .thirdBody #thirdmiddle #thirdcontent ul.articleList li");
                 }
                 NoticeList noticeList = new NoticeList();
@@ -288,7 +386,6 @@ public class JwSpiderService {
                     }
                     noticeList.setList(list);
                 }
-                System.out.println(noticeList.toString());
                 return noticeList;
             }
         } catch (IOException e) {

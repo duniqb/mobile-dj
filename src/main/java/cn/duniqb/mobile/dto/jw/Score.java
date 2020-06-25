@@ -28,7 +28,7 @@ public class Score implements Serializable {
     /**
      * 学分
      */
-    private Double credit;
+    private String credit;
 
     /**
      * 教师姓名

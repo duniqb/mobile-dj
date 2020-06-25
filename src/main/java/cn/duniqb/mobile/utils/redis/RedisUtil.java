@@ -32,8 +32,8 @@ public class RedisUtil {
      * @param key
      * @return
      */
-    public void expire(String key, long timeout) {
-        redisTemplate.expire(key, timeout, TimeUnit.SECONDS);
+    public Boolean expire(String key, long timeout) {
+      return redisTemplate.expire(key, timeout, TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -58,8 +58,8 @@ public class RedisUtil {
      *
      * @param key
      */
-    public void del(String key) {
-        redisTemplate.delete(key);
+    public Boolean del(String key) {
+        return redisTemplate.delete(key);
     }
 
     // String（字符串）
