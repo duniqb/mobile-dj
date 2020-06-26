@@ -47,9 +47,7 @@ public class LibrarySpiderService {
         try (Response response = client.newCall(request).execute()) {
             if (response.code() == 200) {
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
-                System.out.println(doc);
                 viewState = doc.select("body form input").get(2).attr("value");
-                System.out.println(viewState);
 
             }
         } catch (IOException e) {

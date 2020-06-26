@@ -195,6 +195,7 @@ public class JwController {
         };
         String cookieFromRedis = redisUtil.get(COOKIE + ":" + sessionId);
         if (cookieFromRedis == null) {
+            redisUtil.del(COOKIE + ":" + sessionId);
             return R.error(400, "验证码无效");
         }
 
@@ -228,12 +229,10 @@ public class JwController {
             Call loginCall = okHttpClient.newCall(request);
             try (Response response = loginCall.execute()) {
                 if (response.code() == 302) {
-                    Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
                     //获取返回数据的头部
                     Headers headers = response.headers();
-                    System.out.println(headers.toString());
                     if (headers.get("Location").contains("error")) {
-                        redisUtil.del(COOKIE + ":" + sessionId);
+                        redisUtil.del("JW_LOGIN:" + sessionId);
                         return R.error(400, "登录失败");
                     }
                     HttpUrl loginUrl = request.url();
@@ -266,7 +265,6 @@ public class JwController {
                             }
                         }
                     }
-                    return R.ok("教务登录成功");
                 }
             }
         } catch (IOException e) {

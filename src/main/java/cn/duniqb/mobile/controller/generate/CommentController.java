@@ -59,6 +59,8 @@ public class CommentController {
         // 找到该文章对应的评论
         QueryWrapper<CommentEntity> queryWrapperComment = new QueryWrapper<>();
         queryWrapperComment.eq("article_id", id);
+        queryWrapperComment.orderByDesc("time");
+
         List<CommentEntity> commentEntityList = commentService.list(queryWrapperComment);
 
         // 找到每个评论对应的回复

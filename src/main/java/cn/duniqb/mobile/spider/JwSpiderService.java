@@ -78,6 +78,7 @@ public class JwSpiderService {
                 .readTimeout(10, TimeUnit.SECONDS).build();
         String cookieFromRedis = redisUtil.get(COOKIE + ":" + sessionId);
         if (cookieFromRedis == null) {
+            redisUtil.del("JW_LOGIN:" + sessionId);
             return null;
         }
 
@@ -202,6 +203,7 @@ public class JwSpiderService {
                 .readTimeout(10, TimeUnit.SECONDS).build();
         String cookieFromRedis = redisUtil.get(COOKIE + ":" + sessionId);
         if (cookieFromRedis == null) {
+            redisUtil.del("JW_LOGIN:" + sessionId);
             return null;
         }
 
@@ -299,6 +301,7 @@ public class JwSpiderService {
                 .readTimeout(10, TimeUnit.SECONDS).build();
         String cookieFromRedis = redisUtil.get(COOKIE + ":" + sessionId);
         if (cookieFromRedis == null) {
+            redisUtil.del("JW_LOGIN:" + sessionId);
             return null;
         }
         Request request = new Request.Builder()
