@@ -13,12 +13,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Value("${local.verifyPath}")
     private String verifyPath;
 
-    /**
-     * 图片的存放路径
-     */
-    @Value("${local.image}")
-    private String imagePath;
-
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         // 和页面有关的静态目录都放在项目的static目录下

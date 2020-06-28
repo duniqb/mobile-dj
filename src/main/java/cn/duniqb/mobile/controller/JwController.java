@@ -10,12 +10,12 @@ import cn.duniqb.mobile.spider.JwSpiderService;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.redis.RedisUtil;
 import com.alibaba.fastjson.JSON;
+import com.aliyun.oss.OSS;
+import com.aliyun.oss.model.PutObjectRequest;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import okhttp3.*;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
 import java.io.*;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -45,6 +49,15 @@ public class JwController {
 
     @Autowired
     private RedisUtil redisUtil;
+
+    @Resource
+    private OSS ossClient;
+
+    @Value("${spring.cloud.alicloud.oss.endpoint}")
+    private String endpoint;
+
+    @Value("${spring.cloud.alicloud.oss.bucket}")
+    private String bucket;
 
     /**
      * 通知列表在 Redis 里的前缀
@@ -280,9 +293,12 @@ public class JwController {
     @GetMapping("/verify")
     public R getVerifyCode(@RequestParam String sessionId) {
         // 获取验证码并保存到本地
-        String fileName = saveVerifyCode(sessionId);
-        String imgUrl = "api/v2/verify/" + fileName + ".jpg";
-        return R.ok("验证码获取成功").put("url", localhost + imgUrl);
+        String imgUrl = saveVerifyCode(sessionId);
+        if (imgUrl == null) {
+            R.error(400, "验证码获取失败");
+        }
+
+        return R.ok("验证码获取成功").put("url", imgUrl);
     }
 
     /**
@@ -292,7 +308,6 @@ public class JwController {
      */
     private String saveVerifyCode(String sessionId) {
         String url = "http://" + host + "/academic/getCaptcha.do";
-        String fileName = System.currentTimeMillis() + "";
 
         // 初始化Cookie管理器
         CookieJar cookieJar = new CookieJar() {
@@ -352,23 +367,67 @@ public class JwController {
                         redisUtil.set(COOKIE + ":" + sessionId, cookie.toString(), 60 * 60 * 24);
                     }
 
-                    // 构造文件对象
-                    File file = new File(verifyPath + fileName + ".jpg");
-                    InputStream inputStream = Objects.requireNonNull(response.body()).byteStream();
-                    OutputStream outputStream = new FileOutputStream(file);
-                    byte[] byteStr = new byte[1024];
-                    int len;
-                    while ((len = inputStream.read(byteStr)) > 0) {
-                        outputStream.write(byteStr, 0, len);
+                    // https://mobile-dj.oss-cn-beijing.aliyuncs.com/slide/1.jpg
+                    // 实际可访问图片地址
+                    String ossHost = "https://" + bucket + "." + endpoint + "/";
+
+
+                    String imgName = saveImage(Objects.requireNonNull(response.body()).bytes());
+                    return ossHost + imgName;
+
+                    /*
+                    FileOutputStream fileOutputStream = null;
+                    try {
+                        File file = new File(verifyPath + fileName + ".jpg");
+                        System.out.println("file:");
+                        System.out.println(file.toString());
+                        fileOutputStream = new FileOutputStream(file);
+                        System.out.println("fileOutputStream：");
+                        System.out.println(fileOutputStream.toString());
+                        fileOutputStream.write(Objects.requireNonNull(response.body()).bytes());
+                    } finally {
+                        try {
+                            if (fileOutputStream != null) {
+                                fileOutputStream.close();
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    inputStream.close();
-                    outputStream.flush();
-                    outputStream.close();
+                    */
+
+                    // 构造文件对象
+//                    File file = new File(verifyPath + fileName + ".jpg");
+//                    InputStream inputStream = Objects.requireNonNull(response.body()).byteStream();
+//                    OutputStream outputStream = new FileOutputStream(file);
+//                    byte[] byteStr = new byte[1024];
+//                    int len;
+//                    while ((len = inputStream.read(byteStr)) > 0) {
+//                        outputStream.write(byteStr, 0, len);
+//                    }
+//                    inputStream.close();
+//                    outputStream.flush();
+//                    outputStream.close();
                 }
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return null;
+    }
+
+    /**
+     * 保存验证码图片到 oss
+     *
+     * @return
+     */
+    private String saveImage(byte[] content) throws IOException {
+        String date = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+        String fileName = "verify/" + date + "/" + System.currentTimeMillis() + ".jpg";
+
+        // 上传Byte数组
+        ossClient.putObject(bucket, fileName, new ByteArrayInputStream(content));
+
         return fileName;
     }
 

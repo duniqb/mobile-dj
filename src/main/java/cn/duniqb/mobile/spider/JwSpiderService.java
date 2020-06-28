@@ -3,6 +3,7 @@ package cn.duniqb.mobile.spider;
 import cn.duniqb.mobile.dto.jw.*;
 import cn.duniqb.mobile.entity.StudentEntity;
 import cn.duniqb.mobile.utils.HttpUtils;
+import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.redis.RedisUtil;
 import okhttp3.*;
 import org.jsoup.Jsoup;
@@ -94,7 +95,23 @@ public class JwSpiderService {
         Call loginCall = okHttpClient.newCall(request);
         try (Response response = loginCall.execute()) {
             if (response.code() == 200) {
+                //获取返回数据的头部
+                Headers headers = response.headers();
+                HttpUrl loginUrl = request.url();
+                List<Cookie> cookies = Cookie.parseAll(loginUrl, headers);
+//                     存储到Cookie管理器中
+                okHttpClient.cookieJar().saveFromResponse(loginUrl, cookies);
+
+//                    从缓存中获取Cookie
+                List<Cookie> cookieOld = okHttpClient.cookieJar().loadForRequest(request.url());
+                for (Cookie cookie : cookieOld) {
+                    redisUtil.set(COOKIE + ":" + sessionId, cookie.toString(), 60 * 60 * 24);
+                }
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
+                if ("登录".equals(doc.select("body form div h3").text().trim())) {
+                    redisUtil.del("JW_LOGIN:" + sessionId);
+                    return null;
+                }
                 String imgUrl = doc.select("table.form td img").attr("src");
 
                 Elements elements = doc.select("table.form tr");
@@ -229,7 +246,23 @@ public class JwSpiderService {
         List<Score> scoreList = new ArrayList<>();
         try (Response response = loginCall.execute()) {
             if (response.code() == 200) {
+                //获取返回数据的头部
+                Headers headers = response.headers();
+                HttpUrl loginUrl = request.url();
+                List<Cookie> cookies = Cookie.parseAll(loginUrl, headers);
+//                     存储到Cookie管理器中
+                okHttpClient.cookieJar().saveFromResponse(loginUrl, cookies);
+
+//                    从缓存中获取Cookie
+                List<Cookie> cookieOld = okHttpClient.cookieJar().loadForRequest(request.url());
+                for (Cookie cookie : cookieOld) {
+                    redisUtil.set(COOKIE + ":" + sessionId, cookie.toString(), 60 * 60 * 24);
+                }
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
+                if ("登录".equals(doc.select("body form div h3").text().trim())) {
+                    redisUtil.del("JW_LOGIN:" + sessionId);
+                    return null;
+                }
                 Element element = doc.select("table.datalist").first();
                 if (element != null) {
                     Elements tr = element.select("tr");
@@ -318,7 +351,24 @@ public class JwSpiderService {
 
         try (Response response = loginCall.execute()) {
             if (response.code() == 200) {
+                //获取返回数据的头部
+                Headers headers = response.headers();
+                HttpUrl loginUrl = request.url();
+                List<Cookie> cookies = Cookie.parseAll(loginUrl, headers);
+//                     存储到Cookie管理器中
+                okHttpClient.cookieJar().saveFromResponse(loginUrl, cookies);
+
+//                    从缓存中获取Cookie
+                List<Cookie> cookieOld = okHttpClient.cookieJar().loadForRequest(request.url());
+                for (Cookie cookie : cookieOld) {
+                    redisUtil.set(COOKIE + ":" + sessionId, cookie.toString(), 60 * 60 * 24);
+                }
+
                 Document doc = Jsoup.parse(Objects.requireNonNull(response.body()).string().replace("&nbsp;", "").replace("amp;", ""));
+                if ("登录".equals(doc.select("body form div h3").text().trim())) {
+                    redisUtil.del("JW_LOGIN:" + sessionId);
+                    return null;
+                }
                 Element element = doc.select("table.infolist_tab").last();
                 Elements tr = element.select("tr");
 

@@ -34,7 +34,7 @@ build/
 /src/main/resources/application-pro.yml
 /src/main/resources/application-dev.yml
 
-/src/main/resources/dj.xiaoshi98.top.jks
+/src/main/resources/dj.duniqb.cn.jks
 **/application-pro.yml
 **/application-dev.yml
 **/mvnw.*

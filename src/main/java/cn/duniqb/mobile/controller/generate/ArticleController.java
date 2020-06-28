@@ -3,10 +3,7 @@ package cn.duniqb.mobile.controller.generate;
 import cn.duniqb.mobile.dao.ImgUrlDao;
 import cn.duniqb.mobile.dto.feed.Article;
 import cn.duniqb.mobile.entity.*;
-import cn.duniqb.mobile.service.ArticleService;
-import cn.duniqb.mobile.service.CommentService;
-import cn.duniqb.mobile.service.LikeArticleService;
-import cn.duniqb.mobile.service.WxUserService;
+import cn.duniqb.mobile.service.*;
 import cn.duniqb.mobile.utils.PageUtils;
 import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.redis.EntityType;
@@ -58,6 +55,9 @@ public class ArticleController {
 
     @Autowired
     private LikeService likeService;
+
+    @Autowired
+    private AdminService adminService;
 
 
     /**
@@ -120,6 +120,11 @@ public class ArticleController {
             String sessionIdValue = redisUtil.get(sessionId);
             if (sessionIdValue != null) {
                 String openid = sessionIdValue.split(":")[0];
+
+                // 是不是发布者（用于删除）
+                if (articleEntity.getOpenId().equals(openid)) {
+                    article.setIsAuthor(true);
+                }
 
                 Integer likeStatus = likeService.getLikeStatus(openid, EntityType.ENTITY_ARTICLE, article.getId());
                 if (likeStatus == 1) {
@@ -195,6 +200,26 @@ public class ArticleController {
         String sessionIdValue = redisUtil.get(sessionId);
         if (sessionIdValue != null) {
             String openid = sessionIdValue.split(":")[0];
+
+            // 是否是管理员
+            String adminOpenid = redisUtil.get("ADMIN" + ":" + openid);
+            if (adminOpenid != null) {
+                if (adminOpenid.equals(openid)) {
+                    article.setIsAdmin(true);
+                }
+            } else {
+                QueryWrapper<AdminEntity> queryWrapperIsAdmin = new QueryWrapper<>();
+                queryWrapperIsAdmin.eq("openid", openid);
+                AdminEntity adminEntity = adminService.getOne(queryWrapperIsAdmin);
+                if (adminEntity != null) {
+                    String adminOpenidFromDb = adminEntity.getOpenid();
+                    redisUtil.set("ADMIN" + ":" + openid, adminOpenidFromDb, 60 * 60 * 24);
+                    if (adminOpenidFromDb.equals(openid)) {
+                        article.setIsAdmin(true);
+                    }
+                }
+            }
+
             QueryWrapper<LikeArticleEntity> queryWrapperIsLike = new QueryWrapper<>();
             queryWrapperIsLike.eq("article_id", article.getId());
             queryWrapperIsLike.eq("open_id", openid);
@@ -203,6 +228,7 @@ public class ArticleController {
                 article.setIsLike(true);
             }
         }
+
 
         // 查找评论数量
         QueryWrapper<CommentEntity> queryWrapperComment = new QueryWrapper<>();
@@ -239,9 +265,13 @@ public class ArticleController {
     @RequestMapping("/update")
     // @RequiresPermissions("mobile:article:update")
     public R update(@RequestBody ArticleEntity article) {
-        articleService.updateById(article);
+        article.setStatus(1);
+        boolean update = articleService.updateById(article);
 
-        return R.ok();
+        if (update) {
+            return R.ok("文章删除成功");
+        }
+        return R.error(400, "文章删除失败");
     }
 
     /**

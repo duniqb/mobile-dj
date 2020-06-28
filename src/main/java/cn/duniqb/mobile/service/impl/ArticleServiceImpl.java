@@ -22,6 +22,7 @@ public class ArticleServiceImpl extends ServiceImpl<ArticleDao, ArticleEntity> i
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         QueryWrapper<ArticleEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", 0);
         queryWrapper.orderByDesc("time");
 
         IPage<ArticleEntity> page = this.page(

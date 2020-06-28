@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Resource;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -32,7 +33,7 @@ public class NewsSpiderService {
     @Autowired
     private ImgUrlService imgUrlService;
 
-    @Autowired
+    @Resource
     private OSS ossClient;
 
     @Value("${spring.cloud.alicloud.oss.endpoint}")

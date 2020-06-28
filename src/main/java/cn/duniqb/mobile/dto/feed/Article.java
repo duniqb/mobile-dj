@@ -79,4 +79,14 @@ public class Article {
      * 发表时间戳
      */
     private Long timestamp;
+
+    /**
+     * 是不是发布者（用于删除）
+     */
+    private Boolean isAuthor = false;
+
+    /**
+     * 是不是管理员（用于删除）
+     */
+    private Boolean isAdmin = false;
 }

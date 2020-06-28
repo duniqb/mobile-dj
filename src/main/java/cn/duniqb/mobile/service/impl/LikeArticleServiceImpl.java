@@ -67,7 +67,6 @@ public class LikeArticleServiceImpl extends ServiceImpl<LikeArticleDao, LikeArti
     @Scheduled(cron = "0/60 * * * * ?")
     @Override
     public void saveLikeToDatabase() {
-        System.out.println("正在执行定时任务：保存文章点赞");
         Set<String> articleIdList = redisUtil.ssmembers(ARTICLE_ID_LIKE_LIST);
 
         // 遍历文章列表
@@ -85,7 +84,6 @@ public class LikeArticleServiceImpl extends ServiceImpl<LikeArticleDao, LikeArti
 
                 // 保存到数据库
                 if (selectOne == null) {
-                    System.out.println("新增了一条点赞记录：articleId:" + articleId);
                     LikeArticleEntity likeArticleEntity = new LikeArticleEntity();
                     likeArticleEntity.setArticleId(Integer.parseInt(articleId));
                     likeArticleEntity.setOpenId(openid);
@@ -106,7 +104,6 @@ public class LikeArticleServiceImpl extends ServiceImpl<LikeArticleDao, LikeArti
     @Scheduled(cron = "0/60 * * * * ?")
     @Override
     public void saveDislikeToDatabase() {
-        System.out.println("正在执行定时任务：保存取消文章点赞");
         Set<String> articleIdList = redisUtil.ssmembers(ARTICLE_ID_DISLIKE_LIST);
 
         // 遍历文章列表
@@ -124,7 +121,6 @@ public class LikeArticleServiceImpl extends ServiceImpl<LikeArticleDao, LikeArti
 
                 // 有记录则删除
                 if (selectOne != null) {
-                    System.out.println("删除了一条点赞记录：articleId:" + articleId);
                     likeArticleService.remove(queryWrapper);
                 }
             }
