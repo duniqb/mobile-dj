@@ -11,7 +11,6 @@ import cn.duniqb.mobile.utils.R;
 import cn.duniqb.mobile.utils.redis.RedisUtil;
 import com.alibaba.fastjson.JSON;
 import com.aliyun.oss.OSS;
-import com.aliyun.oss.model.PutObjectRequest;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,10 +23,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
-import java.io.*;
-import java.net.URL;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -79,18 +77,6 @@ public class JwController {
      */
     @Value("${jw.host}")
     private String host;
-
-    /**
-     * 本机 url，以供回传验证码地址
-     */
-    @Value("${local.host}")
-    private String localhost;
-
-    /**
-     * 设置验证码存放路径
-     */
-    @Value("${local.verifyPath}")
-    private String verifyPath;
 
     /**
      * 查询教务登录是否过期
@@ -374,40 +360,6 @@ public class JwController {
 
                     String imgName = saveImage(Objects.requireNonNull(response.body()).bytes());
                     return ossHost + imgName;
-
-                    /*
-                    FileOutputStream fileOutputStream = null;
-                    try {
-                        File file = new File(verifyPath + fileName + ".jpg");
-                        System.out.println("file:");
-                        System.out.println(file.toString());
-                        fileOutputStream = new FileOutputStream(file);
-                        System.out.println("fileOutputStream：");
-                        System.out.println(fileOutputStream.toString());
-                        fileOutputStream.write(Objects.requireNonNull(response.body()).bytes());
-                    } finally {
-                        try {
-                            if (fileOutputStream != null) {
-                                fileOutputStream.close();
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                    */
-
-                    // 构造文件对象
-//                    File file = new File(verifyPath + fileName + ".jpg");
-//                    InputStream inputStream = Objects.requireNonNull(response.body()).byteStream();
-//                    OutputStream outputStream = new FileOutputStream(file);
-//                    byte[] byteStr = new byte[1024];
-//                    int len;
-//                    while ((len = inputStream.read(byteStr)) > 0) {
-//                        outputStream.write(byteStr, 0, len);
-//                    }
-//                    inputStream.close();
-//                    outputStream.flush();
-//                    outputStream.close();
                 }
             }
         } catch (IOException e) {

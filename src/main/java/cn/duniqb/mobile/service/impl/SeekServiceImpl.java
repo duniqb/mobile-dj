@@ -24,6 +24,7 @@ public class SeekServiceImpl extends ServiceImpl<SeekDao, SeekEntity> implements
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         QueryWrapper<SeekEntity> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("status", 0);
         queryWrapper.orderByDesc("time");
 
         IPage<SeekEntity> page = this.page(

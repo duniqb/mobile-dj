@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
@@ -86,6 +87,7 @@ public class LikeArticleServiceImpl extends ServiceImpl<LikeArticleDao, LikeArti
                 if (selectOne == null) {
                     LikeArticleEntity likeArticleEntity = new LikeArticleEntity();
                     likeArticleEntity.setArticleId(Integer.parseInt(articleId));
+                    likeArticleEntity.setTime(new Date());
                     likeArticleEntity.setOpenId(openid);
                     likeArticleService.save(likeArticleEntity);
                 }

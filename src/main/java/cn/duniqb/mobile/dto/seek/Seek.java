@@ -1,6 +1,7 @@
 package cn.duniqb.mobile.dto.seek;
 
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -66,4 +67,9 @@ public class Seek {
      * 日期
      */
     private LocalDate date;
+
+    /**
+     * 日期
+     */
+    private Boolean isAdmin = false;
 }

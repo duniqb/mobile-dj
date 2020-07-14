@@ -53,8 +53,30 @@ public class SeekController {
      */
     @RequestMapping("/list")
     // @RequiresPermissions("mobile:seek:list")
-    public R list(@RequestParam Map<String, Object> params) {
+    public R list(@RequestParam Map<String, Object> params, @RequestParam String sessionId) {
         PageUtils page = seekService.queryPage(params);
+
+        List<SeekEntity> seekEntityList = (List<SeekEntity>) page.getList();
+
+        List<Seek> seekList = new ArrayList<>();
+        for (SeekEntity seekEntity : seekEntityList) {
+            Seek seek = new Seek();
+
+            // 复制已有属性
+            BeanUtils.copyProperties(seekEntity, seek);
+
+            String sessionIdValue = redisUtil.get(sessionId);
+            if (sessionIdValue != null) {
+                String openid = sessionIdValue.split(":")[0];
+
+                // 是不是管理员（用于删除）
+                if (seekEntity.getOpenid().equals(openid)) {
+                    seek.setIsAdmin(true);
+                }
+            }
+            seekList.add(seek);
+        }
+        page.setList(seekList);
 
         return R.ok().put("page", page);
     }
@@ -121,9 +143,14 @@ public class SeekController {
     @RequestMapping("/update")
     // @RequiresPermissions("mobile:seek:update")
     public R update(@RequestBody SeekEntity seek) {
-        seekService.updateById(seek);
+        seek.setStatus(1);
+        System.out.println(seek.toString());
+        boolean update = seekService.updateById(seek);
 
-        return R.ok();
+        if (update) {
+            return R.ok("失物招领删除成功");
+        }
+        return R.error(400, "失物招领删除失败");
     }
 
     /**
