@@ -1,51 +1,20 @@
 package cn.duniqb.mobile.service;
 
-import cn.duniqb.mobile.domain.WxUser;
+import cn.duniqb.mobile.utils.PageUtils;
+import com.baomidou.mybatisplus.extension.service.IService;
+import cn.duniqb.mobile.entity.WxUserEntity;
 
-public interface WxUserService {
-    /**
-     * 根据 openid 查找
-     *
-     * @param openid
-     * @return
-     */
-    WxUser selectByOpenid(String openid);
+import java.util.Map;
 
-    /**
-     * 插入
-     *
-     * @param wxUser
-     * @return
-     */
-    int insertWxUser(WxUser wxUser);
+/**
+ * 小程序用户表
+ *
+ * @author duniqb
+ * @email duniqb@qq.com
+ * @date 2020-04-30 19:36:16
+ */
+public interface WxUserService extends IService<WxUserEntity> {
 
-    /**
-     * 根据 openid 更新
-     *
-     * @param wxUser
-     * @return
-     */
-    int updateWxUser(WxUser wxUser);
+    PageUtils queryPage(Map<String, Object> params);
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

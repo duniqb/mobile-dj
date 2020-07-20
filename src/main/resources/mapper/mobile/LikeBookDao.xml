@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="cn.duniqb.mobile.dao.LikeBookDao">
+
+	<!-- 可根据自己的需求，是否要使用 -->
+    <resultMap type="cn.duniqb.mobile.entity.LikeBookEntity" id="likeBookMap">
+        <result property="openid" column="openid"/>
+        <result property="bookId" column="book_id"/>
+        <result property="time" column="time"/>
+        <result property="bookName" column="book_name"/>
+        <result property="author" column="author"/>
+    </resultMap>
+
+
+</mapper>

@@ -1,74 +1,29 @@
 package cn.duniqb.mobile.service.impl;
 
-import cn.duniqb.mobile.domain.Student;
-import cn.duniqb.mobile.dto.User;
-import cn.duniqb.mobile.mapper.StudentMapper;
+import cn.duniqb.mobile.dao.StudentDao;
+import cn.duniqb.mobile.entity.StudentEntity;
 import cn.duniqb.mobile.service.StudentService;
+import cn.duniqb.mobile.utils.PageUtils;
+import cn.duniqb.mobile.utils.Query;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
-import tk.mybatis.mapper.entity.Example;
 
-import javax.annotation.Resource;
+import java.util.Map;
 
-@Service
-public class StudentServiceImpl implements StudentService {
 
-    @Resource
-    private StudentMapper studentMapper;
+@Service("studentService")
+public class StudentServiceImpl extends ServiceImpl<StudentDao, StudentEntity> implements StudentService {
 
-    /**
-     * 根据学号查询学生
-     *
-     * @param no
-     * @return
-     */
     @Override
-    public Student selectOneByNo(String no) {
+    public PageUtils queryPage(Map<String, Object> params) {
+        IPage<StudentEntity> page = this.page(
+                new Query<StudentEntity>().getPage(params),
+                new QueryWrapper<StudentEntity>()
+        );
 
-        return studentMapper.selectByPrimaryKey(no);
+        return new PageUtils(page);
     }
 
-    /**
-     * 根据学号删除学生
-     *
-     * @param stuNo
-     * @return
-     */
-    @Override
-    public int deleteByStuNo(String stuNo) {
-
-        return studentMapper.deleteByPrimaryKey(stuNo);
-    }
-
-    /**
-     * 根据账户密码查询学生
-     *
-     * @param no
-     * @param password
-     * @return
-     */
-    @Override
-    public Student selectOneByStuNoPwd(String no, String password) {
-        Example example = new Example(Student.class);
-        example.createCriteria().andEqualTo("stuNo", no).andEqualTo("password", password);
-        return studentMapper.selectOneByExample(example);
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

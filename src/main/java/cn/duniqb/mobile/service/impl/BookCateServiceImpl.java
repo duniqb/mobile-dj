@@ -1,29 +1,29 @@
 package cn.duniqb.mobile.service.impl;
 
-import cn.duniqb.mobile.domain.BookCate;
+import cn.duniqb.mobile.dao.BookCateDao;
+import cn.duniqb.mobile.entity.BookCateEntity;
+import cn.duniqb.mobile.service.BookCateService;
+import cn.duniqb.mobile.utils.PageUtils;
+import cn.duniqb.mobile.utils.Query;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import java.util.Map;
 
-import cn.duniqb.mobile.mapper.BookCateMapper;
-import cn.duniqb.mobile.service.BookCateService;
 
-import java.util.List;
+@Service("bookCateService")
+public class BookCateServiceImpl extends ServiceImpl<BookCateDao, BookCateEntity> implements BookCateService {
 
-@Service
-public class BookCateServiceImpl implements BookCateService {
-
-    @Resource
-    private BookCateMapper bookCateMapper;
-
-    /**
-     * 查询所有
-     *
-     * @return
-     */
     @Override
-    public List<BookCate> selectAll() {
+    public PageUtils queryPage(Map<String, Object> params) {
+        IPage<BookCateEntity> page = this.page(
+                new Query<BookCateEntity>().getPage(params),
+                new QueryWrapper<BookCateEntity>()
+        );
 
-        return bookCateMapper.selectAll();
+        return new PageUtils(page);
     }
+
 }

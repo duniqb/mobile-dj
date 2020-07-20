@@ -1,79 +1,29 @@
 package cn.duniqb.mobile.service.impl;
 
-import cn.duniqb.mobile.domain.WxUser;
+import cn.duniqb.mobile.dao.WxUserDao;
+import cn.duniqb.mobile.entity.WxUserEntity;
+import cn.duniqb.mobile.service.WxUserService;
+import cn.duniqb.mobile.utils.PageUtils;
+import cn.duniqb.mobile.utils.Query;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
+import java.util.Map;
 
-import cn.duniqb.mobile.mapper.WxUserMapper;
-import cn.duniqb.mobile.service.WxUserService;
-import tk.mybatis.mapper.entity.Example;
 
-/**
- * @author duniqb
- */
-@Service
-public class WxUserServiceImpl implements WxUserService {
+@Service("wxUserService")
+public class WxUserServiceImpl extends ServiceImpl<WxUserDao, WxUserEntity> implements WxUserService {
 
-    @Resource
-    private WxUserMapper wxUserMapper;
-
-    /**
-     * 根据 openid 查找
-     *
-     * @param openid
-     * @return
-     */
     @Override
-    public WxUser selectByOpenid(String openid) {
-        Example example = new Example(WxUser.class);
-        example.createCriteria().andEqualTo("openid", openid);
-        return wxUserMapper.selectOneByExample(example);
+    public PageUtils queryPage(Map<String, Object> params) {
+        IPage<WxUserEntity> page = this.page(
+                new Query<WxUserEntity>().getPage(params),
+                new QueryWrapper<WxUserEntity>()
+        );
+
+        return new PageUtils(page);
     }
 
-    /**
-     * 插入
-     *
-     * @param wxUser
-     * @return
-     */
-    @Override
-    public int insertWxUser(WxUser wxUser) {
-
-        return wxUserMapper.insert(wxUser);
-    }
-
-    /**
-     * 根据 openid 更新
-     *
-     * @param wxUser
-     * @return
-     */
-    @Override
-    public int updateWxUser(WxUser wxUser) {
-
-        return wxUserMapper.updateByPrimaryKey(wxUser);
-    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

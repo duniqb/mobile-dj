@@ -1,5 +1,6 @@
 package cn.duniqb.mobile.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -15,9 +16,13 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 @EnableSwagger2
 public class SwaggerConfig implements WebMvcConfigurer {
 
+    @Value("${swagger.show}")
+    private boolean swaggerShow;
+
     @Bean
     public Docket mobileApi() {
         return new Docket(DocumentationType.SWAGGER_2)
+                .enable(swaggerShow)
                 .apiInfo(apiInfo())
                 .select()
                 .apis(RequestHandlerSelectors.basePackage("cn.duniqb.mobile.controller"))
@@ -29,7 +34,7 @@ public class SwaggerConfig implements WebMvcConfigurer {
                 .title("Mobile DJ 接口")
                 .contact(new Contact("duniqb", "null", "duniqb@qq.com"))
                 .version("v1")
-                .termsOfServiceUrl("localhost:8080/v1/")
+                .termsOfServiceUrl("dj.duniqb.cn/v2/")
                 .description("Mobile DJ 接口")
                 .build();
     }

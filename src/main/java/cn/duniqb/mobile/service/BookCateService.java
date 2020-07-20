@@ -1,15 +1,20 @@
 package cn.duniqb.mobile.service;
 
-import cn.duniqb.mobile.domain.BookCate;
+import cn.duniqb.mobile.utils.PageUtils;
+import com.baomidou.mybatisplus.extension.service.IService;
+import cn.duniqb.mobile.entity.BookCateEntity;
 
-import java.util.List;
+import java.util.Map;
 
-public interface BookCateService {
+/**
+ * 图书分类法总类
+ *
+ * @author duniqb
+ * @email duniqb@qq.com
+ * @date 2020-04-30 19:36:16
+ */
+public interface BookCateService extends IService<BookCateEntity> {
 
-    /**
-     * 查询所有
-     *
-     * @return
-     */
-    List<BookCate> selectAll();
+    PageUtils queryPage(Map<String, Object> params);
 }
+

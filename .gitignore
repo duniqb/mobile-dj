@@ -29,4 +29,16 @@ build/
 
 ### VS Code ###
 .vscode/
+<<<<<<< HEAD
 !/src/main/resources/application-dev.yml
+=======
+
+### Custom ###
+/src/main/resources/application-pro.yml
+/src/main/resources/application-dev.yml
+
+/src/main/resources/dj.duniqb.cn.jks
+**/application-pro.yml
+**/application-dev.yml
+**/mvnw.*
+>>>>>>> dev

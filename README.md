@@ -1,12 +1,24 @@
 ## 介绍
 
-掌上大交小程序，提供教务信息，一卡通信息，图书查询，后勤报修，就业信息等服务。
+掌上大交小程序，提供教务信息、图书查询、后勤报修、就业信息等服务，更有校友圈等新特性你体验。
 
+<<<<<<< HEAD
 
+=======
+## 更新日志
+
+##### V1.0 
+
+2019.12.05，完成所有功能
+
+##### V2.0
+
+2020.06.28，完成第二版开发，优化了教务使用体验，新增了社交功能。
+>>>>>>> dev
 
 ## 前端
 
-https://github.com/aitwzl/mobile-dj-mini
+https://github.com/duniqb/mobile-dj-mini
 
 感谢以下优秀小程序开源组件库，掌上大交小程序前端基于 `Color UI` 以及 `Vant Weapp` 组件库。
 
@@ -16,20 +28,29 @@ https://github.com/aitwzl/mobile-dj-mini
 ## 体验
 
 ![扫码体验](https://wx2.sinaimg.cn/mw690/6cb17e18ly1gc1mwsqtoej20u01d8k13.jpg)
+<<<<<<< HEAD
 
+=======
+>>>>>>> dev
 
 ## 开发细节
 
 #### 一、技术栈及工具
 
-- 开发框架：`SpringBoot`
-- 数据库：`MySQL`
-- 持久层框架：`MyBatis`
+- 开发框架：`SpringBoot2.2`
+- 数据库：`MySQL8.0`
+- 持久层框架：`MyBatis3.2`
 - 缓存中间件：`Redis`
-- 爬虫框架：`HttpClient`，`Jsoup`
+- 爬虫框架：`OkHttp3`，`Jsoup`
 - 构建工具：`Maven`
 - 日志框架：`Log4j`
-- 效率工具：`Lombok`，`fastjson`，`Swagger2`，`tk.mybatis`，`MyBatisCodeHelper-Pro`
+- 效率工具：`Lombok`，`fastjson`，`Swagger2`，`MyBatis-Plus`，`MyBatisCodeHelper-Pro`, `Docker`
+
+相对 v1 版的变更
+
+1. HttpClient 更换为 OkHttp，模拟请求更轻量优雅
+2. tk.mybatis 更换为 MyBatis-Plus，拒绝重复增删改查
+3. Docker 容器部署，减少环境问题，方便管理与自动重启
 
 #### 二、爬虫的使用
 
@@ -169,9 +190,3 @@ public class JWController {
 ## 开源协议
 
 本项目基于 [MIT](https://zh.wikipedia.org/wiki/MIT許可證) 协议，请自由地享受和参与开源。
-
-## 更新日志
-
-##### 2019.12.05 
-
-完成所有功能
