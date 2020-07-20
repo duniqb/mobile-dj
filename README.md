@@ -36,12 +36,13 @@ https://github.com/duniqb/mobile-dj-mini
 - 爬虫框架：`OkHttp3`，`Jsoup`
 - 构建工具：`Maven`
 - 日志框架：`Log4j`
-- 效率工具：`Lombok`，`fastjson`，`Swagger2`，`MyBatis-Plus`，`MyBatisCodeHelper-Pro`
+- 效率工具：`Lombok`，`fastjson`，`Swagger2`，`MyBatis-Plus`，`MyBatisCodeHelper-Pro`, `Docker`
 
 相对 v1 版的变更
 
 1. HttpClient 更换为 OkHttp，模拟请求更轻量优雅
 2. tk.mybatis 更换为 MyBatis-Plus，拒绝重复增删改查
+3. Docker 容器部署，减少环境问题，方便管理与自动重启
 
 #### 二、爬虫的使用
 
